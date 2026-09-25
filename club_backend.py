@@ -13,6 +13,30 @@ H={"Accept":"*/*","Origin":"https://app.playmfl.com","Referer":"https://app.play
 ATTRS=("pace","shooting","passing","dribbling","defense","physical")
 SHORT={"pace":"PAC","shooting":"SHO","passing":"PAS","dribbling":"DRI","defense":"DEF","physical":"PHY"}
 
+RATE_DELAY_SECONDS=2.0
+DEFAULT_COOLDOWN_SECONDS=180
+
+def _meta_get(key,default=None):
+    c=db()
+    r=c.execute("SELECT value FROM meta WHERE key=?",(key,)).fetchone()
+    c.close()
+    return r["value"] if r else default
+
+def _meta_set(key,value):
+    c=db()
+    c.execute("INSERT OR REPLACE INTO meta(key,value) VALUES(?,?)",(key,str(value)))
+    c.commit(); c.close()
+
+def cooldown_remaining():
+    try:
+        until=float(_meta_get("rate_limit_until","0") or 0)
+    except Exception:
+        until=0
+    return max(0,int(until-time.time()))
+
+def clear_cooldown():
+    _meta_set("rate_limit_until","0")
+
 CACHE_VERSION="3-cumulative-progression"
 
 def db():
@@ -40,7 +64,7 @@ def db():
 def token():
     rt=os.getenv("MFL_REFRESH_TOKEN")
     if not rt: raise RuntimeError("MFL_REFRESH_TOKEN missing")
-    r=requests.post(BASE+"/auth/refresh",headers=H,json={"refreshToken":rt},timeout=(3,6))
+    r=requests.post(BASE+"/auth/refresh",headers=H,json={"refreshToken":rt},timeout=(5,20))
     r.raise_for_status()
     d=r.json(); a=d.get("access")
     if a is None and isinstance(d.get("data"),dict): a=d["data"].get("access")
@@ -51,13 +75,34 @@ def token():
 def ah(t):
     h=dict(H); h["Authorization"]="Bearer "+t; return h
 
-def get(path,t,params=None,timeout=(3,6)):
-    r=requests.get(BASE+path,headers=ah(t),params=params,timeout=timeout)
-    if r.status_code==429:
-        raise RuntimeError("MFL_RATE_LIMITED")
-    if not r.ok:
-        raise RuntimeError(f"{path} returned {r.status_code}: {r.text[:120]}")
-    return r.json()
+def get(path,t,params=None,timeout=(5,20)):
+    remaining=cooldown_remaining()
+    if remaining>0:
+        raise RuntimeError(f"MFL_COOLDOWN:{remaining}")
+
+    last_error=None
+    for attempt in range(3):
+        try:
+            r=requests.get(BASE+path,headers=ah(t),params=params,timeout=timeout)
+            if r.status_code==429:
+                retry=r.headers.get("Retry-After")
+                try:
+                    wait=max(DEFAULT_COOLDOWN_SECONDS,int(float(retry))) if retry else DEFAULT_COOLDOWN_SECONDS
+                except Exception:
+                    wait=DEFAULT_COOLDOWN_SECONDS
+                _meta_set("rate_limit_until",time.time()+wait)
+                raise RuntimeError(f"MFL_RATE_LIMITED:{wait}")
+            if not r.ok:
+                raise RuntimeError(f"{path} returned {r.status_code}: {r.text[:120]}")
+            return r.json()
+        except (requests.exceptions.ReadTimeout, requests.exceptions.ConnectTimeout,
+                requests.exceptions.ConnectionError) as e:
+            last_error=e
+            if attempt < 2:
+                time.sleep(3 * (attempt + 1))
+                continue
+            raise RuntimeError(f"MFL_TIMEOUT:{path}") from e
+    raise last_error
 
 def arr(d):
     if isinstance(d,list): return d
@@ -241,7 +286,12 @@ def cached(wallet):
     c.close()
     return pd.DataFrame([dict(r) for r in rows])
 
-def sync_batch(wallet,season_start,batch_size=30,progress=None):
+def sync_batch(wallet,season_start,batch_size=10,progress=None):
+    remaining=cooldown_remaining()
+    if remaining>0:
+        return {"saved":0,"errors":[],"batch":0,"eligible":0,"excluded":0,"owned":owned_clubs(wallet),
+                "cooldown":remaining,"rate_limited":True}
+
     t=token()
     mine=owned_clubs(wallet,t)
     names={x["name"].strip().casefold():x["name"] for x in mine}
@@ -251,39 +301,72 @@ def sync_batch(wallet,season_start,batch_size=30,progress=None):
     for r in rs:
         cn=(r.get("club") or "").strip()
         if cn.casefold() in names:
-            r["club"]=names[cn.casefold()];eligible.append(r)
+            r["club"]=names[cn.casefold()]
+            eligible.append(r)
         else:
             excluded+=1
+
     c=db()
-    checked={r[0] for r in c.execute("SELECT player_id FROM club_player_s17 WHERE wallet=? AND error IS NULL",(wallet.lower(),)).fetchall()}
+    checked={r[0] for r in c.execute(
+        "SELECT player_id FROM club_player_s17 WHERE wallet=? AND error IS NULL",
+        (wallet.lower(),)
+    ).fetchall()}
     c.close()
+
     todo=[r for r in eligible if r["player_id"] not in checked][:int(batch_size)]
     if not todo:
-        # refresh oldest successful rows when full cache exists
+        # Once baseline coverage is complete, refresh only a small oldest slice.
         c=db()
-        old=[r[0] for r in c.execute("SELECT player_id FROM club_player_s17 WHERE wallet=? ORDER BY checked_at LIMIT ?",(wallet.lower(),int(batch_size))).fetchall()]
+        old=[r[0] for r in c.execute(
+            "SELECT player_id FROM club_player_s17 WHERE wallet=? AND error IS NULL ORDER BY checked_at LIMIT ?",
+            (wallet.lower(),int(batch_size))
+        ).fetchall()]
         c.close()
-        wanted=set(old);todo=[r for r in eligible if r["player_id"] in wanted]
+        wanted=set(old)
+        todo=[r for r in eligible if r["player_id"] in wanted]
 
-    done=0;errors=[];saved=0
-    with ThreadPoolExecutor(max_workers=min(12,max(1,len(todo)))) as ex:
-        fut={ex.submit(analyse_player,r,t,season_start):r for r in todo}
-        for f in as_completed(fut):
-            r=fut[f]
-            try:
-                x=f.result()
-                c=db()
-                c.execute("""INSERT OR REPLACE INTO club_player_s17
-                (wallet,player_id,player,club,start_ovr,current_ovr,ovr_gain,attr_gain,pac,sho,pas,dri,defn,phy,baseline_at,last_progression,checked_at,error)
-                VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NULL)""",
-                (wallet.lower(),x["player_id"],x["player"],x["club"],x["start_ovr"],x["current_ovr"],x["ovr_gain"],x["attr_gain"],
-                 x["pac"],x["sho"],x["pas"],x["dri"],x["defn"],x["phy"],x["baseline_at"],x["last_progression"],datetime.now(timezone.utc).isoformat()))
-                c.commit();c.close();saved+=1
-            except Exception as e:
-                errors.append((r["player_id"],str(e)))
-            done+=1
-            if progress:progress(done,len(todo),len(errors))
-    return {"saved":saved,"errors":errors,"batch":len(todo),"eligible":len(eligible),"excluded":excluded,"owned":mine}
+    errors=[]; saved=0; done=0; rate_limited=False; cooldown=0
+    total=len(todo)
+
+    # Deliberately sequential. MFL was rate-limiting concurrent history requests
+    # after ~70 players. One call at a time with a short gap is slower per batch
+    # but reliable and preserves every completed player.
+    for r in todo:
+        try:
+            x=analyse_player(r,t,season_start)
+            c=db()
+            c.execute("""INSERT OR REPLACE INTO club_player_s17
+            (wallet,player_id,player,club,start_ovr,current_ovr,ovr_gain,attr_gain,pac,sho,pas,dri,defn,phy,baseline_at,last_progression,checked_at,error)
+            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,NULL)""",
+            (wallet.lower(),x["player_id"],x["player"],x["club"],x["start_ovr"],x["current_ovr"],x["ovr_gain"],x["attr_gain"],
+             x["pac"],x["sho"],x["pas"],x["dri"],x["defn"],x["phy"],x["baseline_at"],x["last_progression"],datetime.now(timezone.utc).isoformat()))
+            c.commit(); c.close(); saved+=1
+        except Exception as e:
+            msg=str(e)
+            if "MFL_RATE_LIMITED" in msg or "MFL_COOLDOWN" in msg:
+                rate_limited=True
+                cooldown=cooldown_remaining()
+                errors.append((r["player_id"],msg))
+                done+=1
+                if progress: progress(done,total,len(errors))
+                break
+            if "MFL_TIMEOUT" in msg:
+                # Leave this player unsynced. Completed players stay saved and the
+                # next run resumes here instead of losing the whole batch.
+                errors.append((r["player_id"],msg))
+                done+=1
+                if progress: progress(done,total,len(errors))
+                break
+            errors.append((r["player_id"],msg))
+        done+=1
+        if progress: progress(done,total,len(errors))
+        time.sleep(RATE_DELAY_SECONDS)
+
+    return {
+        "saved":saved,"errors":errors,"batch":total,"eligible":len(eligible),
+        "excluded":excluded,"owned":mine,"cooldown":cooldown,
+        "rate_limited":rate_limited
+    }
 
 def counts(wallet):
     d=cached(wallet)

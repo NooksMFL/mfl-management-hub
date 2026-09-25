@@ -229,7 +229,7 @@ with st.sidebar:
 
     st.divider()
     st.markdown('<span class="pill"><span class="dot"></span>Season 17</span>',unsafe_allow_html=True)
-    st.caption("POLISHED BUILD v3")
+    st.caption("RESILIENT SYNC v5")
 
 wallet=st.session_state.wallet
 
@@ -423,7 +423,7 @@ elif page=="Agency Development":
 elif page=="Club Development":
     page_head("CLUB ANALYTICS · SEASON 17","Club Development","Which of your owned clubs is producing the most development?")
     with st.expander("Season settings"):
-        season_start=st.text_input("Season 17 baseline (UTC)",value=st.session_state.get("season_start","2026-09-22T00:00:00Z"));st.session_state.season_start=season_start;batch=int(st.selectbox("Players per sync",[20,30,40],index=1))
+        season_start=st.text_input("Season 17 baseline (UTC)",value=st.session_state.get("season_start","2026-09-22T00:00:00Z"));st.session_state.season_start=season_start;batch=int(st.selectbox("Players per sync",[5,10,15],index=1))
     try:mine=club.owned_clubs(wallet)
     except Exception:mine=[]
     cached=club.cached(wallet)
@@ -432,15 +432,36 @@ elif page=="Club Development":
     with top[1]:stat("●",len(cached),"Players Synced")
     with top[2]:stat("▲",f"+{cached['ovr_gain'].fillna(0).sum():g}" if not cached.empty else "—","S17 OVR Loaded")
     with top[3]:stat("▥",f"+{cached['attr_gain'].fillna(0).sum():g}" if not cached.empty else "—","Attributes Loaded")
-    st.markdown('<div class="section-head2"><h3>Progression sync</h3></div>',unsafe_allow_html=True)
+    st.markdown('<div class="section-head2"><h3>Progression sync</h3><span class="small-note2">Resumes from your existing saved players</span></div>',unsafe_allow_html=True)
+    remaining=club.cooldown_remaining()
+    if remaining>0:
+        mins=max(1,math.ceil(remaining/60))
+        st.info(f"MFL cooldown active — wait about {mins} minute(s). Your {len(cached)} synced players are still saved.")
     b1,b2=st.columns([1,4])
-    with b1:do_sync=st.button(f"Sync next {batch}",type="primary",use_container_width=True)
+    with b1:do_sync=st.button(f"Sync next {batch}",type="primary",use_container_width=True,disabled=remaining>0)
     if do_sync:
         bar=st.progress(0,text="Preparing batch…");status=st.empty()
         def prog(done,total,errs):bar.progress(done/max(total,1),text=f"{done}/{total} players");status.caption(f"{errs} skipped/failed")
         try:
-            res=club.sync_batch(wallet,season_start,batch,prog);bar.empty();status.empty();st.success(f"Saved {res['saved']} players." if not res["errors"] else f"Saved {res['saved']}; {len(res['errors'])} skipped/failed.");st.rerun()
-        except Exception as e:bar.empty();status.empty();st.error("MFL could not complete this batch.");st.code(str(e))
+            res=club.sync_batch(wallet,season_start,batch,prog);bar.empty();status.empty()
+            if res.get("rate_limited"):
+                mins=max(1,math.ceil(res.get("cooldown",0)/60))
+                st.warning(f"MFL rate limit reached. {res['saved']} completed player(s) were kept. Wait about {mins} minute(s), then continue.")
+            elif any("MFL_TIMEOUT" in str(x[1]) for x in res.get("errors",[])):
+                st.warning(f"MFL timed out on one player after automatic retries. {res['saved']} completed player(s) were kept. Press Sync again later and it will resume from the unsynced player.")
+            elif res["errors"]:
+                st.warning(f"Saved {res['saved']}; {len(res['errors'])} player(s) skipped.")
+            else:
+                st.success(f"Saved {res['saved']} players. Batch complete.")
+            st.rerun()
+        except Exception as e:
+            bar.empty();status.empty()
+            msg=str(e)
+            if "MFL_TIMEOUT" in msg or "Read timed out" in msg:
+                st.warning("MFL is responding slowly. Nothing already synced has been lost. Wait a moment and try the next batch again.")
+            else:
+                st.error("MFL could not complete this batch.")
+                with st.expander("Technical detail"):st.code(msg)
     cached=club.cached(wallet)
     if cached.empty:st.markdown('<div class="empty"><b>No progression synced yet</b>Press Sync next 30. The old zero-only cache has been discarded.</div>',unsafe_allow_html=True)
     else:
