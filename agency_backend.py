@@ -5,27 +5,13 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 
 BASE="https://api.playmfl.com"; DB="agency_development.db"
-SEED_DB=Path(__file__).with_name("agency_seed.db")
-
 def ensure_seed_database():
- try:
-  p=Path(DB)
-  needs=(not p.exists()) or p.stat().st_size < 4096
-  if not needs:
-   c=sqlite3.connect(DB)
-   try:
-    tables={r[0] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-    needs=("ownership_v65" not in tables or c.execute("SELECT COUNT(*) FROM ownership_v65").fetchone()[0]==0)
-   finally:
-    c.close()
-  if needs and SEED_DB.exists():
-   shutil.copy2(SEED_DB,p)
-   return True
- except Exception:
-  return False
- return False
+    # Public build: never restore a bundled/private wallet database.
+    # Tables are created lazily by init().
+    return False
 
-SEEDED_ON_START=ensure_seed_database()
+SEEDED_ON_START=False
+
 
 H={"Accept":"*/*","Origin":"https://app.playmfl.com","Referer":"https://app.playmfl.com/",
 "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36 Edg/152.0.0.0"}
@@ -68,15 +54,25 @@ def token():
 def ah(t):
  h=dict(H);h["Authorization"]="Bearer "+t;return h
 def get(path,t,params=None):
+ last=None
  for attempt in range(5):
-  r=requests.get(BASE+path,headers=ah(t),params=params,timeout=30)
-  if r.status_code==429:
-   wait=int(r.headers.get("Retry-After") or min(60,5*(2**attempt)))
-   time.sleep(wait)
-   continue
-  if not r.ok:raise RuntimeError(f"{path} returned {r.status_code}: {r.text[:180]}")
-  return r.json()
- raise RuntimeError(f"{path} is still rate-limited after retries. Please wait and try again later.")
+  try:
+   r=requests.get(BASE+path,headers=ah(t),params=params,timeout=30)
+   if r.status_code==429:
+    wait=int(r.headers.get("Retry-After") or min(60,5*(2**attempt)))
+    last=f"HTTP 429: {r.text[:180]}"
+    time.sleep(wait)
+    continue
+   if r.status_code in (500,502,503,504):
+    last=f"HTTP {r.status_code}: {r.text[:180]}"
+    time.sleep(min(20,2*(2**attempt)))
+    continue
+   if not r.ok:raise RuntimeError(f"{path} returned {r.status_code}: {r.text[:180]}")
+   return r.json()
+  except (requests.Timeout, requests.ConnectionError) as e:
+   last=str(e)
+   time.sleep(min(20,2*(2**attempt)))
+ raise RuntimeError(f"{path} failed after retries. Last response: {last}")
 
 def arr(d):
  if isinstance(d,list):return d

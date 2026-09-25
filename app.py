@@ -375,28 +375,33 @@ a.quick-v15:hover{background:#0b222a;border-color:#2a5a65;transform:translateY(-
 """,unsafe_allow_html=True)
 
 
-OPTION6_LOGO_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 360">
-  <defs>
-    <linearGradient id="mint" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#5BF1D1"/>
-      <stop offset="1" stop-color="#13C9A1"/>
-    </linearGradient>
-  </defs>
-  <g transform="translate(35 48)">
-    <path d="M25 225V35h45l86 78 86-78h45v190h-56V111l-75 67-75-67v114z" fill="#F7FBFA"/>
-    <rect x="154" y="154" width="33" height="71" rx="2" fill="url(#mint)"/>
-    <rect x="193" y="120" width="33" height="105" rx="2" fill="url(#mint)"/>
-    <rect x="232" y="79" width="33" height="146" rx="2" fill="url(#mint)"/>
-  </g>
-  <g transform="translate(355 0)">
-    <text x="0" y="172" font-family="Inter, Arial, Helvetica, sans-serif"
-          font-size="126" font-weight="900" letter-spacing="2" fill="#F7FBFA">MFL</text>
-    <text x="3" y="252" font-family="Inter, Arial, Helvetica, sans-serif"
-          font-size="56" font-weight="500" letter-spacing="1" fill="#F7FBFA">Management Hub</text>
-  </g>
-</svg>"""
 
-OPTION6_LOGO_URI = "data:image/svg+xml;base64," + base64.b64encode(OPTION6_LOGO_SVG.encode("utf-8")).decode("ascii")
+st.markdown(r"""
+<style>
+/* ===== v17 PUBLIC BUILD ===== */
+.public-brand{padding:20px 16px 17px;border-bottom:1px solid #15333c}
+.public-brand-mfl{font-size:1.55rem;color:#f7fbfa;font-weight:950;letter-spacing:-.07em;line-height:1}
+.public-brand-mfl span{color:#13e0b4}
+.public-brand-sub{font-size:.59rem;color:#70868c;letter-spacing:.18em;font-weight:900;margin-top:7px}
+.public-brand-line{width:70px;height:3px;border-radius:99px;background:#13e0b4;margin-top:11px}
+.public-brand-season{font-size:.54rem;color:#526c73;letter-spacing:.10em;font-weight:800;margin-top:11px}
+
+.wallet-empty{background:#07161d;border:1px solid #173843;border-radius:9px;padding:10px;font-size:.66rem;color:#70888e}
+.wallet-short{font-family:ui-monospace,monospace;background:#07161d;border:1px solid #173843;border-radius:9px;padding:10px;font-size:.67rem;color:#c7d4d5}
+.public-connect{background:linear-gradient(135deg,#07171e,#09232a);border:1px solid #1a414b;border-radius:14px;padding:22px;margin:14px 0}
+.public-connect-kicker{font-size:.59rem;color:#13e0b4;letter-spacing:.15em;font-weight:900}
+.public-connect-title{font-size:1.48rem;color:#f3f9f8;font-weight:900;letter-spacing:-.04em;margin-top:7px}
+.public-connect-copy{font-size:.75rem;color:#748b91;line-height:1.55;margin-top:7px;max-width:720px}
+
+.public-home-head{margin-bottom:13px}
+.public-home-kicker{font-size:.60rem;color:#13e0b4;letter-spacing:.16em;font-weight:900}
+.public-home-title{font-size:2.15rem;color:#f5faf9;font-weight:950;letter-spacing:-.06em;line-height:1.02;margin-top:8px}
+.public-home-copy{font-size:.80rem;color:#788f95;margin-top:8px;line-height:1.55;max-width:760px}
+
+.home-brand-row-v16{display:none!important}
+.brand-image-shell{display:none!important}
+</style>
+""",unsafe_allow_html=True)
 
 def esc(x): return html.escape(str(x))
 
@@ -564,7 +569,7 @@ def club_gain_badges(row):
 
 def club_feature_card(rank,row,max_attr):
     cls={1:"first",2:"second",3:"third"}.get(rank,"")
-    pct=min(100,max(6,float(row["Attributes"] or 0)/max(max_attr,1)*100))
+    pct=min(100,max(6,float(row.get("ATTR ↑") or 0)/max(max_attr,1)*100))
     return (
       f'<div class="club-feature {cls}">'
       f'<div class="cf-rank">#{rank} · DEVELOPMENT</div>'
@@ -590,12 +595,21 @@ def club_player_card(row):
     )
 
 
+
+def short_wallet(v):
+    v=(v or "").strip()
+    if not v:
+        return ""
+    if len(v)<=14:
+        return v
+    return f"{v[:8]}…{v[-5:]}"
+
+
 def valid_wallet(v):
     v=(v or "").strip()
     return len(v)>=10 and v.lower().startswith("0x") and all(c in "0123456789abcdefABCDEF" for c in v[2:])
 
-DEFAULT_WALLET="0x65cc0e72dd71ad80"
-if "wallet" not in st.session_state: st.session_state.wallet=DEFAULT_WALLET
+if "wallet" not in st.session_state: st.session_state.wallet=""
 
 # ---------------- SIDEBAR ----------------
 nav_pages=["Home","Grower or Shower","Agency Development","Club Development"]
@@ -604,50 +618,76 @@ if query_page not in nav_pages:
     query_page="Home"
 
 with st.sidebar:
-    st.markdown(
-        f'<div class="brand-image-shell">'
-        f'<img src="{OPTION6_LOGO_URI}" alt="MFL Management Hub">'
-        f'<div class="brand-image-season">SEASON 17 · LIVE WORKSPACE</div>'
-        f'</div>',
-        unsafe_allow_html=True
-    )
+    st.markdown("""<div class="public-brand">
+      <div class="public-brand-mfl"><span>MFL</span> HUB</div>
+      <div class="public-brand-sub">MANAGEMENT & DEVELOPMENT</div>
+      <div class="public-brand-line"></div>
+      <div class="public-brand-season">SEASON 17 · PUBLIC</div>
+    </div>""",unsafe_allow_html=True)
 
     page=st.radio("Navigation",nav_pages,index=nav_pages.index(query_page),label_visibility="collapsed")
 
     st.markdown('<div class="wallet-area"><div class="wallet-label">ACTIVE WALLET</div>',unsafe_allow_html=True)
-    st.markdown(f'<div class="wallet-chip">{esc(st.session_state.wallet)}</div>',unsafe_allow_html=True)
-    if st.button("Change wallet",use_container_width=True):
-        st.session_state.edit_wallet=not st.session_state.get("edit_wallet",False)
-    if st.session_state.get("edit_wallet"):
-        nw=st.text_input("Wallet",value=st.session_state.wallet,label_visibility="collapsed")
-        if st.button("Use wallet",use_container_width=True):
+    if st.session_state.wallet:
+        st.markdown(f'<div class="wallet-short">{esc(short_wallet(st.session_state.wallet))}</div>',unsafe_allow_html=True)
+        if st.button("Change wallet",use_container_width=True):
+            st.session_state.edit_wallet=True
+    else:
+        st.markdown('<div class="wallet-empty">No wallet connected</div>',unsafe_allow_html=True)
+        st.session_state.edit_wallet=True
+
+    if st.session_state.get("edit_wallet",False):
+        nw=st.text_input("MFL wallet",value="" if not st.session_state.wallet else st.session_state.wallet,
+                         placeholder="0x…",label_visibility="collapsed",key="public_wallet_input")
+        if st.button("Use wallet",type="primary",use_container_width=True,key="public_wallet_use"):
             if valid_wallet(nw):
                 st.session_state.wallet=nw.strip().lower()
                 st.session_state.edit_wallet=False
                 st.rerun()
             else:
-                st.error("Enter a valid 0x wallet.")
+                st.error("Enter a valid 0x wallet address.")
     st.markdown('</div>',unsafe_allow_html=True)
-    st.markdown("""<div class="season-box"><div class="season-top"><span>Season 17</span><span>LIVE</span></div><div class="connected"><i></i><span>MFL connected</span></div></div><div class="build">OPTION 6 LOGO · v16.2.2</div>""",unsafe_allow_html=True)
+
+    st.markdown("""<div class="season-box">
+      <div class="season-top"><span>Season 17</span><span>PUBLIC</span></div>
+      <div class="connected"><i></i><span>MFL API ready</span></div>
+    </div>
+    <div class="build">PUBLIC FIX · v17.1</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 
 # ---------------- HOME ----------------
 if page=="Home":
+    st.markdown("""<div class="public-home-head">
+      <div class="public-home-kicker">MFL MANAGEMENT HUB · SEASON 17</div>
+      <div class="public-home-title">Track your MFL network.</div>
+      <div class="public-home-copy">Grower or Shower is available immediately. Connect an MFL wallet to load your own agency and owned-club development.</div>
+    </div>""",unsafe_allow_html=True)
+
+    if not wallet:
+        st.markdown("""<div class="public-connect">
+          <div class="public-connect-kicker">CONNECT YOUR WALLET</div>
+          <div class="public-connect-title">Load your own agency and clubs</div>
+          <div class="public-connect-copy">Enter your public MFL wallet in the sidebar. This public build does not contain or default to another user's wallet.</div>
+        </div>""",unsafe_allow_html=True)
+
     try:
         c=agency.db();agency.init(c);agency.ensure_v2(c)
-        players=c.execute("SELECT COUNT(*) FROM ownership_v65 WHERE wallet=?",(wallet.lower(),)).fetchone()[0]
-        improved=c.execute("SELECT COUNT(*) FROM ownership_v65 WHERE wallet=? AND current_ovr>start_ovr",(wallet.lower(),)).fetchone()[0]
+        players=c.execute("SELECT COUNT(*) FROM ownership_v65 WHERE wallet=?",(wallet.lower(),)).fetchone()[0] if wallet else 0
+        improved=c.execute("SELECT COUNT(*) FROM ownership_v65 WHERE wallet=? AND current_ovr>start_ovr",(wallet.lower(),)).fetchone()[0] if wallet else 0
         c.close()
     except Exception:
         players=0; improved=0
 
-    try:
-        mine=club.owned_clubs(wallet)
-    except Exception:
+    if wallet:
+        try:
+            mine=club.owned_clubs(wallet)
+        except Exception:
+            mine=[]
+        cached=club.cached(wallet)
+    else:
         mine=[]
-
-    cached=club.cached(wallet)
+        cached=pd.DataFrame()
     good=cached[cached["error"].isna()] if (not cached.empty and "error" in cached.columns) else cached
     total_ovr=float(good["ovr_gain"].fillna(0).sum()) if not good.empty else 0
     total_attr=float(good["attr_gain"].fillna(0).sum()) if not good.empty else 0
@@ -655,18 +695,13 @@ if page=="Home":
     total_current=float(good["current_ovr"].fillna(0).sum()) if not good.empty else 0
     synced=len(good)
 
-    st.markdown(
-        f'<div class="home-brand-row-v16"><img src="{OPTION6_LOGO_URI}" alt="MFL Management Hub"><div class="home-brand-live-v16">CONNECTED</div></div>',
-        unsafe_allow_html=True
-    )
-
     st.markdown(f"""
     <div class="home-shell">
       <div class="home-hero-v15">
         <div>
-          <div class="home-eyebrow-v15">MFL MANAGEMENT HUB · SEASON 17</div>
-          <div class="home-title-v15">Your whole MFL network.<br>One clear view.</div>
-          <div class="home-copy-v15">Track agency development, compare every owned club and follow Grower or Shower from the same workspace.</div>
+          <div class="home-eyebrow-v15">YOUR SEASON 17 WORKSPACE</div>
+          <div class="home-title-v15">Development at a glance.</div>
+          <div class="home-copy-v15">Competition tracking is public. Connect a wallet to unlock personal agency and club development views.</div>
           <div class="home-meta-v15">
             <span class="home-pill-v15"><b>{len(mine) if mine else "—"}</b> owned clubs</span>
             <span class="home-pill-v15"><b>{players or "—"}</b> agency players</span>
@@ -819,7 +854,7 @@ elif page=="Grower or Shower":
                 st.code(str(e))
 
     if not rows:
-        st.markdown('<div class="empty"><b>No competition data yet</b>Refresh the competition once to build the standings.</div>',unsafe_allow_html=True)
+        st.markdown('<div class="empty"><b>Competition cache is empty on this fresh public deployment</b>Click <strong>Refresh competition</strong> above once to load the 14 entrants and current Season 17 data.</div>',unsafe_allow_html=True)
     else:
         st.markdown('<div class="section-head2"><h3>Front runners</h3><span class="small-note2">OVR → ATTR → RATING</span></div>',unsafe_allow_html=True)
         cards="".join(grower_leader_card(i,r) for i,r in enumerate(rows[:3],1))
@@ -858,6 +893,14 @@ elif page=="Grower or Shower":
 
 # ---------------- AGENCY ----------------
 elif page=="Agency Development":
+    if not wallet:
+        st.markdown("""<div class="public-connect">
+          <div class="public-connect-kicker">AGENCY DEVELOPMENT</div>
+          <div class="public-connect-title">Connect a wallet to continue</div>
+          <div class="public-connect-copy">Enter your public MFL wallet in the sidebar to build your agency development view.</div>
+        </div>""",unsafe_allow_html=True)
+        st.stop()
+
     c=agency.db();agency.init(c);agency.ensure_v2(c)
     rows=c.execute("""SELECT o.*,COALESCE(t.tag,'NORMAL') tag,COALESCE(t.note,'') note,
       m.age,m.position,m.club,a.last_event_at,a.match_events,a.training_events,a.total_events
@@ -868,7 +911,35 @@ elif page=="Agency Development":
       WHERE o.wallet=?""",(wallet.lower(),)).fetchall()
 
     if not rows:
-        st.markdown('<div class="empty"><b>No seeded agency data for this wallet</b>Use your main wallet or build its agency cache first.</div>',unsafe_allow_html=True)
+        st.markdown("""<div class="public-connect">
+          <div class="public-connect-kicker">FIRST-TIME AGENCY LOAD</div>
+          <div class="public-connect-title">Build this wallet's agency</div>
+          <div class="public-connect-copy">This wallet has not been cached yet. Load a small first batch now; you can continue refreshing safely from the Agency page.</div>
+        </div>""",unsafe_allow_html=True)
+        if st.button("Load first 4 players",type="primary",key="public_agency_first_load"):
+            bar=st.progress(0,text="Loading agency safely…")
+            try:
+                def p(n,total):
+                    bar.progress(n/max(total,1),text=f"{n}/{max(total,1)}")
+                total,added,errs,analysed,planned=agency.sync(wallet,p,batch_size=4)
+                bar.empty()
+                if added:
+                    st.success(f"Loaded {added} player(s). Continue in small batches once the page opens.")
+                    st.rerun()
+                elif total == 0:
+                    st.info("MFL returned no players for this wallet.")
+                elif errs:
+                    st.warning(f"MFL returned {len(errs)} player error(s) before anything could be saved. Wait a moment and try again.")
+                    with st.expander("Import detail"):
+                        for pid,msg in errs[:8]:
+                            st.code(f"{pid}: {msg}")
+                else:
+                    st.warning("Nothing was saved yet. Try again in a moment.")
+            except Exception as e:
+                bar.empty()
+                st.error("MFL could not load this wallet yet.")
+                with st.expander("Technical detail"):
+                    st.code(str(e))
     else:
         df=pd.DataFrame([dict(r) for r in rows])
         for lab,cur,start_col in [
@@ -991,13 +1062,13 @@ elif page=="Agency Development":
             )
 
         with st.expander("Refresh player data"):
-            st.caption("Refreshes 20 players at a time so MFL rate limits cannot lock the page.")
-            if st.button("Refresh next 20 players",key="agency_refresh20"):
+            st.caption("Refreshes 8 players at a time to reduce MFL rate-limit pressure on the public app.")
+            if st.button("Refresh next 8 players",key="agency_refresh20"):
                 bar=st.progress(0,text="Refreshing players…")
                 def prog(n,total):
-                    bar.progress(n/max(total,1),text=f"{n}/{min(total,20)}")
+                    bar.progress(n/max(total,1),text=f"{n}/{min(total,8)}")
                 try:
-                    done,total,errs=agency.refresh_current_v21(wallet,prog,20)
+                    done,total,errs=agency.refresh_current_v21(wallet,prog,8)
                     bar.empty()
                     st.success(f"Updated {done} players." if not errs else f"Updated {done}; {len(errs)} issue(s).")
                 except Exception as e:
@@ -1009,6 +1080,14 @@ elif page=="Agency Development":
 
 # ---------------- CLUBS ----------------
 elif page=="Club Development":
+    if not wallet:
+        st.markdown("""<div class="public-connect">
+          <div class="public-connect-kicker">CLUB DEVELOPMENT</div>
+          <div class="public-connect-title">Connect a wallet to continue</div>
+          <div class="public-connect-copy">Enter your public MFL wallet in the sidebar to discover owned clubs and sync Season 17 development.</div>
+        </div>""",unsafe_allow_html=True)
+        st.stop()
+
     try:
         mine=club.owned_clubs(wallet)
     except Exception:

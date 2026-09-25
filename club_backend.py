@@ -138,22 +138,7 @@ def club_name(p):
             if n:return str(n)
     return None
 
-KNOWN_OWNER_CLUBS={
- "0x65cc0e72dd71ad80":[
-  {"id":3983,"name":"FCN Supermarine"},
-  {"id":5884,"name":"FCN Goyang"},
-  {"id":6390,"name":"FCN Vélez Academy"},
-  {"id":6451,"name":"FCN Gladbach"},
-  {"id":7126,"name":"FCN Angrense"},
-  {"id":7530,"name":"FCN David Academy"},
-  {"id":7580,"name":"FCN Antibes"},
-  {"id":7756,"name":"FCN Swindon Town"},
-  {"id":8026,"name":"FCN Gorzów"},
-  {"id":8199,"name":"FCN Pickering"},
-  {"id":9582,"name":"FCN Halesowen Academy"},
-  {"id":10910,"name":"FCN Garza Academy"},
- ]
-}
+KNOWN_OWNER_CLUBS={}
 
 def _save_owned(wallet,found):
     c=db(); now=datetime.now(timezone.utc).isoformat()
@@ -174,9 +159,7 @@ def owned_clubs(wallet,t=None,refresh=False):
     if t is None:
         try:t=token()
         except Exception:
-            fallback=KNOWN_OWNER_CLUBS.get(wallet,[])
-            if fallback:_save_owned(wallet,fallback)
-            return fallback
+            return []
 
     # The actual MFL web response mixes owned and staff-role clubs. The reliable
     # discriminator is title == MFL_OWNER. Do NOT send withLeague; MFL rejects it

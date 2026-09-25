@@ -1,8 +1,11 @@
-# MFL Management Hub — Option 6 Logo v16.2
+# MFL Management Hub — Public Fix v17.1
 
-Fixes the Streamlit Cloud FileNotFoundError.
+Fixes:
+- Club Development KeyError in Top developing clubs (`ATTR ↑` column mismatch).
+- Public Agency first load is reduced to 4 players per batch.
+- Public Agency now shows per-player API errors instead of looking like a hard failure.
+- Agency HTTP calls retry timeouts / connection errors / transient 5xx responses.
+- Agency current refresh reduced to 8 players per batch.
+- Grower fresh-deployment empty state now clearly tells users to run Refresh Competition.
 
-The selected Option 6 logo is now embedded directly inside `app.py` as a base64 SVG data URI.
-There is no `assets` folder dependency anymore, so GitHub/Streamlit cannot lose the logo file.
-
-Upload the contents of this ZIP over the existing repository and reboot the app.
+Privacy protections from v17 remain unchanged.
