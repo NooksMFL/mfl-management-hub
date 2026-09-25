@@ -1,9 +1,15 @@
-# MFL Management Hub — Headroom + Fonts v12.2
+# MFL Management Hub — Agency Redesign v13
 
-Grower top-three refinements:
-- portraits are now top-anchored with explicit headroom instead of bottom-anchored
-- image size reduced slightly so the full head remains visible
-- portrait zone increased modestly without making the whole card oversized
-- typography increased throughout Grower: names, owners, OVR, ratings, stat labels,
-  stat values, standings, badges and development spotlight
-- cards remain compact, but readability is substantially improved
+Builds on the improved Grower v12.2 and redesigns Agency Development.
+
+Agency changes
+- full agency hero and KPI summary
+- actual MFL portraits for top movers
+- top-mover cards with OVR, start OVR, gain and attribute gains
+- visual New Mints / Originals cards with portraits and joined-agency date
+- visual tagged-player board
+- cleaner three-tab workspace: Development / My List / All Agency
+- full detail tables retained lower down for power-user scanning
+- existing 20-player agency refresh preserved
+
+Club Development and Home remain intact for the next pass.

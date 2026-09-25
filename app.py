@@ -200,6 +200,66 @@ st.markdown(r"""
 </style>
 """, unsafe_allow_html=True)
 
+
+st.markdown(r"""
+<style>
+/* ===== v13 Agency Development ===== */
+.agency-hero{position:relative;overflow:hidden;border:1px solid #173944;border-radius:14px;
+ background:linear-gradient(115deg,#07151c 0%,#07151c 48%,#0a2230 100%);
+ min-height:170px;padding:22px 24px;margin-bottom:13px}
+.agency-hero:after{content:"";position:absolute;right:-45px;top:-70px;width:280px;height:280px;border-radius:50%;
+ border:44px solid rgba(22,166,255,.035)}
+.ah-kicker{font-size:.68rem;letter-spacing:.16em;color:#29a9ff;font-weight:900}
+.ah-title{font-size:2.08rem;color:#f7fbfa;font-weight:930;letter-spacing:-.055em;margin-top:7px}
+.ah-copy{font-size:.86rem;color:#758c92;line-height:1.55;margin-top:7px;max-width:720px}
+.ah-badges{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px}
+.ah-badge{font-size:.70rem;color:#a6b7ba;background:#0b2330;border:1px solid #19465d;border-radius:999px;padding:6px 9px}
+.ah-badge b{color:#45b6ff}
+
+.agency-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:13px 0 18px}
+.ag-kpi{background:#07161d;border:1px solid #173843;border-radius:11px;padding:14px}
+.ag-kpi-label{font-size:.61rem;color:#607b82;text-transform:uppercase;letter-spacing:.08em;font-weight:850}
+.ag-kpi-value{font-size:1.7rem;color:#f3f9f8;font-weight:930;letter-spacing:-.05em;margin-top:8px}
+.ag-kpi-value.blue{color:#38afff}.ag-kpi-value.green{color:#13e0b4}.ag-kpi-value.violet{color:#a56cff}
+
+.movers-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.mover-card{position:relative;overflow:hidden;background:linear-gradient(145deg,#08171e,#061219);border:1px solid #173944;border-radius:12px;min-height:250px}
+.mover-photo-zone{position:relative;height:135px;overflow:hidden;background:
+ radial-gradient(circle at 72% 32%,rgba(22,166,255,.18),transparent 45%),linear-gradient(145deg,#0a2130,#07151b)}
+.mover-photo{position:absolute;right:6px;top:6px;height:136px;width:136px;object-fit:contain;object-position:center top;
+ filter:drop-shadow(0 10px 16px rgba(0,0,0,.42))}
+.mover-rank{position:absolute;left:14px;top:13px;z-index:2;font-size:.61rem;color:#37b1ff;letter-spacing:.13em;font-weight:900}
+.mover-tag{position:absolute;left:14px;top:34px;z-index:2;font-size:.56rem;padding:4px 6px;border-radius:6px;
+ background:#0b2430;border:1px solid #1d4c5e;color:#8fb7c7}
+.mover-body{padding:13px 14px 14px}.mover-name{font-size:1.02rem;color:#f1f7f6;font-weight:900;letter-spacing:-.035em}
+.mover-meta{font-size:.67rem;color:#6d858b;margin-top:3px}.mover-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:11px}
+.mstat{background:#0a2028;border:1px solid #173b45;border-radius:8px;padding:8px}.mstat span{display:block;font-size:.56rem;color:#58737a;letter-spacing:.07em;text-transform:uppercase}
+.mstat b{display:block;font-size:.88rem;color:#e8f1f0;margin-top:3px}.mstat b.up{color:#13e0b4}
+.mover-gains{display:flex;gap:4px;flex-wrap:wrap;margin-top:9px}.mgain{font-size:.60rem;padding:4px 6px;border-radius:5px;background:#0a2028;color:#637c82;border:1px solid #173841}
+.mgain.up{color:#13e0b4;border-color:rgba(19,224,180,.22);background:rgba(19,224,180,.04)}
+
+.mint-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mint-card{display:grid;grid-template-columns:82px 1fr;gap:12px;align-items:center;background:#07161d;border:1px solid #173843;border-radius:11px;padding:11px}
+.mint-photo-wrap{width:82px;height:92px;overflow:hidden;border-radius:9px;background:linear-gradient(145deg,#0a2130,#07151b);border:1px solid #183f4d}
+.mint-photo{width:100%;height:100%;object-fit:contain;object-position:center top}
+.mint-name{font-size:.84rem;color:#edf5f4;font-weight:850}.mint-meta{font-size:.62rem;color:#637c82;margin-top:3px}
+.mint-ovr{font-size:1.25rem;color:#38afff;font-weight:930;margin-top:8px}.mint-gain{font-size:.63rem;color:#13e0b4;margin-top:2px}
+
+.tag-board{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tag-card{background:#07161d;border:1px solid #173843;border-radius:11px;padding:13px}
+.tag-pill{display:inline-block;font-size:.56rem;padding:4px 6px;border-radius:6px;background:#10242c;color:#a9b8ba;border:1px solid #1b424c}
+.tag-pill.PRIORITY{color:#ffcf66;border-color:#6f5720;background:#241e0a}
+.tag-pill.DEVELOP{color:#13e0b4;border-color:#1f584c;background:#0c231e}
+.tag-pill.WATCH{color:#a86fff;border-color:#4d3170;background:#1a1026}
+.tag-name{font-size:.82rem;color:#edf5f4;font-weight:850;margin-top:9px}.tag-note{font-size:.63rem;color:#637c82;margin-top:4px;line-height:1.45}
+
+.agency-filterbar{display:grid;grid-template-columns:1.8fr 1fr 1fr;gap:9px;margin-bottom:11px}
+.agency-table-note{font-size:.61rem;color:#59727a;margin-top:6px}
+@media(max-width:1100px){.movers-grid{grid-template-columns:1fr 1fr}.mint-grid,.tag-board{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.agency-kpis,.movers-grid,.mint-grid,.tag-board,.agency-filterbar{grid-template-columns:1fr}}
+</style>
+""",unsafe_allow_html=True)
+
 def esc(x): return html.escape(str(x))
 
 def page_head(kicker,title,sub):
@@ -303,6 +363,55 @@ def grower_standings_html(rows):
     return "".join(out)
 
 
+
+def agency_portrait(pid):
+    return f"https://d13e14gtps4iwl.cloudfront.net/players/v2/{int(pid)}/photo.webp"
+
+def agency_gain_pills(row):
+    gains=[]
+    for key,label in [("PAC ↑","PAC"),("SHO ↑","SHO"),("PAS ↑","PAS"),("DRI ↑","DRI"),("DEF ↑","DEF"),("PHY ↑","PHY")]:
+        try:v=float(row.get(key) or 0)
+        except:v=0
+        if v>0:
+            gains.append(f'<span class="mgain up">{label} +{v:g}</span>')
+    return "".join(gains) or '<span class="mgain">No attribute gain</span>'
+
+def agency_mover_card(rank,row):
+    gain=float(row.get("OVR ↑") or 0)
+    current=row.get("current_ovr")
+    age=row.get("age")
+    pos=row.get("position") or "—"
+    club=row.get("club") or "No club"
+    tag=str(row.get("tag") or "NORMAL")
+    return (
+      f'<div class="mover-card">'
+      f'<div class="mover-photo-zone"><img class="mover-photo" src="{agency_portrait(row["player_id"])}">'
+      f'<div class="mover-rank">#{rank} · TOP MOVER</div><div class="mover-tag">{esc(tag)}</div></div>'
+      f'<div class="mover-body"><div class="mover-name">{esc(row["player_name"])}</div>'
+      f'<div class="mover-meta">{esc(pos)} · {esc(club)} · Age {esc(age if pd.notna(age) else "—")}</div>'
+      f'<div class="mover-stats">'
+      f'<div class="mstat"><span>OVR</span><b>{esc(current)}</b></div>'
+      f'<div class="mstat"><span>Gain</span><b class="up">+{gain:g}</b></div>'
+      f'<div class="mstat"><span>Start</span><b>{esc(row.get("start_ovr") or "—")}</b></div>'
+      f'</div><div class="mover-gains">{agency_gain_pills(row)}</div></div></div>'
+    )
+
+def agency_mint_card(row):
+    gain=float(row.get("OVR ↑") or 0)
+    date=row.get("Initial date")
+    if pd.notna(date):
+        try: date_txt=pd.Timestamp(date).strftime("%d %b %Y")
+        except: date_txt="—"
+    else:
+        date_txt="—"
+    return (
+      f'<div class="mint-card"><div class="mint-photo-wrap"><img class="mint-photo" src="{agency_portrait(row["player_id"])}"></div>'
+      f'<div><div class="mint-name">{esc(row["player_name"])}</div>'
+      f'<div class="mint-meta">{esc(row.get("position") or "—")} · Age {esc(row.get("age") if pd.notna(row.get("age")) else "—")}<br>{esc(row.get("club") or "No club")}<br>Joined agency {esc(date_txt)}</div>'
+      f'<div class="mint-ovr">{esc(row.get("current_ovr") or "—")} OVR</div><div class="mint-gain">+{gain:g} since initial</div></div></div>'
+    )
+
+
 def valid_wallet(v):
     v=(v or "").strip()
     return len(v)>=10 and v.lower().startswith("0x") and all(c in "0123456789abcdefABCDEF" for c in v[2:])
@@ -346,7 +455,7 @@ with st.sidebar:
       <div class="season-top"><span>Season 17</span><span>⌄</span></div>
       <div class="connected"><i></i><span>Connected</span></div>
     </div>
-    <div class="build">HEADROOM + FONTS · v12.2</div>""",unsafe_allow_html=True)
+    <div class="build">AGENCY REDESIGN · v13</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 
@@ -580,7 +689,6 @@ elif page=="Grower or Shower":
 
 # ---------------- AGENCY ----------------
 elif page=="Agency Development":
-    page_head("PLAYER DEVELOPMENT","Agency Development","Track ownership baselines, tags, new mints and player progression.")
     c=agency.db();agency.init(c);agency.ensure_v2(c)
     rows=c.execute("""SELECT o.*,COALESCE(t.tag,'NORMAL') tag,COALESCE(t.note,'') note,
       m.age,m.position,m.club,a.last_event_at,a.match_events,a.training_events,a.total_events
@@ -589,78 +697,145 @@ elif page=="Agency Development":
       LEFT JOIN player_meta m ON m.wallet=o.wallet AND m.player_id=o.player_id
       LEFT JOIN activity a ON a.wallet=o.wallet AND a.player_id=o.player_id
       WHERE o.wallet=?""",(wallet.lower(),)).fetchall()
+
     if not rows:
         st.markdown('<div class="empty"><b>No seeded agency data for this wallet</b>Use your main wallet or build its agency cache first.</div>',unsafe_allow_html=True)
     else:
         df=pd.DataFrame([dict(r) for r in rows])
-        for lab,cur,start in [
+        for lab,cur,start_col in [
             ("OVR ↑","current_ovr","start_ovr"),("PAC ↑","current_pac","start_pac"),("SHO ↑","current_sho","start_sho"),
             ("PAS ↑","current_pas","start_pas"),("DRI ↑","current_dri","start_dri"),("DEF ↑","current_def","start_def"),("PHY ↑","current_phy","start_phy")]:
-            df[lab]=pd.to_numeric(df[cur],errors="coerce")-pd.to_numeric(df[start],errors="coerce")
+            df[lab]=pd.to_numeric(df[cur],errors="coerce")-pd.to_numeric(df[start_col],errors="coerce")
         df["Acquired"]=pd.to_datetime(df.acquired_at,utc=True,errors="coerce")
         df["Initial date"]=pd.to_datetime(df.history_start,utc=True,errors="coerce")
 
-        m=st.columns(4)
-        with m[0]: stat("●",len(df),"Players")
-        with m[1]: stat("▲",int((df["OVR ↑"]>0).sum()),"Improved OVR")
-        with m[2]: stat("◆",int((df.source=="NEW MINT / ORIGINAL").sum()),"New / Original")
-        with m[3]: stat("★",int((df.tag=="PRIORITY").sum()),"Priority")
+        improved=int((df["OVR ↑"]>0).sum())
+        originals=int((df.source=="NEW MINT / ORIGINAL").sum())
+        priority=int((df.tag=="PRIORITY").sum())
+        total_ovr=float(df["OVR ↑"].fillna(0).clip(lower=0).sum())
 
-        st.write("")
-        tabs=st.tabs(["Development","New Mints","My List","Agency"])
+        st.markdown(
+            f'<div class="agency-hero"><div class="ah-kicker">AGENCY · OWNERSHIP DEVELOPMENT</div>'
+            f'<div class="ah-title">Agency Development</div>'
+            f'<div class="ah-copy">See which players are moving, where they started, and which new mints or priority players deserve attention.</div>'
+            f'<div class="ah-badges"><span class="ah-badge"><b>{len(df)}</b> players</span>'
+            f'<span class="ah-badge"><b>{improved}</b> improved OVR</span>'
+            f'<span class="ah-badge"><b>{originals}</b> new/original</span>'
+            f'<span class="ah-badge"><b>{priority}</b> priority</span></div></div>',
+            unsafe_allow_html=True
+        )
+
+        st.markdown(
+            f'<div class="agency-kpis">'
+            f'<div class="ag-kpi"><div class="ag-kpi-label">Players tracked</div><div class="ag-kpi-value">{len(df)}</div></div>'
+            f'<div class="ag-kpi"><div class="ag-kpi-label">OVR gained</div><div class="ag-kpi-value green">+{total_ovr:g}</div></div>'
+            f'<div class="ag-kpi"><div class="ag-kpi-label">Improved players</div><div class="ag-kpi-value blue">{improved}</div></div>'
+            f'<div class="ag-kpi"><div class="ag-kpi-label">Priority list</div><div class="ag-kpi-value violet">{priority}</div></div>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
+
+        movers=df[df["OVR ↑"]>0].sort_values(["OVR ↑","current_ovr"],ascending=False).head(4)
+        st.markdown('<div class="section-head2"><h3>Top movers</h3><span class="small-note2">OWNERSHIP-SPELL DEVELOPMENT</span></div>',unsafe_allow_html=True)
+        if movers.empty:
+            st.markdown('<div class="empty"><b>No OVR movers yet</b>Attribute-level progression can still be reviewed below.</div>',unsafe_allow_html=True)
+        else:
+            mover_html="".join(agency_mover_card(i,r) for i,(_,r) in enumerate(movers.iterrows(),1))
+            st.markdown(f'<div class="movers-grid">{mover_html}</div>',unsafe_allow_html=True)
+
+        mints=df[df.source=="NEW MINT / ORIGINAL"].sort_values(["OVR ↑","current_ovr"],ascending=False).head(6)
+        if not mints.empty:
+            st.markdown('<div class="section-head2"><h3>New mints & originals</h3><span class="small-note2">JOINED AGENCY FROM INITIAL STATE</span></div>',unsafe_allow_html=True)
+            mint_html="".join(agency_mint_card(r) for _,r in mints.iterrows())
+            st.markdown(f'<div class="mint-grid">{mint_html}</div>',unsafe_allow_html=True)
+
+        st.markdown('<div class="section-head2"><h3>Agency workspace</h3><span class="small-note2">FILTER · TAG · REVIEW</span></div>',unsafe_allow_html=True)
+        tabs=st.tabs(["Development","My List","All Agency"])
+
         with tabs[0]:
-            v=df[df["OVR ↑"]>0].sort_values(["OVR ↑","current_ovr"],ascending=False)
-            st.dataframe(v[["player_name","age","position","club","start_ovr","current_ovr","OVR ↑","PAC ↑","SHO ↑","PAS ↑","DRI ↑","DEF ↑","PHY ↑"]]
-                         .rename(columns={"player_name":"Player","age":"Age","position":"Position","club":"Club","start_ovr":"Start","current_ovr":"Current"}),
-                         use_container_width=True,hide_index=True)
+            v=df.sort_values(["OVR ↑","current_ovr"],ascending=False,na_position="last")
+            q=st.text_input("Search development",placeholder="Search player name",key="agency_dev_search")
+            if q:
+                v=v[v.player_name.str.contains(q,case=False,na=False)]
+            st.dataframe(
+                v[["player_name","age","position","club","start_ovr","current_ovr","OVR ↑","PAC ↑","SHO ↑","PAS ↑","DRI ↑","DEF ↑","PHY ↑","tag"]]
+                .rename(columns={"player_name":"Player","age":"Age","position":"Position","club":"Club","start_ovr":"Start","current_ovr":"Current","tag":"Tag"}),
+                use_container_width=True,hide_index=True,height=520
+            )
+            st.caption("Detailed table retained for scanning the full agency; the visual cards above surface the important movers first.")
+
         with tabs[1]:
-            v=df[df.source=="NEW MINT / ORIGINAL"].sort_values(["OVR ↑","current_ovr"],ascending=False)
-            st.dataframe(v[["player_name","age","Initial date","start_ovr","current_ovr","OVR ↑","club"]]
-                         .rename(columns={"player_name":"Player","age":"Age","start_ovr":"Initial","current_ovr":"Current","club":"Club"}),
-                         use_container_width=True,hide_index=True)
-        with tabs[2]:
-            mine=df[df.tag!="NORMAL"].copy()
-            if mine.empty:
+            tagged=df[df.tag!="NORMAL"].copy()
+            if tagged.empty:
                 st.markdown('<div class="empty"><b>No tagged players yet</b>Add DEVELOP, PRIORITY or WATCH tags below.</div>',unsafe_allow_html=True)
             else:
-                st.dataframe(mine[["tag","player_name","age","current_ovr","OVR ↑","note"]]
-                             .rename(columns={"player_name":"Player","age":"Age","current_ovr":"OVR","tag":"Tag","note":"Note"}),
-                             use_container_width=True,hide_index=True)
+                tag_cards=[]
+                for _,r in tagged.sort_values(["tag","OVR ↑"],ascending=[True,False]).head(12).iterrows():
+                    tag_cards.append(
+                        f'<div class="tag-card"><span class="tag-pill {esc(r["tag"])}">{esc(r["tag"])}</span>'
+                        f'<div class="tag-name">{esc(r["player_name"])}</div>'
+                        f'<div class="tag-note">{esc(r["note"] or "No note")}<br>OVR {esc(r["current_ovr"])} · +{float(r["OVR ↑"] or 0):g}</div></div>'
+                    )
+                st.markdown(f'<div class="tag-board">{"".join(tag_cards)}</div>',unsafe_allow_html=True)
+                st.write("")
+
             opts={f"{r.player_name} · {int(r.player_id)}":int(r.player_id) for _,r in df.sort_values("player_name").iterrows()}
-            who=st.selectbox("Player",list(opts))
+            col1,col2=st.columns([1.2,1])
+            with col1:
+                who=st.selectbox("Player",list(opts),key="agency_tag_player")
             ex=df[df.player_id==opts[who]].iloc[0]
-            tags=["NORMAL","DEVELOP","PRIORITY","WATCH"]
-            tag=st.selectbox("Tag",tags,index=tags.index(ex.tag) if ex.tag in tags else 0)
-            note=st.text_input("Note",value=ex.note or "")
-            if st.button("Save tag",type="primary"):
+            with col2:
+                tags=["NORMAL","DEVELOP","PRIORITY","WATCH"]
+                tag=st.selectbox("Tag",tags,index=tags.index(ex.tag) if ex.tag in tags else 0,key="agency_tag_type")
+            note=st.text_input("Note",value=ex.note or "",key="agency_tag_note")
+            if st.button("Save tag",type="primary",key="agency_save_tag"):
                 c.execute("""INSERT INTO tags(wallet,player_id,tag,note) VALUES(?,?,?,?)
                 ON CONFLICT(wallet,player_id) DO UPDATE SET tag=excluded.tag,note=excluded.note""",
                           (wallet.lower(),opts[who],tag,note))
                 c.commit();st.rerun()
-        with tabs[3]:
-            q=st.text_input("Search players",placeholder="Search by player name")
-            v=df if not q else df[df.player_name.str.contains(q,case=False,na=False)]
-            sort=st.selectbox("Sort",["OVR gain","OVR","Age","Name"])
-            if sort=="OVR gain":v=v.sort_values(["OVR ↑","current_ovr"],ascending=False,na_position="last")
-            elif sort=="OVR":v=v.sort_values("current_ovr",ascending=False,na_position="last")
-            elif sort=="Age":v=v.sort_values("age",na_position="last")
-            else:v=v.sort_values("player_name")
-            st.dataframe(v[["player_name","age","position","club","source","Acquired","start_ovr","current_ovr","OVR ↑","tag"]]
-                         .rename(columns={"player_name":"Player","age":"Age","position":"Position","club":"Club","source":"Ownership","start_ovr":"Start","current_ovr":"OVR","tag":"Tag"}),
-                         use_container_width=True,hide_index=True)
+
+        with tabs[2]:
+            f1,f2,f3=st.columns([1.7,1,1])
+            with f1:
+                q=st.text_input("Search players",placeholder="Search by player name",key="agency_all_search")
+            with f2:
+                tag_filter=st.selectbox("Tag",["All","PRIORITY","DEVELOP","WATCH","NORMAL"],key="agency_all_tag")
+            with f3:
+                sort=st.selectbox("Sort",["OVR gain","OVR","Age","Name"],key="agency_all_sort")
+            v=df.copy()
+            if q:
+                v=v[v.player_name.str.contains(q,case=False,na=False)]
+            if tag_filter!="All":
+                v=v[v.tag==tag_filter]
+            if sort=="OVR gain":
+                v=v.sort_values(["OVR ↑","current_ovr"],ascending=False,na_position="last")
+            elif sort=="OVR":
+                v=v.sort_values("current_ovr",ascending=False,na_position="last")
+            elif sort=="Age":
+                v=v.sort_values("age",na_position="last")
+            else:
+                v=v.sort_values("player_name")
+            st.dataframe(
+                v[["player_name","age","position","club","source","Acquired","start_ovr","current_ovr","OVR ↑","tag"]]
+                .rename(columns={"player_name":"Player","age":"Age","position":"Position","club":"Club","source":"Ownership","start_ovr":"Start","current_ovr":"OVR","tag":"Tag"}),
+                use_container_width=True,hide_index=True,height=600
+            )
 
         with st.expander("Refresh player data"):
             st.caption("Refreshes 20 players at a time so MFL rate limits cannot lock the page.")
-            if st.button("Refresh next 20 players"):
+            if st.button("Refresh next 20 players",key="agency_refresh20"):
                 bar=st.progress(0,text="Refreshing players…")
-                def prog(n,total):bar.progress(n/max(total,1),text=f"{n}/{min(total,20)}")
+                def prog(n,total):
+                    bar.progress(n/max(total,1),text=f"{n}/{min(total,20)}")
                 try:
                     done,total,errs=agency.refresh_current_v21(wallet,prog,20)
                     bar.empty()
                     st.success(f"Updated {done} players." if not errs else f"Updated {done}; {len(errs)} issue(s).")
                 except Exception as e:
-                    bar.empty();st.error("MFL could not refresh this batch.")
-                    with st.expander("Technical detail"):st.code(str(e))
+                    bar.empty()
+                    st.error("MFL could not refresh this batch.")
+                    with st.expander("Technical detail"):
+                        st.code(str(e))
     c.close()
 
 # ---------------- CLUBS ----------------
