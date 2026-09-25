@@ -260,6 +260,68 @@ st.markdown(r"""
 </style>
 """,unsafe_allow_html=True)
 
+
+st.markdown(r"""
+<style>
+/* ===== v14 Club Development ===== */
+.club-hero{position:relative;overflow:hidden;border:1px solid #173944;border-radius:14px;
+ background:linear-gradient(115deg,#07151c 0%,#07151c 45%,#1a1030 100%);
+ min-height:170px;padding:22px 24px;margin-bottom:13px}
+.club-hero:after{content:"";position:absolute;right:-35px;top:-55px;width:280px;height:280px;border-radius:50%;
+ border:44px solid rgba(154,82,255,.035)}
+.ch-kicker{font-size:.68rem;letter-spacing:.16em;color:#a56cff;font-weight:900}
+.ch-title{font-size:2.08rem;color:#f7fbfa;font-weight:930;letter-spacing:-.055em;margin-top:7px}
+.ch-copy{font-size:.86rem;color:#758c92;line-height:1.55;margin-top:7px;max-width:720px}
+.ch-badges{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px}
+.ch-badge{font-size:.70rem;color:#a6b7ba;background:#1a1428;border:1px solid #4b356a;border-radius:999px;padding:6px 9px}
+.ch-badge b{color:#b57dff}
+
+.club-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:13px 0 18px}
+.ckpi{background:#07161d;border:1px solid #173843;border-radius:11px;padding:14px}
+.ckpi-label{font-size:.61rem;color:#607b82;text-transform:uppercase;letter-spacing:.08em;font-weight:850}
+.ckpi-value{font-size:1.7rem;color:#f3f9f8;font-weight:930;letter-spacing:-.05em;margin-top:8px}
+.ckpi-value.green{color:#13e0b4}.ckpi-value.blue{color:#38afff}.ckpi-value.violet{color:#ad76ff}
+
+.club-rank-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.club-feature{position:relative;overflow:hidden;background:linear-gradient(145deg,#08171e,#061219);border:1px solid #173944;border-radius:12px;min-height:235px;padding:17px}
+.club-feature.first{border-color:#13c79f}.club-feature.second{border-color:#1888c9}.club-feature.third{border-color:#6b39a4}
+.club-feature:after{content:"";position:absolute;right:-35px;bottom:-45px;width:130px;height:130px;border-radius:50%;border:22px solid rgba(255,255,255,.018)}
+.cf-rank{font-size:.58rem;letter-spacing:.14em;font-weight:900;color:#13e0b4}.second .cf-rank{color:#24a9ff}.third .cf-rank{color:#a065ff}
+.cf-name{font-size:1.08rem;color:#f4f9f8;font-weight:900;letter-spacing:-.035em;margin-top:10px}
+.cf-big{font-size:2.3rem;color:#fff;font-weight:950;letter-spacing:-.07em;margin-top:20px}
+.cf-big span{font-size:.72rem;color:#687f85;letter-spacing:0;font-weight:750;margin-left:3px}
+.cf-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:15px}
+.cf-stat{background:#0a2028;border:1px solid #173b45;border-radius:8px;padding:8px}
+.cf-stat span{display:block;font-size:.56rem;color:#58737a;text-transform:uppercase;letter-spacing:.07em}
+.cf-stat b{display:block;font-size:.88rem;color:#e8f1f0;margin-top:3px}.cf-stat b.up{color:#13e0b4}
+.cf-track{height:6px;background:#0d252d;border-radius:99px;overflow:hidden;margin-top:14px}.cf-fill{height:100%;background:linear-gradient(90deg,#13e0b4,#38afff);border-radius:99px}
+
+.club-selector-wrap{background:#07161d;border:1px solid #173843;border-radius:11px;padding:14px;margin-top:12px}
+.club-detail-head{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin-bottom:12px}
+.club-detail-name{font-size:1.1rem;color:#eef6f4;font-weight:900}.club-detail-meta{font-size:.64rem;color:#617b82;margin-top:3px}
+.club-detail-total{font-size:1.25rem;color:#13e0b4;font-weight:930}
+
+.player-grid-club{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.club-player{background:#07161d;border:1px solid #173843;border-radius:11px;overflow:hidden}
+.cp-photo-zone{position:relative;height:118px;background:radial-gradient(circle at 68% 30%,rgba(154,82,255,.18),transparent 45%),linear-gradient(145deg,#171027,#07151b);overflow:hidden}
+.cp-photo{position:absolute;right:6px;top:4px;height:122px;width:122px;object-fit:contain;object-position:center top}
+.cp-copy{position:absolute;left:12px;top:11px;z-index:2;max-width:58%}
+.cp-name{font-size:.84rem;color:#f1f7f6;font-weight:880;line-height:1.05}.cp-pos{font-size:.56rem;color:#687f85;margin-top:4px}
+.cp-body{padding:11px 12px 12px}.cp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.cp-stat{background:#0a2028;border:1px solid #173b45;border-radius:7px;padding:7px}.cp-stat span{display:block;font-size:.49rem;color:#58737a;text-transform:uppercase}.cp-stat b{display:block;font-size:.78rem;color:#e8f1f0;margin-top:2px}.cp-stat b.up{color:#13e0b4}
+.cp-gains{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}.cp-gain{font-size:.54rem;padding:3px 5px;border-radius:5px;background:#0a2028;color:#637c82;border:1px solid #173841}.cp-gain.up{color:#13e0b4;border-color:rgba(19,224,180,.22);background:rgba(19,224,180,.04)}
+
+.club-table-wrap{margin-top:12px}
+.sync-panel{background:linear-gradient(145deg,#07161d,#061219);border:1px solid #173843;border-radius:12px;padding:15px}
+.sync-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.sync-left{display:flex;align-items:center;gap:11px}.sync-icon{width:38px;height:38px;border-radius:10px;background:#181127;border:1px solid #4b356a;color:#b57dff;display:flex;align-items:center;justify-content:center;font-weight:900}
+.sync-title2{font-size:.82rem;color:#edf5f4;font-weight:850}.sync-sub2{font-size:.61rem;color:#607a80;margin-top:3px}
+.sync-status{font-size:.61rem;color:#13e0b4;background:#0d251f;border:1px solid #1b5146;border-radius:999px;padding:6px 8px}
+@media(max-width:1100px){.club-rank-grid,.player-grid-club{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.club-kpis,.club-rank-grid,.player-grid-club{grid-template-columns:1fr}}
+</style>
+""",unsafe_allow_html=True)
+
 def esc(x): return html.escape(str(x))
 
 def page_head(kicker,title,sub):
@@ -412,6 +474,46 @@ def agency_mint_card(row):
     )
 
 
+
+def club_player_portrait(pid):
+    return f"https://d13e14gtps4iwl.cloudfront.net/players/v2/{int(pid)}/photo.webp"
+
+def club_gain_badges(row):
+    bits=[]
+    for key,label in [("pac","PAC"),("sho","SHO"),("pas","PAS"),("dri","DRI"),("defn","DEF"),("phy","PHY")]:
+        v=float(row.get(key) or 0)
+        if v>0:
+            bits.append(f'<span class="cp-gain up">{label} +{v:g}</span>')
+    return "".join(bits) or '<span class="cp-gain">No attribute gain</span>'
+
+def club_feature_card(rank,row,max_attr):
+    cls={1:"first",2:"second",3:"third"}.get(rank,"")
+    pct=min(100,max(6,float(row["Attributes"] or 0)/max(max_attr,1)*100))
+    return (
+      f'<div class="club-feature {cls}">'
+      f'<div class="cf-rank">#{rank} · DEVELOPMENT</div>'
+      f'<div class="cf-name">{esc(row["Club"])}</div>'
+      f'<div class="cf-big">+{float(row["OVR ↑"]):g}<span>OVR</span></div>'
+      f'<div class="cf-stats">'
+      f'<div class="cf-stat"><span>Players</span><b>{int(row["Players"])}</b></div>'
+      f'<div class="cf-stat"><span>Attributes</span><b class="up">+{float(row["ATTR ↑"]):g}</b></div>'
+      f'<div class="cf-stat"><span>Avg / player</span><b>{float(row["ATTR ↑"])/max(int(row["Players"]),1):.1f}</b></div>'
+      f'</div><div class="cf-track"><div class="cf-fill" style="width:{pct:.0f}%"></div></div></div>'
+    )
+
+def club_player_card(row):
+    return (
+      f'<div class="club-player"><div class="cp-photo-zone">'
+      f'<img class="cp-photo" src="{club_player_portrait(row["player_id"])}">'
+      f'<div class="cp-copy"><div class="cp-name">{esc(row["player"])}</div><div class="cp-pos">{esc(row["club"])}</div></div></div>'
+      f'<div class="cp-body"><div class="cp-stats">'
+      f'<div class="cp-stat"><span>OVR</span><b>{esc(row["current_ovr"])}</b></div>'
+      f'<div class="cp-stat"><span>OVR ↑</span><b class="{"up" if float(row.get("ovr_gain") or 0)>0 else ""}">+{float(row.get("ovr_gain") or 0):g}</b></div>'
+      f'<div class="cp-stat"><span>ATTR ↑</span><b class="{"up" if float(row.get("attr_gain") or 0)>0 else ""}">+{float(row.get("attr_gain") or 0):g}</b></div>'
+      f'</div><div class="cp-gains">{club_gain_badges(row)}</div></div></div>'
+    )
+
+
 def valid_wallet(v):
     v=(v or "").strip()
     return len(v)>=10 and v.lower().startswith("0x") and all(c in "0123456789abcdefABCDEF" for c in v[2:])
@@ -455,7 +557,7 @@ with st.sidebar:
       <div class="season-top"><span>Season 17</span><span>⌄</span></div>
       <div class="connected"><i></i><span>Connected</span></div>
     </div>
-    <div class="build">AGENCY REDESIGN · v13</div>""",unsafe_allow_html=True)
+    <div class="build">CLUB REDESIGN · v14</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 
@@ -840,69 +942,130 @@ elif page=="Agency Development":
 
 # ---------------- CLUBS ----------------
 elif page=="Club Development":
-    page_head("CLUB ANALYTICS · SEASON 17","Club Development","Which of your owned clubs is producing the most development?")
-    with st.expander("Season settings"):
-        season_start=st.text_input("Season 17 baseline (UTC)",value=st.session_state.get("season_start","2026-09-22T00:00:00Z"));st.session_state.season_start=season_start
-        st.caption("One click processes every remaining owned-club player slowly and automatically.")
-    try:mine=club.owned_clubs(wallet)
-    except Exception:mine=[]
+    try:
+        mine=club.owned_clubs(wallet)
+    except Exception:
+        mine=[]
     cached=club.cached(wallet)
-    top=st.columns(4)
-    with top[0]:stat("◆",len(mine) if mine else "—","Owned Clubs")
-    with top[1]:stat("●",len(cached),"Players Synced")
-    with top[2]:stat("▲",f"+{cached['ovr_gain'].fillna(0).sum():g}" if not cached.empty else "—","S17 OVR Loaded")
-    with top[3]:stat("▥",f"+{cached['attr_gain'].fillna(0).sum():g}" if not cached.empty else "—","Attributes Loaded")
-    st.markdown('<div class="section-head2"><h3>Progression sync</h3><span class="small-note2">Resumes from your existing saved players</span></div>',unsafe_allow_html=True)
+    good=cached[cached["error"].isna()] if (not cached.empty and "error" in cached.columns) else cached
+
+    total_ovr=float(good["ovr_gain"].fillna(0).sum()) if not good.empty else 0
+    total_attr=float(good["attr_gain"].fillna(0).sum()) if not good.empty else 0
+    developed=int(((good["ovr_gain"].fillna(0)>0) | (good["attr_gain"].fillna(0)>0)).sum()) if not good.empty else 0
+    synced=len(good)
+
+    st.markdown(
+        f'<div class="club-hero"><div class="ch-kicker">CLUB NETWORK · SEASON 17</div>'
+        f'<div class="ch-title">Club Development</div>'
+        f'<div class="ch-copy">Compare progression across your owned clubs, then drill into the players driving each club forward.</div>'
+        f'<div class="ch-badges"><span class="ch-badge"><b>{len(mine) if mine else "—"}</b> owned clubs</span>'
+        f'<span class="ch-badge"><b>{synced}</b> players synced</span>'
+        f'<span class="ch-badge"><b>+{total_ovr:g}</b> OVR</span>'
+        f'<span class="ch-badge"><b>+{total_attr:g}</b> attributes</span></div></div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        f'<div class="club-kpis">'
+        f'<div class="ckpi"><div class="ckpi-label">Owned clubs</div><div class="ckpi-value">{len(mine) if mine else "—"}</div></div>'
+        f'<div class="ckpi"><div class="ckpi-label">Players synced</div><div class="ckpi-value blue">{synced}</div></div>'
+        f'<div class="ckpi"><div class="ckpi-label">OVR gained</div><div class="ckpi-value green">+{total_ovr:g}</div></div>'
+        f'<div class="ckpi"><div class="ckpi-label">Players developing</div><div class="ckpi-value violet">{developed}</div></div>'
+        f'</div>',
+        unsafe_allow_html=True
+    )
+
     remaining=club.cooldown_remaining()
-    if remaining>0:
-        mins=max(1,math.ceil(remaining/60))
-        st.info(f"MFL cooldown active — wait about {mins} minute(s). Your {len(cached)} synced players are still saved.")
-    b1,b2=st.columns([1,4])
-    with b1:do_sync=st.button("Sync all remaining",type="primary",use_container_width=True,disabled=remaining>0)
+    st.markdown(
+        f'<div class="sync-panel"><div class="sync-row"><div class="sync-left"><div class="sync-icon">⟳</div><div>'
+        f'<div class="sync-title2">Slow full-network sync</div><div class="sync-sub2">Processes all remaining owned-club players safely and saves each one immediately.</div>'
+        f'</div></div><div class="sync-status">{"COOLDOWN" if remaining>0 else "READY"}</div></div></div>',
+        unsafe_allow_html=True
+    )
+    st.write("")
+    b1,b2=st.columns([1.2,4])
+    with b1:
+        do_sync=st.button("Sync all remaining",type="primary",use_container_width=True,disabled=remaining>0)
+    with b2:
+        if remaining>0:
+            st.info(f"MFL cooldown active — about {max(1,math.ceil(remaining/60))} minute(s) remaining. Cached data is safe.")
+        else:
+            st.caption(f"{synced} player records currently cached. One click continues from the first unsynced player.")
+
     if do_sync:
-        bar=st.progress(0,text="Preparing batch…");status=st.empty()
-        def prog(done,total,errs):bar.progress(done/max(total,1),text=f"{done}/{total} players");status.caption(f"{errs} skipped/failed")
+        bar=st.progress(0,text="Preparing full sync…")
+        status=st.empty()
+        starting=synced
+        def prog(done,total,errs):
+            bar.progress(done/max(total,1),text=f"{done}/{total} remaining players processed")
+            status.caption(f"{starting + done - errs} total cached · {errs} delayed/skipped · leave this page open")
         try:
-            res=club.sync_batch(wallet,season_start,None,prog);bar.empty();status.empty()
+            season_start=st.session_state.get("season_start","2026-09-22T00:00:00Z")
+            res=club.sync_batch(wallet,season_start,None,prog)
+            bar.empty();status.empty()
             if res.get("rate_limited"):
                 mins=max(1,math.ceil(res.get("cooldown",0)/60))
-                st.warning(f"MFL finally imposed a rate limit after {res['saved']} new player(s). Everything completed is saved. Wait about {mins} minute(s); one click will resume the remaining players.")
-            elif any("MFL_TIMEOUT" in str(x[1]) for x in res.get("errors",[])):
-                st.warning(f"The full run finished with {len(res['errors'])} slow player(s) left for the next run. {res['saved']} player(s) were saved.")
+                st.warning(f"MFL rate limit reached after saving {res['saved']} player(s). Wait about {mins} minute(s), then run again.")
             elif res["errors"]:
-                st.warning(f"Saved {res['saved']}; {len(res['errors'])} player(s) skipped.")
+                st.warning(f"Saved {res['saved']} player(s); {len(res['errors'])} slow/failed player(s) can be retried next run.")
             else:
-                st.success(f"Saved {res['saved']} players. Batch complete.")
+                st.success(f"Saved {res['saved']} player(s). Full run complete.")
             st.rerun()
         except Exception as e:
             bar.empty();status.empty()
-            msg=str(e)
-            if "MFL_TIMEOUT" in msg or "Read timed out" in msg:
-                st.warning("MFL is responding slowly. Nothing already synced has been lost. Wait a moment and try the next batch again.")
-            else:
-                st.error("MFL could not complete this batch.")
-                with st.expander("Technical detail"):st.code(msg)
-    cached=club.cached(wallet)
-    if cached.empty:st.markdown('<div class="empty"><b>No progression synced yet</b>Press Sync next 30. The old zero-only cache has been discarded.</div>',unsafe_allow_html=True)
-    else:
-        good=cached[cached["error"].isna()] if "error" in cached.columns else cached
-        clubs=good.groupby("club").agg(Players=("player_id","count"),OVR=("ovr_gain","sum"),Attributes=("attr_gain","sum"),PAC=("pac","sum"),SHO=("sho","sum"),PAS=("pas","sum"),DRI=("dri","sum"),DEF=("defn","sum"),PHY=("phy","sum")).reset_index().sort_values(["OVR","Attributes"],ascending=False)
-        st.markdown('<div class="section-head2"><h3>Top developing clubs</h3><span class="small-note2">Loaded Season 17 data</span></div>',unsafe_allow_html=True)
-        topclubs=clubs.head(3);cols=st.columns(3);mx=max(float(topclubs["Attributes"].max()) if not topclubs.empty else 1,1)
-        for i,(col,row) in enumerate(zip(cols,topclubs.to_dict("records")),1):
-            pct=min(100,max(5,float(row["Attributes"])/mx*100))
-            html_box=f'<div class="club-card2"><div class="club-pos2">#{i} DEVELOPMENT</div><div class="club-name2">{esc(row["club"])}</div><div class="club-total2">+{row["OVR"]:g} OVR</div><div class="club-sub2">{int(row["Players"])} players · +{row["Attributes"]:g} attributes</div><div class="progress-track2"><div class="progress-fill2" style="width:{pct:.0f}%"></div></div></div>'
-            with col:st.markdown(html_box,unsafe_allow_html=True)
-        st.markdown('<div class="section-head2"><h3>Club leaderboard</h3></div>',unsafe_allow_html=True)
-        st.dataframe(clubs.rename(columns={"club":"Club","OVR":"OVR ↑","Attributes":"ATTR ↑"}),use_container_width=True,hide_index=True,height=min(520,75+35*len(clubs)))
-        if not clubs.empty:
-            left,right=st.columns([1.55,1])
-            with left:
-                choice=st.selectbox("Club detail",clubs["club"].tolist());detail=good[good.club==choice].sort_values(["ovr_gain","attr_gain"],ascending=False);st.dataframe(detail[["player","start_ovr","current_ovr","ovr_gain","attr_gain","pac","sho","pas","dri","defn","phy"]].rename(columns={"player":"Player","start_ovr":"S17 Start","current_ovr":"Current","ovr_gain":"OVR ↑","attr_gain":"ATTR ↑","pac":"PAC ↑","sho":"SHO ↑","pas":"PAS ↑","dri":"DRI ↑","defn":"DEF ↑","phy":"PHY ↑"}),use_container_width=True,hide_index=True)
-            with right:
-                body=""
-                for i,x in enumerate(mine,1):
-                    crow=clubs[clubs.club==x["name"]];gain=float(crow.iloc[0]["OVR"]) if not crow.empty else 0;body+=f'<div class="rank-row"><div class="rank-pos">{i}</div><div class="rank-name">{esc(x["name"])}</div><div class="rank-gain">+{gain:g}</div></div>'
-                st.markdown(f'<div class="panel">{body}</div>',unsafe_allow_html=True)
-        st.caption("Progression is rebuilt cumulatively from MFL events in this version. Continue syncing batches until coverage is complete.")
+            st.error("MFL could not complete the sync.")
+            with st.expander("Technical detail"):
+                st.code(str(e))
 
+    cached=club.cached(wallet)
+    good=cached[cached["error"].isna()] if (not cached.empty and "error" in cached.columns) else cached
+
+    if good.empty:
+        st.markdown('<div class="empty"><b>No club development loaded yet</b>Run the sync once and this page will populate automatically.</div>',unsafe_allow_html=True)
+    else:
+        clubs=(good.groupby("club").agg(
+            Players=("player_id","count"),OVR=("ovr_gain","sum"),Attributes=("attr_gain","sum"),
+            PAC=("pac","sum"),SHO=("sho","sum"),PAS=("pas","sum"),DRI=("dri","sum"),DEF=("defn","sum"),PHY=("phy","sum")
+        ).reset_index().sort_values(["OVR","Attributes"],ascending=False))
+        clubs=clubs.rename(columns={"club":"Club","OVR":"OVR ↑","Attributes":"ATTR ↑"})
+
+        st.markdown('<div class="section-head2"><h3>Top developing clubs</h3><span class="small-note2">SEASON 17 NETWORK LEADERS</span></div>',unsafe_allow_html=True)
+        top=clubs.head(3)
+        max_attr=float(top["ATTR ↑"].max()) if not top.empty else 1
+        cards="".join(club_feature_card(i,r,max_attr) for i,r in enumerate(top.to_dict("records"),1))
+        st.markdown(f'<div class="club-rank-grid">{cards}</div>',unsafe_allow_html=True)
+
+        st.markdown('<div class="section-head2"><h3>Club drill-down</h3><span class="small-note2">PLAYER DEVELOPMENT</span></div>',unsafe_allow_html=True)
+        choice=st.selectbox("Choose club",clubs["Club"].tolist(),label_visibility="collapsed",key="club_visual_choice")
+        detail=good[good.club==choice].sort_values(["ovr_gain","attr_gain","current_ovr"],ascending=False)
+        selected_row=clubs[clubs["Club"]==choice].iloc[0]
+
+        st.markdown(
+            f'<div class="club-selector-wrap"><div class="club-detail-head"><div>'
+            f'<div class="club-detail-name">{esc(choice)}</div>'
+            f'<div class="club-detail-meta">{int(selected_row["Players"])} players · +{float(selected_row["ATTR ↑"]):g} attributes</div>'
+            f'</div><div class="club-detail-total">+{float(selected_row["OVR ↑"]):g} OVR</div></div></div>',
+            unsafe_allow_html=True
+        )
+
+        movers=detail[(detail["ovr_gain"].fillna(0)>0) | (detail["attr_gain"].fillna(0)>0)].head(8)
+        if movers.empty:
+            st.markdown('<div class="empty"><b>No recorded development in this club yet</b>The detail table below still shows every synced player.</div>',unsafe_allow_html=True)
+        else:
+            st.write("")
+            player_html="".join(club_player_card(r) for _,r in movers.iterrows())
+            st.markdown(f'<div class="player-grid-club">{player_html}</div>',unsafe_allow_html=True)
+
+        st.markdown('<div class="section-head2"><h3>Club leaderboard</h3><span class="small-note2">ALL OWNED CLUBS</span></div>',unsafe_allow_html=True)
+        st.dataframe(
+            clubs,
+            use_container_width=True,hide_index=True,height=min(500,75+35*len(clubs))
+        )
+
+        st.markdown('<div class="section-head2"><h3>Full player detail</h3><span class="small-note2">SELECTED CLUB</span></div>',unsafe_allow_html=True)
+        st.dataframe(
+            detail[["player","start_ovr","current_ovr","ovr_gain","attr_gain","pac","sho","pas","dri","defn","phy"]]
+            .rename(columns={"player":"Player","start_ovr":"S17 Start","current_ovr":"Current","ovr_gain":"OVR ↑","attr_gain":"ATTR ↑",
+                             "pac":"PAC ↑","sho":"SHO ↑","pas":"PAS ↑","dri":"DRI ↑","defn":"DEF ↑","phy":"PHY ↑"}),
+            use_container_width=True,hide_index=True,height=520
+        )

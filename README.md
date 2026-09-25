@@ -1,15 +1,15 @@
-# MFL Management Hub — Agency Redesign v13
+# MFL Management Hub — Club Redesign v14
 
-Builds on the improved Grower v12.2 and redesigns Agency Development.
+Builds on the approved Agency v13 design and gives Club Development the same product treatment.
 
-Agency changes
-- full agency hero and KPI summary
-- actual MFL portraits for top movers
-- top-mover cards with OVR, start OVR, gain and attribute gains
-- visual New Mints / Originals cards with portraits and joined-agency date
-- visual tagged-player board
-- cleaner three-tab workspace: Development / My List / All Agency
-- full detail tables retained lower down for power-user scanning
-- existing 20-player agency refresh preserved
+Club changes
+- proper Season 17 hero and KPI summary
+- redesigned safe full-network sync panel
+- visual top-three developing club cards
+- club drill-down selector with summary
+- real MFL portraits for the leading developing players inside each club
+- clear OVR / attribute / individual-stat gain cards
+- full club leaderboard and selected-club detail table retained lower down
+- existing one-click slow all-remaining sync preserved
 
-Club Development and Home remain intact for the next pass.
+Grower and Agency remain intact from v12.2 / v13.
