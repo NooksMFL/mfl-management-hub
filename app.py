@@ -322,6 +322,55 @@ st.markdown(r"""
 </style>
 """,unsafe_allow_html=True)
 
+
+st.markdown(r"""
+<style>
+.brand-clean{padding:18px 16px 16px;border-bottom:1px solid #15333c}
+.brand-lock{display:flex;align-items:center;gap:12px}.brand-mark-v15{width:48px;height:48px;flex:0 0 48px}
+.brand-mfl-v15{font-size:1.12rem;font-weight:950;color:#f7fbfa;letter-spacing:-.055em;line-height:1}.brand-mfl-v15 span{color:#13e0b4}
+.brand-hub-v15{font-size:.58rem;color:#6f858b;letter-spacing:.17em;font-weight:900;margin-top:6px}.brand-line-v15{width:86px;height:3px;background:linear-gradient(90deg,#13e0b4,transparent);border-radius:99px;margin-top:10px}
+.brand-season-v15{font-size:.56rem;color:#4f696f;letter-spacing:.10em;font-weight:800;margin-top:10px}
+
+.home-shell{max-width:1400px;margin:auto}
+.home-hero-v15{position:relative;overflow:hidden;display:grid;grid-template-columns:1.35fr .65fr;gap:16px;background:linear-gradient(118deg,#07151c 0%,#081922 58%,#0b2430 100%);border:1px solid #173944;border-radius:16px;padding:27px 28px;margin-bottom:13px;min-height:220px}
+.home-hero-v15:after{content:"";position:absolute;right:-90px;top:-90px;width:330px;height:330px;border-radius:50%;border:48px solid rgba(19,224,180,.03)}
+.home-eyebrow-v15{font-size:.60rem;color:#13e0b4;letter-spacing:.18em;font-weight:900}.home-title-v15{font-size:2.35rem;line-height:1.02;color:#f6fbfa;font-weight:950;letter-spacing:-.065em;margin-top:10px;max-width:720px}
+.home-copy-v15{font-size:.83rem;color:#7c9399;line-height:1.6;margin-top:13px;max-width:680px}.home-meta-v15{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}
+.home-pill-v15{font-size:.62rem;color:#a8b8bb;background:#0c252d;border:1px solid #1d4650;border-radius:999px;padding:6px 9px}.home-pill-v15 b{color:#13e0b4}
+.network-card-v15{position:relative;z-index:2;background:rgba(5,15,20,.60);border:1px solid #1a414b;border-radius:13px;padding:18px}
+.network-label-v15{font-size:.56rem;color:#5b767d;letter-spacing:.13em;font-weight:900}.network-big-v15{font-size:2.45rem;color:#13e0b4;font-weight:950;letter-spacing:-.07em;margin-top:16px}.network-sub-v15{font-size:.66rem;color:#6f878d;margin-top:3px}
+.network-rule-v15{height:1px;background:#15343d;margin:16px 0}.network-row-v15{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:9px;font-size:.66rem;color:#70888e}.network-row-v15 b{color:#e2ecea}
+
+.home-kpis-v15{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:17px}.home-kpi-v15{background:#07161d;border:1px solid #173843;border-radius:11px;padding:14px 15px}
+.hk-label{font-size:.56rem;color:#58747a;letter-spacing:.10em;font-weight:850;text-transform:uppercase}.hk-value{font-size:1.58rem;color:#f2f8f7;font-weight:930;letter-spacing:-.05em;margin-top:8px}.hk-value.mint{color:#13e0b4}.hk-value.blue{color:#38afff}.hk-value.violet{color:#ad76ff}.hk-sub{font-size:.60rem;color:#667f85;margin-top:4px}
+
+.home-section-v15{display:flex;align-items:end;justify-content:space-between;margin:22px 0 9px}.home-section-v15 h3{font-size:.95rem;color:#eaf2f1;margin:0}.home-section-v15 span{font-size:.54rem;color:#526d74;letter-spacing:.10em;font-weight:850}
+.workspace-grid-v15{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+a.workspace-card-v15{text-decoration:none!important;color:inherit!important;display:block;position:relative;overflow:hidden;background:linear-gradient(145deg,#07161d,#061219);border:1px solid #173843;border-radius:12px;min-height:170px;padding:18px;transition:.16s ease}
+a.workspace-card-v15:hover{transform:translateY(-2px);border-color:#2a5b66;box-shadow:0 16px 30px rgba(0,0,0,.16)}
+.workspace-top-v15{display:flex;align-items:center;justify-content:space-between}.workspace-icon-v15{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:#0c2926;border:1px solid #155449}
+.workspace-icon-v15.blue{background:#0b2333;border-color:#164968}.workspace-icon-v15.violet{background:#1b122d;border-color:#4c3370}.workspace-icon-v15 svg{width:22px;height:22px}
+.workspace-arrow-v15{width:31px;height:31px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#0b2229;border:1px solid #1c4650;color:#8ba1a5;font-size:.85rem}
+.workspace-title-v15{font-size:1rem;color:#f2f8f7;font-weight:880;margin-top:18px}.workspace-sub-v15{font-size:.67rem;color:#70878d;line-height:1.45;margin-top:5px;max-width:88%}
+.workspace-accent-v15{position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#13e0b4,transparent)}
+.workspace-card-v15.blue .workspace-accent-v15{background:linear-gradient(90deg,#38afff,transparent)}.workspace-card-v15.violet .workspace-accent-v15{background:linear-gradient(90deg,#ad76ff,transparent)}
+
+.home-dashboard-v15{display:grid;grid-template-columns:1.2fr .8fr .8fr;gap:10px;margin-top:10px}.home-bottom-v15{display:grid;grid-template-columns:1.1fr .9fr;gap:10px;margin-top:10px}
+.home-panel-v15{background:#07161d;border:1px solid #173843;border-radius:11px;padding:14px}.hp-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.hp-title{font-size:.76rem;color:#e8f0ef;font-weight:820}.hp-meta{font-size:.52rem;color:#536e74;letter-spacing:.08em}
+.home-list-row{display:grid;grid-template-columns:24px 1fr auto;gap:9px;align-items:center;padding:9px 0;border-bottom:1px solid #102b33}.home-list-row:last-child{border-bottom:0}
+.home-list-rank{width:22px;height:22px;border-radius:50%;background:#0d252d;color:#a8b7b9;display:flex;align-items:center;justify-content:center;font-size:.57rem}.home-list-main{font-size:.67rem;color:#dbe5e4;font-weight:730}.home-list-sub{font-size:.54rem;color:#59737a;margin-top:2px}.home-list-value{font-size:.68rem;color:#13e0b4;font-weight:900}
+.quick-grid-v15{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+a.quick-v15{text-decoration:none!important;color:inherit!important;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#081820;border:1px solid #193b45;border-radius:9px;padding:11px 12px;transition:.14s ease}
+a.quick-v15:hover{background:#0b222a;border-color:#2a5a65;transform:translateY(-1px)}.quick-left-v15{display:flex;align-items:center;gap:9px}.quick-ico-v15{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#0d272f;border:1px solid #1d4650}
+.quick-ico-v15 svg{width:16px;height:16px}.quick-title-v15{font-size:.68rem;color:#e0e8e7;font-weight:760}.quick-arr-v15{color:#698086}
+.spark-chart-v15{height:205px;position:relative}.spark-grid-v15{position:absolute;inset:10px 8px 26px 38px;background:linear-gradient(to right,transparent calc(25% - .5px),#102a32 25%,transparent calc(25% + .5px),transparent calc(50% - .5px),#102a32 50%,transparent calc(50% + .5px),transparent calc(75% - .5px),#102a32 75%,transparent calc(75% + .5px)),linear-gradient(to bottom,transparent calc(25% - .5px),#102a32 25%,transparent calc(25% + .5px),transparent calc(50% - .5px),#102a32 50%,transparent calc(50% + .5px),transparent calc(75% - .5px),#102a32 75%,transparent calc(75% + .5px))}
+.spark-svg-v15{position:absolute;left:38px;right:8px;top:10px;bottom:26px;width:calc(100% - 46px);height:calc(100% - 36px)}.spark-labels-v15{position:absolute;left:38px;right:8px;bottom:2px;display:flex;justify-content:space-between;color:#5c747a;font-size:.54rem}
+@media(max-width:1000px){.home-hero-v15{grid-template-columns:1fr}.home-kpis-v15,.workspace-grid-v15,.home-dashboard-v15,.home-bottom-v15{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){.home-kpis-v15,.workspace-grid-v15,.home-dashboard-v15,.home-bottom-v15,.quick-grid-v15{grid-template-columns:1fr}.home-title-v15{font-size:1.9rem}}
+</style>
+""",unsafe_allow_html=True)
+
 def esc(x): return html.escape(str(x))
 
 def page_head(kicker,title,sub):
@@ -522,21 +571,28 @@ DEFAULT_WALLET="0x65cc0e72dd71ad80"
 if "wallet" not in st.session_state: st.session_state.wallet=DEFAULT_WALLET
 
 # ---------------- SIDEBAR ----------------
+nav_pages=["Home","Grower or Shower","Agency Development","Club Development"]
+query_page=st.query_params.get("page","Home")
+if query_page not in nav_pages:
+    query_page="Home"
+
 with st.sidebar:
     st.markdown("""
-    <div class="side-poster">
-      <div class="poster-crown">♕</div>
-      <div class="poster-mfl">MFL</div>
-      <div class="poster-sub">MANAGEMENT HUB</div>
-      <div class="poster-swipe"></div>
+    <div class="brand-clean">
+      <div class="brand-lock">
+        <svg class="brand-mark-v15" viewBox="0 0 64 64" aria-label="MFL">
+          <defs><linearGradient id="brandmint15" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4ff0ce"/><stop offset="1" stop-color="#12c79f"/></linearGradient></defs>
+          <path d="M32 4 55 12v18c0 14.8-9.4 24.8-23 30C18.4 54.8 9 44.8 9 30V12L32 4Z" fill="#081d24" stroke="#13e0b4" stroke-width="2"/>
+          <path d="M19 19h6l3 6 4-8 4 8 3-6h6l-4 10H23l-4-10Z" fill="url(#brandmint15)"/>
+          <path d="M18 36h5v11h-5V36Zm8 0h5l3 5 3-5h5v11h-5v-5l-3 4-3-4v5h-5V36Zm19 0h10v4h-5v2h4v4h-4v1h-5V36Z" fill="#f3f9f7"/>
+        </svg>
+        <div><div class="brand-mfl-v15"><span>MFL</span> Management</div><div class="brand-hub-v15">MANAGEMENT HUB</div><div class="brand-line-v15"></div></div>
+      </div>
+      <div class="brand-season-v15">SEASON 17 · LIVE WORKSPACE</div>
     </div>
     """,unsafe_allow_html=True)
 
-    page=st.radio(
-        "Navigation",
-        ["Home","Grower or Shower","Agency Development","Club Development"],
-        label_visibility="collapsed"
-    )
+    page=st.radio("Navigation",nav_pages,index=nav_pages.index(query_page),label_visibility="collapsed")
 
     st.markdown('<div class="wallet-area"><div class="wallet-label">ACTIVE WALLET</div>',unsafe_allow_html=True)
     st.markdown(f'<div class="wallet-chip">{esc(st.session_state.wallet)}</div>',unsafe_allow_html=True)
@@ -552,12 +608,7 @@ with st.sidebar:
             else:
                 st.error("Enter a valid 0x wallet.")
     st.markdown('</div>',unsafe_allow_html=True)
-
-    st.markdown("""<div class="season-box">
-      <div class="season-top"><span>Season 17</span><span>⌄</span></div>
-      <div class="connected"><i></i><span>Connected</span></div>
-    </div>
-    <div class="build">CLUB REDESIGN · v14</div>""",unsafe_allow_html=True)
+    st.markdown("""<div class="season-box"><div class="season-top"><span>Season 17</span><span>LIVE</span></div><div class="connected"><i></i><span>MFL connected</span></div></div><div class="build">HOME REWORK · v15</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 
@@ -569,8 +620,7 @@ if page=="Home":
         improved=c.execute("SELECT COUNT(*) FROM ownership_v65 WHERE wallet=? AND current_ovr>start_ovr",(wallet.lower(),)).fetchone()[0]
         c.close()
     except Exception:
-        players=0
-        improved=0
+        players=0; improved=0
 
     try:
         mine=club.owned_clubs(wallet)
@@ -583,123 +633,115 @@ if page=="Home":
     total_attr=float(good["attr_gain"].fillna(0).sum()) if not good.empty else 0
     total_start=float(good["start_ovr"].fillna(0).sum()) if not good.empty else 0
     total_current=float(good["current_ovr"].fillna(0).sum()) if not good.empty else 0
-
-    clubs_rank=pd.DataFrame()
-    top_players=pd.DataFrame()
-    if not good.empty:
-        clubs_rank=(good.groupby("club").agg(ovr=("ovr_gain","sum"),attrs=("attr_gain","sum"),players=("player_id","count"))
-                    .reset_index().sort_values(["ovr","attrs"],ascending=False).head(5))
-        top_players=good.sort_values(["attr_gain","ovr_gain"],ascending=False).head(5)
+    synced=len(good)
 
     st.markdown(f"""
-      <div class="banner">
-        <div class="banner-row">
-          <div>
-            <div class="brand-word">MFL <span>MANAGEMENT HUB</span></div>
-            <div class="brand-stroke"></div>
-            <div class="brand-tag">TRACK. ANALYSE. DEVELOP. ALL IN ONE PLACE.</div>
+    <div class="home-shell">
+      <div class="home-hero-v15">
+        <div>
+          <div class="home-eyebrow-v15">MFL MANAGEMENT HUB · SEASON 17</div>
+          <div class="home-title-v15">Your whole MFL network.<br>One clear view.</div>
+          <div class="home-copy-v15">Track agency development, compare every owned club and follow Grower or Shower from the same workspace.</div>
+          <div class="home-meta-v15">
+            <span class="home-pill-v15"><b>{len(mine) if mine else "—"}</b> owned clubs</span>
+            <span class="home-pill-v15"><b>{players or "—"}</b> agency players</span>
+            <span class="home-pill-v15"><b>{synced}</b> club players synced</span>
           </div>
-          <div class="season-badge">Season 17⌄</div>
         </div>
-        <div class="banner-note">SAME GAME.<br><b>BIGGER INSIGHTS.</b></div>
-      </div>
-
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon">♢</div><div><div class="stat-num">{len(mine) if mine else "—"}</div><div class="stat-lab">Owned Clubs</div></div><div class="stat-trend">LIVE</div>
-        </div>
-        <div class="stat-card cyan">
-          <div class="stat-icon">👥</div><div><div class="stat-num">{players or "—"}</div><div class="stat-lab">Players Tracked</div></div><div class="stat-trend">LIVE</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">⇈</div><div><div class="stat-num">+{total_ovr:g}</div><div class="stat-lab">Total OVR Gained</div></div><div class="stat-trend">S17</div>
-        </div>
-        <div class="stat-card violet">
-          <div class="stat-icon">▥</div><div><div class="stat-num">+{total_attr:g}</div><div class="stat-lab">Total Attributes</div></div><div class="stat-trend">S17</div>
+        <div class="network-card-v15">
+          <div class="network-label-v15">SEASON 17 NETWORK DEVELOPMENT</div>
+          <div class="network-big-v15">+{total_ovr:g}</div>
+          <div class="network-sub-v15">Total OVR gained across loaded club data</div>
+          <div class="network-rule-v15"></div>
+          <div class="network-row-v15"><span>Attribute gains</span><b>+{total_attr:g}</b></div>
+          <div class="network-row-v15"><span>Agency improved</span><b>{improved}</b></div>
+          <div class="network-row-v15"><span>Owned clubs</span><b>{len(mine) if mine else "—"}</b></div>
         </div>
       </div>
 
-      <div class="feature-grid">
-        <div class="feature-card grower"><div class="feature-bg"></div><div class="feature-art">🏆</div>
-          <div class="feature-copy"><div class="feature-title">Grower or Shower</div><div class="feature-sub">Competition tracking and leaderboards</div></div><div class="feature-go">›</div>
-        </div>
-        <div class="feature-card agency"><div class="feature-bg"></div><div class="feature-art">♟♟♟</div>
-          <div class="feature-copy"><div class="feature-title">Agency Development</div><div class="feature-sub">Track all your players and progress</div></div><div class="feature-go">›</div>
-        </div>
-        <div class="feature-card club"><div class="feature-bg"></div><div class="feature-art">⚽</div>
-          <div class="feature-copy"><div class="feature-title">Club Development</div><div class="feature-sub">Compare club progression</div></div><div class="feature-go">›</div>
-        </div>
+      <div class="home-kpis-v15">
+        <div class="home-kpi-v15"><div class="hk-label">Owned clubs</div><div class="hk-value">{len(mine) if mine else "—"}</div><div class="hk-sub">Verified MFL_OWNER clubs</div></div>
+        <div class="home-kpi-v15"><div class="hk-label">Agency players</div><div class="hk-value blue">{players or "—"}</div><div class="hk-sub">Tracked in your current agency</div></div>
+        <div class="home-kpi-v15"><div class="hk-label">Club OVR gained</div><div class="hk-value mint">+{total_ovr:g}</div><div class="hk-sub">Loaded Season 17 progression</div></div>
+        <div class="home-kpi-v15"><div class="hk-label">Attribute gains</div><div class="hk-value violet">+{total_attr:g}</div><div class="hk-sub">Across synced club players</div></div>
+      </div>
+
+      <div class="home-section-v15"><h3>Workspaces</h3><span>CLICK TO OPEN</span></div>
+      <div class="workspace-grid-v15">
+        <a class="workspace-card-v15" href="?page=Grower%20or%20Shower" target="_self">
+          <div class="workspace-top-v15"><div class="workspace-icon-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#13e0b4" stroke-width="1.8"><path d="M6 4h12v3c0 3.8-2.4 6.7-6 7.8C8.4 13.7 6 10.8 6 7V4Z"/><path d="M9 15h6M10 15v3h4v-3M8 20h8"/></svg></div><div class="workspace-arrow-v15">→</div></div>
+          <div class="workspace-title-v15">Grower or Shower</div><div class="workspace-sub-v15">Competition leaderboard, player ratings and every recorded stat gain.</div><div class="workspace-accent-v15"></div>
+        </a>
+        <a class="workspace-card-v15 blue" href="?page=Agency%20Development" target="_self">
+          <div class="workspace-top-v15"><div class="workspace-icon-v15 blue"><svg viewBox="0 0 24 24" fill="none" stroke="#38afff" stroke-width="1.8"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M3.5 18c.3-3 2.1-4.7 4.5-4.7S12.2 15 12.5 18M11.5 18c.3-3 2.1-4.7 4.5-4.7s4.2 1.7 4.5 4.7"/></svg></div><div class="workspace-arrow-v15">→</div></div>
+          <div class="workspace-title-v15">Agency Development</div><div class="workspace-sub-v15">Top movers, new mints, priority players and ownership-spell progress.</div><div class="workspace-accent-v15"></div>
+        </a>
+        <a class="workspace-card-v15 violet" href="?page=Club%20Development" target="_self">
+          <div class="workspace-top-v15"><div class="workspace-icon-v15 violet"><svg viewBox="0 0 24 24" fill="none" stroke="#ad76ff" stroke-width="1.8"><path d="M4 19h16M6 19V9l6-4 6 4v10"/><path d="M9 19v-5h6v5"/></svg></div><div class="workspace-arrow-v15">→</div></div>
+          <div class="workspace-title-v15">Club Development</div><div class="workspace-sub-v15">Compare development across every owned club and drill into the players.</div><div class="workspace-accent-v15"></div>
+        </a>
       </div>
     """,unsafe_allow_html=True)
+
+    club_rows=""
+    player_rows=""
+    if not good.empty:
+        clubs_rank=(good.groupby("club").agg(ovr=("ovr_gain","sum"),attrs=("attr_gain","sum"),players=("player_id","count")).reset_index().sort_values(["ovr","attrs"],ascending=False).head(5))
+        for i,r in enumerate(clubs_rank.to_dict("records"),1):
+            club_rows += f'<div class="home-list-row"><div class="home-list-rank">{i}</div><div><div class="home-list-main">{esc(r["club"])}</div><div class="home-list-sub">{int(r["players"])} players · +{float(r["attrs"]):g} attributes</div></div><div class="home-list-value">+{float(r["ovr"]):g}</div></div>'
+        top_players=good.sort_values(["attr_gain","ovr_gain"],ascending=False).head(5)
+        for i,(_,r) in enumerate(top_players.iterrows(),1):
+            player_rows += f'<div class="home-list-row"><div class="home-list-rank">{i}</div><div><div class="home-list-main">{esc(r["player"])}</div><div class="home-list-sub">{esc(r["club"])}</div></div><div class="home-list-value">+{float(r["attr_gain"] or 0):g}</div></div>'
+    if not club_rows:
+        club_rows='<div style="color:#5a7279;font-size:.64rem;padding:34px 4px;text-align:center">Sync Club Development to populate this panel.</div>'
+    if not player_rows:
+        player_rows='<div style="color:#5a7279;font-size:.64rem;padding:34px 4px;text-align:center">Player development will appear after club sync.</div>'
 
     if total_start>0:
         lo=min(total_start,total_current); hi=max(total_start,total_current); rng=max(hi-lo,1)
-        y1=140-(total_start-lo)/rng*95; y2=140-(total_current-lo)/rng*95
-        chart_svg=f"""<svg class="chart-svg" viewBox="0 0 500 150" preserveAspectRatio="none">
-          <defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#13e0b4" stop-opacity=".26"/><stop offset="1" stop-color="#13e0b4" stop-opacity="0"/></linearGradient></defs>
-          <path d="M18,{y1:.1f} L482,{y2:.1f} L482,148 L18,148 Z" fill="url(#area)"/>
-          <path d="M18,{y1:.1f} L482,{y2:.1f}" fill="none" stroke="#13e0b4" stroke-width="3"/>
-          <circle cx="18" cy="{y1:.1f}" r="5" fill="#13e0b4"/><circle cx="482" cy="{y2:.1f}" r="5" fill="#13e0b4"/>
-        </svg>"""
-        chart_note=f"{total_start:g} → {total_current:g}"
+        y1=145-(total_start-lo)/rng*100; y2=145-(total_current-lo)/rng*100
+        chart_svg = (
+            f'<svg class="spark-svg-v15" viewBox="0 0 500 155" preserveAspectRatio="none">'
+            f'<defs><linearGradient id="homearea15" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#13e0b4" stop-opacity=".28"/><stop offset="1" stop-color="#13e0b4" stop-opacity="0"/></linearGradient></defs>'
+            f'<path d="M18,{y1:.1f} L482,{y2:.1f} L482,153 L18,153 Z" fill="url(#homearea15)"/>'
+            f'<path d="M18,{y1:.1f} L482,{y2:.1f}" fill="none" stroke="#13e0b4" stroke-width="3"/>'
+            f'<circle cx="18" cy="{y1:.1f}" r="5" fill="#13e0b4"/><circle cx="482" cy="{y2:.1f}" r="5" fill="#13e0b4"/></svg>'
+        )
+        chart_meta=f"{total_start:g} → {total_current:g} OVR"
     else:
-        chart_svg='<div style="color:#5c747a;font-size:.68rem;padding:65px 20px;text-align:center">Sync Club Development to populate Season 17 progression.</div>'
-        chart_note="Waiting for club data"
+        chart_svg='<div style="color:#5a7279;font-size:.64rem;padding:75px 10px;text-align:center">Waiting for Season 17 club progression data.</div>'
+        chart_meta="NO CLUB DATA YET"
 
-    club_rows=""
-    if not clubs_rank.empty:
-        for i,r in enumerate(clubs_rank.to_dict("records"),1):
-            club_rows+=f'<div class="list-row"><div class="list-rank">{i}</div><div><div class="list-main">{esc(r["club"])}</div><div class="list-sub">{int(r["players"])} players · +{r["attrs"]:g} attrs</div></div><div class="list-value">+{r["ovr"]:g}</div></div>'
-    else:
-        club_rows='<div style="color:#5c747a;font-size:.66rem;padding:35px 4px;text-align:center">No club data loaded yet.</div>'
+    st.markdown(
+        '<div class="home-section-v15"><h3>Network intelligence</h3><span>SEASON 17</span></div>'
+        f'<div class="home-dashboard-v15"><div class="home-panel-v15"><div class="hp-head"><div class="hp-title">OVR progression</div><div class="hp-meta">{esc(chart_meta)}</div></div>'
+        f'<div class="spark-chart-v15"><div class="spark-grid-v15"></div>{chart_svg}<div class="spark-labels-v15"><span>S17 Start</span><span>Current</span></div></div></div>'
+        f'<div class="home-panel-v15"><div class="hp-head"><div class="hp-title">Top 5 clubs</div><div class="hp-meta">OVR GAINED</div></div>{club_rows}</div>'
+        f'<div class="home-panel-v15"><div class="hp-head"><div class="hp-title">Top 5 players</div><div class="hp-meta">ATTRIBUTES GAINED</div></div>{player_rows}</div></div>',
+        unsafe_allow_html=True
+    )
 
-    player_rows=""
-    if not top_players.empty:
-        for i,(_,r) in enumerate(top_players.iterrows(),1):
-            player_rows+=f'<div class="list-row"><div class="list-rank">{i}</div><div><div class="list-main">{esc(r["player"])}</div><div class="list-sub">{esc(r["club"])}</div></div><div class="list-value">+{float(r["attr_gain"] or 0):g}</div></div>'
-    else:
-        player_rows='<div style="color:#5c747a;font-size:.66rem;padding:35px 4px;text-align:center">No player development loaded yet.</div>'
-
-    st.markdown(f"""
-      <div class="dash-grid">
-        <div class="card">
-          <div class="card-head"><div class="card-title">♢ &nbsp; OVR Progression (Season 17)</div><div class="card-meta">{esc(chart_note)}</div></div>
-          <div class="chart-box"><div class="chart-grid"></div>{chart_svg}<div class="chart-labels"><span>S17 Start</span><span>Current</span></div></div>
-        </div>
-        <div class="card"><div class="card-head"><div class="card-title">♢ &nbsp; Top 5 Clubs (OVR Gained)</div><div class="card-meta">S17</div></div>{club_rows}</div>
-        <div class="card"><div class="card-head"><div class="card-title">▥ &nbsp; Top 5 Players (Attributes Gained)</div><div class="card-meta">S17</div></div>{player_rows}</div>
-      </div>
-    """,unsafe_allow_html=True)
-
-    activity=""
-    if not good.empty and "last_progression" in good.columns:
-        act=good.copy()
-        act["_dt"]=pd.to_datetime(act["last_progression"],utc=True,errors="coerce")
-        act=act.sort_values("_dt",ascending=False).head(5)
-        for _,r in act.iterrows():
-            gains=[]
-            if float(r.get("ovr_gain") or 0)>0: gains.append(f'+{float(r["ovr_gain"]):g} OVR')
-            if float(r.get("attr_gain") or 0)>0: gains.append(f'+{float(r["attr_gain"]):g} Attributes')
-            gaintext=" · ".join(gains) if gains else "progression checked"
-            date_txt=r["_dt"].strftime("%d %b") if pd.notna(r["_dt"]) else ""
-            activity+=f'<div class="activity-row"><div class="activity-dot"></div><div class="activity-main">{esc(r["player"])} &nbsp; <b>{esc(gaintext)}</b></div><div class="activity-time">{esc(date_txt)}</div></div>'
-    if not activity:
-        activity='<div style="color:#5c747a;font-size:.66rem;padding:35px 4px;text-align:center">Recent progression will appear after Club Development is synced.</div>'
-
-    st.markdown(f"""
-      <div class="bottom-grid">
-        <div class="card"><div class="card-head"><div class="card-title">⚡ &nbsp; Recent Activity</div><div class="card-meta">LATEST PROGRESSION</div></div>{activity}</div>
-        <div class="card">
-          <div class="card-head"><div class="card-title">◎ &nbsp; Quick Actions</div><div class="card-meta">WORKSPACES</div></div>
-          <div class="actions">
-            <div class="action">🏆 &nbsp; Grower or Shower <span>→</span></div>
-            <div class="action">👥 &nbsp; Agency Development <span>→</span></div>
-            <div class="action">▥ &nbsp; Club Development <span>→</span></div>
-            <div class="action">⟳ &nbsp; Sync Latest Data <span>→</span></div>
+    st.markdown("""
+      <div class="home-bottom-v15">
+        <div class="home-panel-v15">
+          <div class="hp-head"><div class="hp-title">Quick actions</div><div class="hp-meta">CLICK TO OPEN</div></div>
+          <div class="quick-grid-v15">
+            <a class="quick-v15" href="?page=Grower%20or%20Shower" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#13e0b4" stroke-width="1.8"><path d="M6 4h12v3c0 3.8-2.4 6.7-6 7.8C8.4 13.7 6 10.8 6 7V4Z"/></svg></div><div class="quick-title-v15">Grower or Shower</div></div><div class="quick-arr-v15">→</div></a>
+            <a class="quick-v15" href="?page=Agency%20Development" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#38afff" stroke-width="1.8"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/></svg></div><div class="quick-title-v15">Agency Development</div></div><div class="quick-arr-v15">→</div></a>
+            <a class="quick-v15" href="?page=Club%20Development" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#ad76ff" stroke-width="1.8"><path d="M4 19h16M6 19V9l6-4 6 4v10"/></svg></div><div class="quick-title-v15">Club Development</div></div><div class="quick-arr-v15">→</div></a>
+            <a class="quick-v15" href="?page=Club%20Development" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#13e0b4" stroke-width="1.8"><path d="M20 7v5h-5"/><path d="M18.5 15A7 7 0 1 1 19 8l1 4"/></svg></div><div class="quick-title-v15">Sync latest data</div></div><div class="quick-arr-v15">→</div></a>
           </div>
         </div>
-      </div>
+        <div class="home-panel-v15">
+          <div class="hp-head"><div class="hp-title">Workspace status</div><div class="hp-meta">LIVE</div></div>
     """,unsafe_allow_html=True)
+
+    st.markdown(
+        f'<div class="home-list-row"><div class="home-list-rank">1</div><div><div class="home-list-main">Grower or Shower</div><div class="home-list-sub">Competition tracker ready</div></div><div class="home-list-value">LIVE</div></div>'
+        f'<div class="home-list-row"><div class="home-list-rank">2</div><div><div class="home-list-main">Agency Development</div><div class="home-list-sub">{players or 0} players available</div></div><div class="home-list-value">LIVE</div></div>'
+        f'<div class="home-list-row"><div class="home-list-rank">3</div><div><div class="home-list-main">Club Development</div><div class="home-list-sub">{synced} player records cached</div></div><div class="home-list-value">{"READY" if synced else "SYNC"}</div></div></div></div></div>',
+        unsafe_allow_html=True
+    )
 
 # ---------------- GROWER ----------------
 elif page=="Grower or Shower":

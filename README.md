@@ -1,15 +1,13 @@
-# MFL Management Hub — Club Redesign v14
+# MFL Management Hub — Home Rework v15
 
-Builds on the approved Agency v13 design and gives Club Development the same product treatment.
+Complete Home/branding pass.
 
-Club changes
-- proper Season 17 hero and KPI summary
-- redesigned safe full-network sync panel
-- visual top-three developing club cards
-- club drill-down selector with summary
-- real MFL portraits for the leading developing players inside each club
-- clear OVR / attribute / individual-stat gain cards
-- full club leaderboard and selected-club detail table retained lower down
-- existing one-click slow all-remaining sync preserved
-
-Grower and Agency remain intact from v12.2 / v13.
+- removed the stadium banner and “Same game. Bigger insights.”
+- replaced the blackboard/poster logo with a clean bespoke MFL shield/wordmark
+- rebuilt the Home hero, KPIs, workspace cards and network intelligence layout
+- workspace cards are clickable
+- Quick Actions are clickable
+- Home links use `?page=` and sidebar navigation reads that value
+- removed emoji-heavy feature art in favour of inline SVG icons
+- kept real top-club/top-player data
+- Grower, Agency and Club pages remain intact from prior approved builds
