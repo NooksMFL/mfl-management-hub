@@ -23,74 +23,140 @@ try:
 except Exception:
     pass
 
-# ---------------- PRODUCT UI ----------------
+# ---------------- MOCKUP-MATCH PRODUCT UI ----------------
 st.markdown("""
 <style>
-:root{--bg:#061016;--panel:#091920;--panel2:#0c2028;--line:#173944;--text:#f3faf8;--muted:#718a90;--mint:#20e0b2;--blue:#48a6ff;--violet:#9275ff}
-.stApp{background:radial-gradient(800px 400px at 80% -10%,rgba(32,224,178,.06),transparent 60%),#061016}
-[data-testid="stHeader"]{background:rgba(6,16,22,.85);border-bottom:1px solid #102b34}
-[data-testid="stSidebar"]{background:#07151c!important;border-right:1px solid #16343d!important;min-width:260px!important}
+:root{
+ --bg:#03090e;--panel:#07131a;--panel2:#091922;--line:#173944;
+ --text:#f4f8f7;--muted:#7b9096;--mint:#13e0b4;--cyan:#16a6ff;--violet:#9a52ff;
+}
+html,body,[class*="css"]{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.stApp{background:radial-gradient(1100px 700px at 78% -12%,rgba(20,124,180,.09),transparent 65%),#03090e;color:var(--text)}
+[data-testid="stHeader"]{background:rgba(3,9,14,.80);backdrop-filter:blur(16px);border-bottom:1px solid #0e252d}
+[data-testid="stSidebar"]{background:linear-gradient(180deg,#040b10,#07131a)!important;border-right:1px solid #142f38!important;min-width:264px!important}
 [data-testid="stSidebarContent"]{padding:0!important}
-.block-container{max-width:1420px!important;padding:1.7rem 2.2rem 4rem!important}
+.block-container{max-width:1510px!important;padding:1.15rem 1.7rem 3.4rem!important}
 #MainMenu,footer,[data-testid="stDecoration"]{display:none!important}
-.brand-shell{padding:25px 20px 19px;border-bottom:1px solid #15333c}
-.brand-row{display:flex;align-items:center;gap:12px}.brand-logo{width:51px;height:51px}
-.brand-title{font-size:.98rem;font-weight:900;color:#f4faf8;letter-spacing:-.035em}.brand-title b{color:#20e0b2}
-.brand-sub{font-size:.56rem;color:#607b82;font-weight:850;letter-spacing:.16em;margin-top:6px}
-.brand-season{margin-top:15px;display:flex;align-items:center;gap:8px;font-size:.57rem;color:#607c83;font-weight:800;letter-spacing:.08em}
-.brand-season i{width:21px;height:2px;border-radius:9px;background:#20e0b2}
-[data-testid="stSidebar"] [role="radiogroup"]{gap:4px;padding:13px}
-[data-testid="stSidebar"] [role="radiogroup"] label{border-radius:10px;padding:9px 11px!important;border:1px solid transparent}
-[data-testid="stSidebar"] [role="radiogroup"] label:hover{background:#0a1d25}
-[data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked){background:#0c252d;border-color:#1d4b55;box-shadow:inset 3px 0 0 #20e0b2}
+
+/* SIDEBAR BRAND */
+.side-poster{margin:14px 13px 12px;border:1px solid #1b313a;border-radius:13px;overflow:hidden;background:
+ linear-gradient(155deg,rgba(255,255,255,.035),rgba(255,255,255,0) 38%),
+ repeating-linear-gradient(168deg,rgba(255,255,255,.012) 0 1px,transparent 1px 5px),
+ #0a1115;position:relative;min-height:205px}
+.poster-crown{font-size:2.1rem;color:var(--mint);line-height:1;text-align:center;margin-top:23px;text-shadow:0 0 18px rgba(19,224,180,.18)}
+.poster-mfl{font-family:"Arial Black",Impact,sans-serif;font-size:3.15rem;font-style:italic;font-weight:950;color:#fff;line-height:.86;text-align:center;letter-spacing:-.09em;transform:skew(-7deg)}
+.poster-sub{font-size:.84rem;font-style:italic;font-weight:900;text-align:center;color:#f2f5f4;letter-spacing:.03em;margin-top:7px}
+.poster-swipe{width:126px;height:7px;margin:11px auto 0;background:linear-gradient(90deg,transparent 0,var(--mint) 18%,var(--mint) 78%,transparent 100%);transform:skew(-18deg);box-shadow:0 0 20px rgba(19,224,180,.26)}
+
+[data-testid="stSidebar"] [role="radiogroup"]{gap:4px;padding:4px 12px 0}
+[data-testid="stSidebar"] [role="radiogroup"] label{border-radius:9px;padding:9px 11px!important;border:1px solid transparent}
+[data-testid="stSidebar"] [role="radiogroup"] label:hover{background:#0b1d25}
+[data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked){background:linear-gradient(90deg,#0e785f,#0b5b4b);border-color:#15cfa7;box-shadow:inset 3px 0 0 #1ff1c1}
 [data-testid="stSidebar"] [role="radiogroup"] label>div:first-child{display:none!important}
-[data-testid="stSidebar"] [role="radiogroup"] p{font-size:.78rem!important;color:#9eb2b6!important;font-weight:720!important}
-[data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) p{color:#f0f8f6!important}
-.side-section{padding:20px 14px 0;margin-top:4px;border-top:1px solid #14313a}.side-label{font-size:.54rem;color:#557179;letter-spacing:.15em;font-weight:900;margin-bottom:8px}
-.wallet-chip{font-family:monospace;font-size:.65rem;color:#aec1c4;background:#091c24;border:1px solid #173d47;border-radius:9px;padding:10px}.build{font-size:.56rem;color:#425e65;margin-top:13px;letter-spacing:.08em}
-.topline{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:19px}.crumb{font-size:.57rem;color:#20e0b2;letter-spacing:.16em;font-weight:900;text-transform:uppercase}
-.h1{font-size:2rem;line-height:1.03;font-weight:930;color:#f6fbfa;letter-spacing:-.055em;margin-top:7px}.subtitle{font-size:.78rem;color:#708a90;margin-top:6px}
-.live{display:flex;align-items:center;gap:7px;font-size:.60rem;color:#94abae;border:1px solid #1a414b;background:#091b23;border-radius:999px;padding:7px 10px}.live:before{content:"";width:6px;height:6px;border-radius:50%;background:#20e0b2;box-shadow:0 0 0 4px rgba(32,224,178,.08)}
-.overview{display:grid;grid-template-columns:1.65fr .75fr;gap:13px;margin-bottom:13px}
-.hero-v9{position:relative;overflow:hidden;min-height:230px;background:linear-gradient(135deg,#0c2028,#091820);border:1px solid #1a404a;border-radius:18px;padding:27px}
-.hero-v9:after{content:"";position:absolute;right:-75px;top:-85px;width:280px;height:280px;border-radius:50%;border:42px solid rgba(32,224,178,.035)}
-.hero-kicker-v9{font-size:.57rem;color:#20e0b2;letter-spacing:.16em;font-weight:900}.hero-title-v9{font-size:2.05rem;color:#f5fbfa;font-weight:930;letter-spacing:-.055em;line-height:1.04;margin-top:10px;max-width:550px}
-.hero-copy-v9{font-size:.77rem;color:#799198;line-height:1.6;margin-top:12px;max-width:560px}.hero-chips-v9{display:flex;flex-wrap:wrap;gap:7px;margin-top:20px}
-.hero-chip-v9{font-size:.60rem;color:#9bb1b4;background:#0d252d;border:1px solid #214852;border-radius:999px;padding:6px 9px}.hero-chip-v9 b{color:#20e0b2}
-.snapshot{background:linear-gradient(145deg,#0b1d25,#08171e);border:1px solid #183b45;border-radius:18px;padding:20px}.snap-label{font-size:.57rem;color:#5d7b82;letter-spacing:.13em;font-weight:900}
-.snap-big{font-size:2.5rem;color:#20e0b2;font-weight:950;letter-spacing:-.07em;margin-top:18px}.snap-copy{font-size:.68rem;color:#789198;margin-top:3px}.snap-line{height:1px;background:#16343d;margin:18px 0}
-.snap-row{display:flex;justify-content:space-between;gap:12px;font-size:.66rem;color:#789198;margin-top:9px}.snap-row b{color:#d8e6e4}
-.kpis-v9{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:21px}.kpi-v9{background:#091920;border:1px solid #173944;border-radius:14px;padding:16px 17px;min-height:105px}
-.kpi-head-v9{display:flex;justify-content:space-between}.kpi-icon-v9{font-size:.56rem;font-weight:900;color:#20e0b2;background:#0d2a31;border:1px solid #17464f;border-radius:7px;padding:5px 7px}.kpi-season-v9{font-size:.49rem;color:#49666d;letter-spacing:.1em;font-weight:850}
-.kpi-value-v9{font-size:1.62rem;font-weight:930;color:#f3faf8;letter-spacing:-.05em;margin-top:13px;line-height:1}.kpi-label-v9{font-size:.62rem;color:#6e888e;margin-top:6px}
-.section-v9{display:flex;align-items:end;justify-content:space-between;margin:23px 0 10px}.section-v9 h3{font-size:.91rem!important;margin:0;color:#eaf4f2}.section-v9 span{font-size:.51rem;color:#4f6b72;letter-spacing:.12em;font-weight:850}
-.workspace-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.workspace{position:relative;background:#091920;border:1px solid #173944;border-radius:14px;padding:18px;min-height:137px}
-.workspace-no{font-size:.51rem;color:#49676e;letter-spacing:.13em;font-weight:900}.workspace h4{font-size:.9rem;margin:17px 0 7px;color:#eef7f5}.workspace p{font-size:.67rem!important;line-height:1.5!important;color:#6e888f!important;margin:0}
-.workspace-arrow{position:absolute;right:16px;top:15px;color:#385961}.workspace-accent{position:absolute;left:18px;bottom:0;width:38px;height:2px;background:#20e0b2}
-.panel,.sync-box{background:#091920;border:1px solid #173944;border-radius:14px;padding:17px}.rank-row{display:grid;grid-template-columns:27px 1fr auto;gap:9px;align-items:center;padding:10px 0;border-bottom:1px solid #13313a}.rank-row:last-child{border-bottom:0}
-.rank-pos{width:24px;height:24px;border-radius:7px;background:#0e2730;color:#8fa6aa;display:flex;align-items:center;justify-content:center;font-size:.61rem;font-weight:850}.rank-name{font-size:.72rem;color:#d9e6e4;font-weight:720}.rank-gain{font-size:.72rem;color:#20e0b2;font-weight:900}
-.hero-card{background:#091920!important;border:1px solid #173944!important;border-radius:14px!important;padding:18px!important}.podium-1{border-color:rgba(32,224,178,.48)!important}.podium-2{border-color:rgba(72,166,255,.35)!important}.podium-3{border-color:rgba(146,117,255,.35)!important}
-.club-card2{background:#091920!important;border:1px solid #173944!important;border-radius:14px!important}
-.stButton>button{background:#0a2028!important;color:#d5e3e1!important;border:1px solid #214a55!important;border-radius:9px!important;font-weight:720!important;font-size:.72rem!important}
-.stButton>button[kind="primary"]{background:#20dbae!important;color:#032019!important;border-color:#20dbae!important}
-[data-testid="stDataFrame"]{border:1px solid #173944!important;border-radius:12px!important;overflow:hidden}[data-testid="stExpander"]{background:#08171e!important;border:1px solid #173944!important;border-radius:11px!important}
-div[data-baseweb="select"]>div,.stTextInput input{background:#091b23!important;border-color:#1d424c!important;color:#e9f3f1!important;border-radius:9px!important}
-[data-baseweb="tab-list"]{background:#08171e!important;border:1px solid #173944!important;border-radius:10px!important;padding:4px!important;gap:4px!important}
-[data-baseweb="tab"][aria-selected="true"]{background:#0d2830!important;color:#20e0b2!important}
-.stProgress>div>div>div>div{background:#20e0b2!important}
-@media(max-width:900px){.overview{grid-template-columns:1fr}.kpis-v9,.workspace-grid{grid-template-columns:1fr 1fr}.block-container{padding:1.2rem!important}}
+[data-testid="stSidebar"] [role="radiogroup"] p{font-size:.76rem!important;color:#c1cbcd!important;font-weight:720!important}
+[data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) p{color:#fff!important}
+.wallet-area{padding:16px 13px 0;margin-top:13px;border-top:1px solid #17323a}
+.wallet-label{font-size:.52rem;color:#557179;letter-spacing:.15em;font-weight:900;margin-bottom:7px}
+.wallet-chip{font-family:ui-monospace,monospace;font-size:.62rem;color:#aababc;background:#07161d;border:1px solid #173944;border-radius:8px;padding:9px 10px;overflow:hidden}
+.season-box{margin:18px 13px 0;padding:13px;background:#07151c;border:1px solid #173843;border-radius:11px}
+.season-top{display:flex;align-items:center;justify-content:space-between;color:#cad4d5;font-size:.68rem;font-weight:750}
+.connected{display:flex;align-items:center;gap:8px;color:#8ca1a5;font-size:.60rem;margin-top:14px}
+.connected i{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 4px rgba(19,224,180,.08)}
+.build{font-size:.52rem;color:#435f66;letter-spacing:.08em;margin:13px 13px 0}
+
+/* HERO BANNER */
+.banner{position:relative;overflow:hidden;min-height:150px;border:1px solid #173844;border-radius:14px;background:
+ radial-gradient(460px 190px at 77% 5%,rgba(26,155,255,.22),transparent 65%),
+ linear-gradient(95deg,#07151c 0%,#07141b 44%,#09202a 72%,#061016 100%);padding:23px 29px 22px}
+.banner:before{content:"";position:absolute;inset:0;background:
+ linear-gradient(116deg,transparent 0 66%,rgba(255,255,255,.025) 66% 67%,transparent 67%),
+ radial-gradient(circle at 78% 20%,rgba(255,255,255,.7) 0 1px,transparent 2px),
+ radial-gradient(circle at 81% 24%,rgba(255,255,255,.5) 0 1px,transparent 2px),
+ radial-gradient(circle at 84% 16%,rgba(255,255,255,.45) 0 1px,transparent 2px)}
+.banner-row{position:relative;z-index:2;display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+.brand-word{font-family:"Arial Black",Impact,sans-serif;font-style:italic;font-size:3rem;line-height:.86;letter-spacing:-.07em;color:#fff;transform:skew(-5deg)}
+.brand-word span{font-size:1.18rem;letter-spacing:.02em;margin-left:9px;vertical-align:middle}
+.brand-stroke{width:210px;height:5px;background:linear-gradient(90deg,transparent,var(--mint) 15%,var(--mint) 82%,transparent);margin:12px 0 0 112px;transform:skew(-20deg)}
+.brand-tag{font-size:.70rem;color:#c2ccce;font-style:italic;letter-spacing:.09em;margin:7px 0 0 117px}
+.season-badge{position:relative;z-index:3;background:#0b1c24;border:1px solid #27434c;color:#dbe4e5;border-radius:8px;padding:8px 11px;font-size:.67rem;font-weight:750}
+.banner-note{position:absolute;right:30px;bottom:18px;z-index:2;color:#eef2f2;font-size:.75rem;font-style:italic;letter-spacing:.06em;transform:rotate(-4deg)}
+.banner-note b{color:var(--mint)}
+
+/* KPI CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+.stat-card{position:relative;overflow:hidden;display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:12px;background:linear-gradient(145deg,#08161d,#071119);border:1px solid #183b45;border-radius:10px;padding:14px 15px;min-height:76px}
+.stat-card.cyan{border-color:#164c70}.stat-card.violet{border-color:#4c2875}
+.stat-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--mint);background:rgba(19,224,180,.06);border:1px solid rgba(19,224,180,.2);font-size:1.08rem}
+.stat-card.cyan .stat-icon{color:var(--cyan);background:rgba(22,166,255,.07);border-color:rgba(22,166,255,.18)}
+.stat-card.violet .stat-icon{color:var(--violet);background:rgba(154,82,255,.07);border-color:rgba(154,82,255,.18)}
+.stat-num{font-size:1.5rem;font-weight:900;color:#f7fbfa;letter-spacing:-.045em;line-height:1}.stat-lab{font-size:.66rem;color:#afbdbf;margin-top:4px}
+.stat-trend{font-size:.68rem;color:#19eab9;font-weight:850}
+
+/* FEATURE CARDS */
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.feature-card{position:relative;overflow:hidden;min-height:155px;border-radius:11px;border:1px solid #153c45;background:#07141b}
+.feature-card.grower{border-color:#10b991}.feature-card.agency{border-color:#1687d1}.feature-card.club{border-color:#6d35a7}
+.feature-bg{position:absolute;inset:0;opacity:.95}
+.grower .feature-bg{background:radial-gradient(circle at 58% 20%,rgba(19,224,180,.40),transparent 36%),linear-gradient(180deg,#07372e 0%,#071319 69%)}
+.agency .feature-bg{background:radial-gradient(circle at 58% 20%,rgba(22,166,255,.34),transparent 38%),linear-gradient(180deg,#082a43 0%,#071319 69%)}
+.club .feature-bg{background:radial-gradient(circle at 72% 15%,rgba(154,82,255,.32),transparent 40%),linear-gradient(180deg,#25103b 0%,#071319 69%)}
+.feature-art{position:absolute;right:22px;top:13px;font-size:4.7rem;opacity:.78;filter:drop-shadow(0 12px 22px rgba(0,0,0,.5))}
+.feature-copy{position:absolute;left:20px;right:20px;bottom:17px;z-index:2}.feature-title{font-size:1.03rem;color:#fff;font-weight:850}.feature-sub{font-size:.68rem;color:#bdc8ca;margin-top:3px}
+.feature-go{position:absolute;right:17px;bottom:17px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#031a15;font-weight:900;background:var(--mint)}
+.agency .feature-go{background:var(--cyan);color:#03111a}.club .feature-go{background:var(--violet);color:#12091b}
+
+/* LOWER DASHBOARD */
+.dash-grid{display:grid;grid-template-columns:1.25fr .76fr .76fr;gap:12px;margin-top:13px}
+.bottom-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:12px;margin-top:12px}
+.card{background:linear-gradient(145deg,#07161d,#061219);border:1px solid #183743;border-radius:11px;padding:15px}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px}.card-title{font-size:.79rem;color:#eaf0f0;font-weight:820}.card-meta{font-size:.56rem;color:#587178;letter-spacing:.08em}
+.chart-box{height:190px;position:relative;padding:5px 6px 0}
+.chart-grid{position:absolute;inset:10px 12px 26px 40px;background:
+ linear-gradient(to right,transparent calc(25% - .5px),#102b33 25%,transparent calc(25% + .5px),transparent calc(50% - .5px),#102b33 50%,transparent calc(50% + .5px),transparent calc(75% - .5px),#102b33 75%,transparent calc(75% + .5px)),
+ linear-gradient(to bottom,transparent calc(25% - .5px),#102b33 25%,transparent calc(25% + .5px),transparent calc(50% - .5px),#102b33 50%,transparent calc(50% + .5px),transparent calc(75% - .5px),#102b33 75%,transparent calc(75% + .5px))}
+.chart-svg{position:absolute;left:40px;right:12px;top:10px;bottom:26px;width:calc(100% - 52px);height:calc(100% - 36px)}
+.chart-labels{position:absolute;left:40px;right:12px;bottom:3px;display:flex;justify-content:space-between;color:#667d83;font-size:.56rem}
+.list-row{display:grid;grid-template-columns:24px 1fr auto;gap:9px;align-items:center;padding:9px 0;border-bottom:1px solid #112b33}.list-row:last-child{border-bottom:0}
+.list-rank{width:22px;height:22px;border-radius:50%;background:#10252c;color:#aebcbf;display:flex;align-items:center;justify-content:center;font-size:.58rem}.list-main{font-size:.69rem;color:#d5dfdf;font-weight:700}.list-sub{font-size:.54rem;color:#5f767c;margin-top:2px}.list-value{font-size:.68rem;color:#19e5b5;font-weight:900}
+.activity-row{display:grid;grid-template-columns:10px 1fr auto;gap:9px;align-items:center;padding:8px 0;border-bottom:1px solid #112b33}.activity-row:last-child{border-bottom:0}
+.activity-dot{width:8px;height:8px;border-radius:50%;background:var(--mint)}.activity-main{font-size:.66rem;color:#d0dcdd}.activity-main b{color:#18e4b4}.activity-time{font-size:.54rem;color:#526a70}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.action{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 13px;border-radius:9px;border:1px solid #193842;background:#08161d;color:#d8e2e2;font-size:.68rem;font-weight:700}.action span{color:#6f858a}
+
+/* SUBPAGES */
+.topline{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin:5px 0 17px}.crumb{font-size:.57rem;color:var(--mint);letter-spacing:.15em;font-weight:900}.h1{font-size:2rem;line-height:1.03;font-weight:930;color:#f5fbfa;letter-spacing:-.05em;margin-top:6px}.subtitle{font-size:.74rem;color:#71878d;margin-top:5px}.live{font-size:.58rem;color:#9db0b3;background:#07171e;border:1px solid #193d46;border-radius:999px;padding:7px 10px}.live:before{content:"●";color:var(--mint);margin-right:6px}
+.hero-card,.panel,.sync-box,.club-card2,.tool-card{background:linear-gradient(145deg,#07161d,#061219)!important;border:1px solid #183743!important;border-radius:11px!important}
+.hero-card{padding:17px!important}.podium-1{border-color:#12bc95!important}.podium-2{border-color:#1688d0!important}.podium-3{border-color:#6f35a8!important}
+.section-head2{display:flex;align-items:center;justify-content:space-between;margin:22px 0 9px}.section-head2 h3{font-size:.88rem;margin:0;color:#e8efef}.small-note2{font-size:.54rem;color:#5b7379;letter-spacing:.08em}
+.rank-row{display:grid;grid-template-columns:26px 1fr auto;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid #112b33}.rank-row:last-child{border-bottom:0}.rank-pos{width:23px;height:23px;border-radius:50%;background:#10252c;color:#aebcbf;display:flex;align-items:center;justify-content:center;font-size:.57rem}.rank-name{font-size:.68rem;color:#d4dede}.rank-gain{font-size:.68rem;color:#19e5b5;font-weight:900}
+.stButton>button{background:#081a21!important;color:#d7e1e1!important;border:1px solid #214650!important;border-radius:8px!important;font-weight:720!important;font-size:.69rem!important}
+.stButton>button[kind="primary"]{background:#13d9ad!important;color:#021b15!important;border-color:#13d9ad!important}
+[data-testid="stDataFrame"]{border:1px solid #173843!important;border-radius:10px!important;overflow:hidden}
+[data-testid="stExpander"]{background:#06151b!important;border:1px solid #173843!important;border-radius:9px!important}
+div[data-baseweb="select"]>div,.stTextInput input{background:#07171e!important;border-color:#1b4049!important;color:#edf4f4!important;border-radius:8px!important}
+[data-baseweb="tab-list"]{background:#06151b!important;border:1px solid #173843!important;border-radius:9px!important;padding:4px!important}
+[data-baseweb="tab"][aria-selected="true"]{background:#0d272f!important;color:var(--mint)!important}
+.stProgress>div>div>div>div{background:linear-gradient(90deg,var(--mint),var(--cyan))!important}
+@media(max-width:1000px){.stats-grid,.feature-grid,.dash-grid,.bottom-grid{grid-template-columns:1fr 1fr}.banner-note{display:none}}
+@media(max-width:700px){.stats-grid,.feature-grid,.dash-grid,.bottom-grid{grid-template-columns:1fr}.block-container{padding:1rem!important}.brand-word{font-size:2.2rem}}
 </style>
 """,unsafe_allow_html=True)
 
 def esc(x): return html.escape(str(x))
 
 def page_head(kicker,title,sub):
-    html = f'<div class="topline"><div><div class="crumb">{esc(kicker)}</div><div class="h1">{esc(title)}</div><div class="subtitle">{esc(sub)}</div></div><div class="live">LIVE</div></div>'
-    st.markdown(html,unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="topline"><div><div class="crumb">{esc(kicker)}</div>'
+        f'<div class="h1">{esc(title)}</div><div class="subtitle">{esc(sub)}</div></div>'
+        f'<div class="live">LIVE</div></div>',
+        unsafe_allow_html=True
+    )
 
 def stat(icon,value,label):
-    html = f'<div class="kpi-v9"><div class="kpi-head-v9"><span class="kpi-icon-v9">{esc(icon)}</span><span class="kpi-season-v9">S17</span></div><div class="kpi-value-v9">{esc(value)}</div><div class="kpi-label-v9">{esc(label)}</div></div>'
-    st.markdown(html,unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="stat-card"><div class="stat-icon">{esc(icon)}</div>'
+        f'<div><div class="stat-num">{esc(value)}</div><div class="stat-lab">{esc(label)}</div></div></div>',
+        unsafe_allow_html=True
+    )
 
 
 def delta_text(v):
@@ -122,18 +188,21 @@ if "wallet" not in st.session_state: st.session_state.wallet=DEFAULT_WALLET
 # ---------------- SIDEBAR ----------------
 with st.sidebar:
     st.markdown("""
-    <div class="brand-shell"><div class="brand-row">
-      <svg class="brand-logo" viewBox="0 0 64 64" aria-label="MFL">
-        <defs><linearGradient id="mflg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#5bf1d1"/><stop offset="1" stop-color="#16c69e"/></linearGradient></defs>
-        <path d="M32 3 56 12v17c0 15.2-9.7 25.5-24 31C17.7 54.5 8 44.2 8 29V12L32 3Z" fill="#0a2028" stroke="#20e0b2" stroke-width="2"/>
-        <path d="M18 18h6l3 6 5-9 5 9 3-6h6l-4 11H22l-4-11Z" fill="url(#mflg)"/>
-        <text x="32" y="45" text-anchor="middle" fill="#f4fbfa" font-size="14" font-family="Arial" font-weight="900">MFL</text>
-      </svg>
-      <div><div class="brand-title"><b>MFL</b> Management</div><div class="brand-sub">PERFORMANCE HUB</div></div>
-    </div><div class="brand-season"><i></i> SEASON 17 · LIVE</div></div>
+    <div class="side-poster">
+      <div class="poster-crown">♕</div>
+      <div class="poster-mfl">MFL</div>
+      <div class="poster-sub">MANAGEMENT HUB</div>
+      <div class="poster-swipe"></div>
+    </div>
     """,unsafe_allow_html=True)
-    page=st.radio("Navigation",["Home","Grower or Shower","Agency Development","Club Development"],label_visibility="collapsed")
-    st.markdown('<div class="side-section"><div class="side-label">ACTIVE WALLET</div>',unsafe_allow_html=True)
+
+    page=st.radio(
+        "Navigation",
+        ["Home","Grower or Shower","Agency Development","Club Development"],
+        label_visibility="collapsed"
+    )
+
+    st.markdown('<div class="wallet-area"><div class="wallet-label">ACTIVE WALLET</div>',unsafe_allow_html=True)
     st.markdown(f'<div class="wallet-chip">{esc(st.session_state.wallet)}</div>',unsafe_allow_html=True)
     if st.button("Change wallet",use_container_width=True):
         st.session_state.edit_wallet=not st.session_state.get("edit_wallet",False)
@@ -141,9 +210,18 @@ with st.sidebar:
         nw=st.text_input("Wallet",value=st.session_state.wallet,label_visibility="collapsed")
         if st.button("Use wallet",use_container_width=True):
             if valid_wallet(nw):
-                st.session_state.wallet=nw.strip().lower();st.session_state.edit_wallet=False;st.rerun()
-            else: st.error("Enter a valid 0x wallet.")
-    st.markdown('<div class="build">PRODUCT UI · v9</div></div>',unsafe_allow_html=True)
+                st.session_state.wallet=nw.strip().lower()
+                st.session_state.edit_wallet=False
+                st.rerun()
+            else:
+                st.error("Enter a valid 0x wallet.")
+    st.markdown('</div>',unsafe_allow_html=True)
+
+    st.markdown("""<div class="season-box">
+      <div class="season-top"><span>Season 17</span><span>⌄</span></div>
+      <div class="connected"><i></i><span>Connected</span></div>
+    </div>
+    <div class="build">MOCKUP MATCH · v10</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 
@@ -155,49 +233,137 @@ if page=="Home":
         improved=c.execute("SELECT COUNT(*) FROM ownership_v65 WHERE wallet=? AND current_ovr>start_ovr",(wallet.lower(),)).fetchone()[0]
         c.close()
     except Exception:
-        players=0; improved=0
-    try: mine=club.owned_clubs(wallet)
-    except Exception: mine=[]
+        players=0
+        improved=0
+
+    try:
+        mine=club.owned_clubs(wallet)
+    except Exception:
+        mine=[]
+
     cached=club.cached(wallet)
-    ovr=float(cached["ovr_gain"].fillna(0).sum()) if not cached.empty else 0
-    attrs=float(cached["attr_gain"].fillna(0).sum()) if not cached.empty else 0
-    synced=len(cached)
+    good=cached[cached["error"].isna()] if (not cached.empty and "error" in cached.columns) else cached
+    total_ovr=float(good["ovr_gain"].fillna(0).sum()) if not good.empty else 0
+    total_attr=float(good["attr_gain"].fillna(0).sum()) if not good.empty else 0
+    total_start=float(good["start_ovr"].fillna(0).sum()) if not good.empty else 0
+    total_current=float(good["current_ovr"].fillna(0).sum()) if not good.empty else 0
 
-    page_head("MFL · SEASON 17","Management Hub","Your agency and club network at a glance.")
+    clubs_rank=pd.DataFrame()
+    top_players=pd.DataFrame()
+    if not good.empty:
+        clubs_rank=(good.groupby("club").agg(ovr=("ovr_gain","sum"),attrs=("attr_gain","sum"),players=("player_id","count"))
+                    .reset_index().sort_values(["ovr","attrs"],ascending=False).head(5))
+        top_players=good.sort_values(["attr_gain","ovr_gain"],ascending=False).head(5)
 
-    overview = f"""
-    <div class="overview">
-      <div class="hero-v9">
-        <div class="hero-kicker-v9">SEASON 17 PERFORMANCE</div>
-        <div class="hero-title-v9">One place to see<br>what's actually improving.</div>
-        <div class="hero-copy-v9">Track your players, compare your clubs and follow Grower or Shower without jumping between separate tools.</div>
-        <div class="hero-chips-v9"><span class="hero-chip-v9"><b>{len(mine) if mine else "—"}</b> clubs</span><span class="hero-chip-v9"><b>{players or "—"}</b> players</span><span class="hero-chip-v9"><b>{synced}</b> club players synced</span></div>
+    st.markdown(f"""
+      <div class="banner">
+        <div class="banner-row">
+          <div>
+            <div class="brand-word">MFL <span>MANAGEMENT HUB</span></div>
+            <div class="brand-stroke"></div>
+            <div class="brand-tag">TRACK. ANALYSE. DEVELOP. ALL IN ONE PLACE.</div>
+          </div>
+          <div class="season-badge">Season 17⌄</div>
+        </div>
+        <div class="banner-note">SAME GAME.<br><b>BIGGER INSIGHTS.</b></div>
       </div>
-      <div class="snapshot"><div class="snap-label">NETWORK DEVELOPMENT</div><div class="snap-big">+{ovr:g}</div><div class="snap-copy">OVR gained in loaded S17 club data</div>
-        <div class="snap-line"></div><div class="snap-row"><span>Attribute gains</span><b>+{attrs:g}</b></div><div class="snap-row"><span>Agency improved</span><b>{improved}</b></div><div class="snap-row"><span>Owned clubs</span><b>{len(mine) if mine else "—"}</b></div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">♢</div><div><div class="stat-num">{len(mine) if mine else "—"}</div><div class="stat-lab">Owned Clubs</div></div><div class="stat-trend">LIVE</div>
+        </div>
+        <div class="stat-card cyan">
+          <div class="stat-icon">👥</div><div><div class="stat-num">{players or "—"}</div><div class="stat-lab">Players Tracked</div></div><div class="stat-trend">LIVE</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⇈</div><div><div class="stat-num">+{total_ovr:g}</div><div class="stat-lab">Total OVR Gained</div></div><div class="stat-trend">S17</div>
+        </div>
+        <div class="stat-card violet">
+          <div class="stat-icon">▥</div><div><div class="stat-num">+{total_attr:g}</div><div class="stat-lab">Total Attributes</div></div><div class="stat-trend">S17</div>
+        </div>
       </div>
-    </div>
-    <div class="kpis-v9">
-      <div class="kpi-v9"><div class="kpi-head-v9"><span class="kpi-icon-v9">CL</span><span class="kpi-season-v9">S17</span></div><div class="kpi-value-v9">{len(mine) if mine else "—"}</div><div class="kpi-label-v9">Owned clubs</div></div>
-      <div class="kpi-v9"><div class="kpi-head-v9"><span class="kpi-icon-v9">PL</span><span class="kpi-season-v9">LIVE</span></div><div class="kpi-value-v9">{players or "—"}</div><div class="kpi-label-v9">Agency players</div></div>
-      <div class="kpi-v9"><div class="kpi-head-v9"><span class="kpi-icon-v9">↑</span><span class="kpi-season-v9">S17</span></div><div class="kpi-value-v9">+{attrs:g}</div><div class="kpi-label-v9">Club attribute gains</div></div>
-      <div class="kpi-v9"><div class="kpi-head-v9"><span class="kpi-icon-v9">DV</span><span class="kpi-season-v9">AGENCY</span></div><div class="kpi-value-v9">{improved}</div><div class="kpi-label-v9">Players improved</div></div>
-    </div>
-    """
-    st.markdown(overview,unsafe_allow_html=True)
-    st.markdown('<div class="section-v9"><h3>Workspaces</h3><span>MANAGEMENT TOOLS</span></div>',unsafe_allow_html=True)
-    st.markdown("""<div class="workspace-grid">
-      <div class="workspace"><span class="workspace-arrow">↗</span><div class="workspace-no">01 · COMPETITION</div><h4>Grower or Shower</h4><p>Live ranking, ratings and individual stat gains.</p><div class="workspace-accent"></div></div>
-      <div class="workspace"><span class="workspace-arrow">↗</span><div class="workspace-no">02 · AGENCY</div><h4>Player Development</h4><p>Ownership baselines, new mints and priority players.</p><div class="workspace-accent" style="background:#48a6ff"></div></div>
-      <div class="workspace"><span class="workspace-arrow">↗</span><div class="workspace-no">03 · CLUBS</div><h4>Club Development</h4><p>Compare progression across the full owned network.</p><div class="workspace-accent" style="background:#9275ff"></div></div>
-    </div>""",unsafe_allow_html=True)
-    if not cached.empty:
-        st.markdown('<div class="section-v9"><h3>Top developing clubs</h3><span>LOADED S17 DATA</span></div>',unsafe_allow_html=True)
-        ranks=cached.groupby("club").agg(ovr=("ovr_gain","sum"),attrs=("attr_gain","sum"),players=("player_id","count")).sort_values(["ovr","attrs"],ascending=False).head(5)
-        body=""
-        for i,(name,row) in enumerate(ranks.iterrows(),1):
-            body += f'<div class="rank-row"><div class="rank-pos">{i}</div><div class="rank-name">{esc(name)}<div style="font-size:.56rem;color:#58747b;margin-top:2px">{int(row["players"])} players · +{row["attrs"]:g} attributes</div></div><div class="rank-gain">+{row["ovr"]:g} OVR</div></div>'
-        st.markdown(f'<div class="panel">{body}</div>',unsafe_allow_html=True)
+
+      <div class="feature-grid">
+        <div class="feature-card grower"><div class="feature-bg"></div><div class="feature-art">🏆</div>
+          <div class="feature-copy"><div class="feature-title">Grower or Shower</div><div class="feature-sub">Competition tracking and leaderboards</div></div><div class="feature-go">›</div>
+        </div>
+        <div class="feature-card agency"><div class="feature-bg"></div><div class="feature-art">♟♟♟</div>
+          <div class="feature-copy"><div class="feature-title">Agency Development</div><div class="feature-sub">Track all your players and progress</div></div><div class="feature-go">›</div>
+        </div>
+        <div class="feature-card club"><div class="feature-bg"></div><div class="feature-art">⚽</div>
+          <div class="feature-copy"><div class="feature-title">Club Development</div><div class="feature-sub">Compare club progression</div></div><div class="feature-go">›</div>
+        </div>
+      </div>
+    """,unsafe_allow_html=True)
+
+    if total_start>0:
+        lo=min(total_start,total_current); hi=max(total_start,total_current); rng=max(hi-lo,1)
+        y1=140-(total_start-lo)/rng*95; y2=140-(total_current-lo)/rng*95
+        chart_svg=f"""<svg class="chart-svg" viewBox="0 0 500 150" preserveAspectRatio="none">
+          <defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#13e0b4" stop-opacity=".26"/><stop offset="1" stop-color="#13e0b4" stop-opacity="0"/></linearGradient></defs>
+          <path d="M18,{y1:.1f} L482,{y2:.1f} L482,148 L18,148 Z" fill="url(#area)"/>
+          <path d="M18,{y1:.1f} L482,{y2:.1f}" fill="none" stroke="#13e0b4" stroke-width="3"/>
+          <circle cx="18" cy="{y1:.1f}" r="5" fill="#13e0b4"/><circle cx="482" cy="{y2:.1f}" r="5" fill="#13e0b4"/>
+        </svg>"""
+        chart_note=f"{total_start:g} → {total_current:g}"
+    else:
+        chart_svg='<div style="color:#5c747a;font-size:.68rem;padding:65px 20px;text-align:center">Sync Club Development to populate Season 17 progression.</div>'
+        chart_note="Waiting for club data"
+
+    club_rows=""
+    if not clubs_rank.empty:
+        for i,r in enumerate(clubs_rank.to_dict("records"),1):
+            club_rows+=f'<div class="list-row"><div class="list-rank">{i}</div><div><div class="list-main">{esc(r["club"])}</div><div class="list-sub">{int(r["players"])} players · +{r["attrs"]:g} attrs</div></div><div class="list-value">+{r["ovr"]:g}</div></div>'
+    else:
+        club_rows='<div style="color:#5c747a;font-size:.66rem;padding:35px 4px;text-align:center">No club data loaded yet.</div>'
+
+    player_rows=""
+    if not top_players.empty:
+        for i,(_,r) in enumerate(top_players.iterrows(),1):
+            player_rows+=f'<div class="list-row"><div class="list-rank">{i}</div><div><div class="list-main">{esc(r["player"])}</div><div class="list-sub">{esc(r["club"])}</div></div><div class="list-value">+{float(r["attr_gain"] or 0):g}</div></div>'
+    else:
+        player_rows='<div style="color:#5c747a;font-size:.66rem;padding:35px 4px;text-align:center">No player development loaded yet.</div>'
+
+    st.markdown(f"""
+      <div class="dash-grid">
+        <div class="card">
+          <div class="card-head"><div class="card-title">♢ &nbsp; OVR Progression (Season 17)</div><div class="card-meta">{esc(chart_note)}</div></div>
+          <div class="chart-box"><div class="chart-grid"></div>{chart_svg}<div class="chart-labels"><span>S17 Start</span><span>Current</span></div></div>
+        </div>
+        <div class="card"><div class="card-head"><div class="card-title">♢ &nbsp; Top 5 Clubs (OVR Gained)</div><div class="card-meta">S17</div></div>{club_rows}</div>
+        <div class="card"><div class="card-head"><div class="card-title">▥ &nbsp; Top 5 Players (Attributes Gained)</div><div class="card-meta">S17</div></div>{player_rows}</div>
+      </div>
+    """,unsafe_allow_html=True)
+
+    activity=""
+    if not good.empty and "last_progression" in good.columns:
+        act=good.copy()
+        act["_dt"]=pd.to_datetime(act["last_progression"],utc=True,errors="coerce")
+        act=act.sort_values("_dt",ascending=False).head(5)
+        for _,r in act.iterrows():
+            gains=[]
+            if float(r.get("ovr_gain") or 0)>0: gains.append(f'+{float(r["ovr_gain"]):g} OVR')
+            if float(r.get("attr_gain") or 0)>0: gains.append(f'+{float(r["attr_gain"]):g} Attributes')
+            gaintext=" · ".join(gains) if gains else "progression checked"
+            date_txt=r["_dt"].strftime("%d %b") if pd.notna(r["_dt"]) else ""
+            activity+=f'<div class="activity-row"><div class="activity-dot"></div><div class="activity-main">{esc(r["player"])} &nbsp; <b>{esc(gaintext)}</b></div><div class="activity-time">{esc(date_txt)}</div></div>'
+    if not activity:
+        activity='<div style="color:#5c747a;font-size:.66rem;padding:35px 4px;text-align:center">Recent progression will appear after Club Development is synced.</div>'
+
+    st.markdown(f"""
+      <div class="bottom-grid">
+        <div class="card"><div class="card-head"><div class="card-title">⚡ &nbsp; Recent Activity</div><div class="card-meta">LATEST PROGRESSION</div></div>{activity}</div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">◎ &nbsp; Quick Actions</div><div class="card-meta">WORKSPACES</div></div>
+          <div class="actions">
+            <div class="action">🏆 &nbsp; Grower or Shower <span>→</span></div>
+            <div class="action">👥 &nbsp; Agency Development <span>→</span></div>
+            <div class="action">▥ &nbsp; Club Development <span>→</span></div>
+            <div class="action">⟳ &nbsp; Sync Latest Data <span>→</span></div>
+          </div>
+        </div>
+      </div>
+    """,unsafe_allow_html=True)
 
 # ---------------- GROWER ----------------
 elif page=="Grower or Shower":

@@ -1,14 +1,15 @@
-# MFL Management Hub — Product UI v9
+# MFL Management Hub — Mockup Match v10
 
-Frontend rebuild on the working v6.1 backend:
-- custom HTML/CSS dashboard
-- bespoke vector MFL shield/crown lockup
-- compact navigation and page hierarchy
-- dashboard hero + performance snapshot
-- proper KPI/workspace/top-club components
-- existing Grower, Agency and Club logic retained
-- one-click slow Club sync retained
+Visual rebuild against the selected mock-up while retaining the proven v6.1 backend.
 
-Note: Streamlit Community Cloud runtime SQLite is ephemeral across redeploys. This build
-does not deliberately clear club cache, but permanent cross-deployment cache persistence
-requires a persistent data store.
+- large blackboard-style MFL logo treatment
+- stadium-style top banner
+- four KPI cards
+- three visual workspace cards
+- OVR progression panel
+- Top 5 Clubs and Top 5 Players panels
+- Recent Activity and Quick Actions
+- existing Grower, Agency and Club Development backends retained
+- one-click slow Club Development sync retained
+
+Note: Streamlit Community Cloud local SQLite cache is ephemeral across redeployments.
