@@ -150,6 +150,8 @@ div[data-baseweb="select"]>div,.stTextInput input{
  background:#0b1921!important;border-color:#244752!important;color:#eef8f6!important;
 }
 .stProgress>div>div>div>div{background-color:var(--mint)!important;}
+
+.hero-card{background:linear-gradient(145deg,#0b1921,#09161e);border:1px solid #1b3640;border-radius:15px;padding:22px;min-height:200px}.podium-1{border-color:rgba(32,222,183,.6)!important}.podium-2{border-color:rgba(43,156,255,.45)!important}.podium-3{border-color:rgba(168,92,255,.45)!important}.hero-label{color:#20deb7;font-size:.68rem;font-weight:850;letter-spacing:.14em;text-transform:uppercase}.hero-name{font-size:1.48rem;font-weight:900;color:#f7fbfa;margin-top:8px}.hero-player{font-size:.88rem;color:#9aafb3;margin-top:3px}.hero-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:15px}.chip{background:#10232c;border:1px solid #234954;border-radius:999px;color:#cfe0e0;padding:6px 9px;font-size:.72rem}.chip strong{color:#20deb7}.attr-strip{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}.attr-pill{font-size:.66rem;padding:3px 6px;border-radius:6px;background:#10232b;color:#789096}.attr-up{color:#20deb7;border:1px solid rgba(32,222,183,.22)}.club-card2{background:linear-gradient(145deg,#0b1921,#09161e);border:1px solid #1b3640;border-radius:15px;padding:18px;min-height:145px}.club-pos2{color:#20deb7;font-weight:900;font-size:.68rem;letter-spacing:.12em}.club-name2{font-size:1.08rem;color:#f3faf8;font-weight:850;margin-top:8px}.club-total2{font-size:1.8rem;font-weight:900;color:#20deb7;margin-top:10px}.club-sub2{font-size:.73rem;color:#81979d}.progress-track2{height:6px;background:#10242c;border-radius:99px;margin-top:13px;overflow:hidden}.progress-fill2{height:100%;background:linear-gradient(90deg,#20deb7,#2b9cff);border-radius:99px}.section-head2{display:flex;align-items:center;justify-content:space-between;margin:21px 0 10px}.section-head2 h3{margin:0;font-size:1.06rem}.small-note2{font-size:.72rem;color:#758d93}
 </style>
 """,unsafe_allow_html=True)
 
@@ -169,6 +171,25 @@ def page_head(kicker,title,sub,live=True):
 
 def stat(icon,value,label):
     st.markdown(f'<div class="stat"><div class="stat-icon">{esc(icon)}</div><div class="stat-value">{esc(value)}</div><div class="stat-label">{esc(label)}</div></div>',unsafe_allow_html=True)
+
+def delta_text(v):
+    try:
+        v=float(v);return f"+{v:g}" if v>0 else f"{v:g}"
+    except:return "—"
+
+def fmt_rating(v):
+    try:return f"{float(v):.2f}"
+    except:return "—"
+
+def podium_card(rank,row):
+    gains=[]
+    for key,label in [("pace_growth","PAC"),("shooting_growth","SHO"),("passing_growth","PAS"),("dribbling_growth","DRI"),("defense_growth","DEF"),("physical_growth","PHY")]:
+        v=row.get(key)
+        if v is not None and float(v)>0:gains.append(f'<span class="attr-pill attr-up">{label} +{float(v):g}</span>')
+    attrs="".join(gains) or '<span class="attr-pill">No attribute gain</span>'
+    cls={1:"podium-1",2:"podium-2",3:"podium-3"}.get(rank,"")
+    html_box=f'<div class="hero-card {cls}"><div class="hero-label">#{rank} · {esc(row["owner"])}</div><div class="hero-name">{esc(row["player"])}</div><div class="hero-player">OVR {esc(row["ovr"])} · {esc(row.get("club") or "—")}</div><div class="hero-chips"><span class="chip">OVR <strong>{delta_text(row["ovr_growth"])}</strong></span><span class="chip">ATTR <strong>{delta_text(row.get("attribute_growth",0))}</strong></span><span class="chip">Rating <strong>{fmt_rating(row.get("avg_rating"))}</strong></span><span class="chip">Apps <strong>{esc(row.get("apps") or 0)}</strong></span></div><div class="attr-strip">{attrs}</div></div>'
+    st.markdown(html_box,unsafe_allow_html=True)
 
 def valid_wallet(v):
     v=(v or "").strip()
@@ -208,7 +229,7 @@ with st.sidebar:
 
     st.divider()
     st.markdown('<span class="pill"><span class="dot"></span>Season 17</span>',unsafe_allow_html=True)
-    st.caption("CLEAN DARK BUILD v2")
+    st.caption("POLISHED BUILD v3")
 
 wallet=st.session_state.wallet
 
@@ -275,58 +296,42 @@ if page=="Home":
 
 # ---------------- GROWER ----------------
 elif page=="Grower or Shower":
-    page_head("WORKTHESPACE · SEASON 17","Grower or Shower","Competition tracking and development in one clean view.")
+    page_head("WORKTHESPACE · SEASON 17","Grower or Shower","Live development race · OVR first, attribute growth second, rating next.")
     with st.expander("Competition settings"):
-        grower_start=st.text_input(
-            "Competition baseline / Season 17 start (UTC)",
-            value=st.session_state.get("grower_start","2026-09-22T00:00:00Z")
-        )
-        st.session_state.grower_start=grower_start
-        os.environ["GROWER_START"]=grower_start
-        st.caption("Baseline is reconstructed from MFL progression history at this point.")
-
+        grower_start=st.text_input("Competition / Season 17 baseline (UTC)",value=st.session_state.get("grower_start","2026-09-22T00:00:00Z"));st.session_state.grower_start=grower_start;os.environ["GROWER_START"]=grower_start
     conn=grower.db();grower.init_db(conn)
     c1,c2=st.columns([1,4])
-    with c1:
-        refresh=st.button("Refresh entrants",type="primary",use_container_width=True)
+    with c1:refresh=st.button("Refresh entrants",type="primary",use_container_width=True)
     if refresh:
         try:
-            tok=grower.refresh_access_token()
-            bar=st.progress(0,text="Refreshing entrants…")
-            errs=[]
+            tok=grower.refresh_access_token();bar=st.progress(0,text="Refreshing 14 entrants…");errs=[]
             for i,(pid,owner) in enumerate(grower.ENTRANTS.items(),1):
-                try: grower.sync_player(conn,tok,pid,owner)
-                except Exception as e: errs.append(owner)
+                try:grower.sync_player(conn,tok,pid,owner)
+                except Exception:errs.append(owner)
                 bar.progress(i/len(grower.ENTRANTS),text=f"{i}/{len(grower.ENTRANTS)} entrants")
-            bar.empty()
-            st.success("Competition refreshed." if not errs else f"Refreshed with {len(errs)} skipped entrant(s).")
-        except Exception as e:
-            st.error("MFL could not refresh the competition just now.")
-            with st.expander("Technical detail"): st.code(str(e))
-
+            bar.empty();st.success("Competition refreshed." if not errs else f"Refreshed with {len(errs)} skipped entrant(s).")
+        except Exception as e:st.error("MFL could not refresh the competition.");st.code(str(e))
     rows=grower.leaderboard(conn)
-    if not rows:
-        st.markdown('<div class="empty"><b>No competition data in this new Hub yet</b>Press Refresh entrants once to populate the leaderboard.</div>',unsafe_allow_html=True)
+    if not rows:st.markdown('<div class="empty"><b>No competition data yet</b>Press Refresh entrants once.</div>',unsafe_allow_html=True)
     else:
-        m=st.columns(4)
-        with m[0]: stat("1",rows[0]["owner"],"Current Leader")
-        with m[1]: stat("▲",grower.fmt_delta(rows[0]["ovr_growth"]),"Leader OVR Growth")
-        with m[2]: stat("✦",grower.fmt_delta(rows[0].get("attribute_growth",0)),"Leader Attribute Growth")
-        with m[3]: stat("●",len(rows),"Entrants")
-        st.write("")
+        cols=st.columns(3)
+        for col,(rank,row) in zip(cols,enumerate(rows[:3],1)):
+            with col:podium_card(rank,row)
+        st.markdown('<div class="section-head2"><h3>Live standings</h3><span class="small-note2">OVR → ATTR → Rating</span></div>',unsafe_allow_html=True)
         table=[]
         for i,r in enumerate(rows,1):
-            table.append({
-              "#":i,"Owner":r["owner"],"Player":r["player"],"OVR":r["ovr"],
-              "OVR ↑":grower.fmt_delta(r["ovr_growth"]),
-              "ATTR ↑":grower.fmt_delta(r.get("attribute_growth",0)),
-              "Rating":r["avg_rating"],"Apps":r["apps"],
-              "PAC ↑":grower.fmt_delta(r["pace_growth"]),"SHO ↑":grower.fmt_delta(r["shooting_growth"]),
-              "PAS ↑":grower.fmt_delta(r["passing_growth"]),"DRI ↑":grower.fmt_delta(r["dribbling_growth"]),
-              "DEF ↑":grower.fmt_delta(r["defense_growth"]),"PHY ↑":grower.fmt_delta(r["physical_growth"])
-            })
-        st.dataframe(pd.DataFrame(table),use_container_width=True,hide_index=True)
-        st.caption("Ranking: OVR growth → total attribute growth → average Season 17 rating.")
+            table.append({"#":i,"Owner":r["owner"],"Player":r["player"],"OVR":r["ovr"],"OVR ↑":delta_text(r["ovr_growth"]),"ATTR ↑":delta_text(r.get("attribute_growth",0)),"Rating":r["avg_rating"],"Apps":r["apps"],"PAC ↑":delta_text(r["pace_growth"]),"SHO ↑":delta_text(r["shooting_growth"]),"PAS ↑":delta_text(r["passing_growth"]),"DRI ↑":delta_text(r["dribbling_growth"]),"DEF ↑":delta_text(r["defense_growth"]),"PHY ↑":delta_text(r["physical_growth"])})
+        st.dataframe(pd.DataFrame(table),use_container_width=True,hide_index=True,height=560)
+        growers=[r for r in rows if (r.get("attribute_growth") or 0)>0]
+        if growers:
+            st.markdown('<div class="section-head2"><h3>Attribute growers</h3></div>',unsafe_allow_html=True)
+            gc=st.columns(min(3,len(growers)))
+            for col,row in zip(gc,growers[:3]):
+                gains=[]
+                for key,label in [("pace_growth","PAC"),("shooting_growth","SHO"),("passing_growth","PAS"),("dribbling_growth","DRI"),("defense_growth","DEF"),("physical_growth","PHY")]:
+                    v=row.get(key)
+                    if v is not None and float(v)>0:gains.append(f"{label} +{float(v):g}")
+                with col:st.markdown(f'<div class="tool-card"><div class="tool-icon">↑</div><h4>{esc(row["player"])}</h4><p><strong style="color:#20deb7">{esc(row["owner"])}</strong><br>{" · ".join(gains)}<br>Rating {fmt_rating(row.get("avg_rating"))} · {row.get("apps") or 0} apps</p></div>',unsafe_allow_html=True)
     conn.close()
 
 # ---------------- AGENCY ----------------
@@ -416,83 +421,47 @@ elif page=="Agency Development":
 
 # ---------------- CLUBS ----------------
 elif page=="Club Development":
-    page_head("CLUB ANALYTICS · SEASON 17","Club Development","Development totals for clubs you genuinely own.")
+    page_head("CLUB ANALYTICS · SEASON 17","Club Development","Which of your owned clubs is producing the most development?")
     with st.expander("Season settings"):
-        season_start=st.text_input("Season 17 start (UTC)",value=st.session_state.get("season_start","2026-09-22T00:00:00Z"))
-        st.session_state.season_start=season_start
-        batch=int(st.selectbox("Players per sync",[20,30,40],index=1))
-
-    try:
-        mine=club.owned_clubs(wallet)
-    except Exception:
-        mine=[]
+        season_start=st.text_input("Season 17 baseline (UTC)",value=st.session_state.get("season_start","2026-09-22T00:00:00Z"));st.session_state.season_start=season_start;batch=int(st.selectbox("Players per sync",[20,30,40],index=1))
+    try:mine=club.owned_clubs(wallet)
+    except Exception:mine=[]
     cached=club.cached(wallet)
-
     top=st.columns(4)
     with top[0]:stat("◆",len(mine) if mine else "—","Owned Clubs")
     with top[1]:stat("●",len(cached),"Players Synced")
     with top[2]:stat("▲",f"+{cached['ovr_gain'].fillna(0).sum():g}" if not cached.empty else "—","S17 OVR Loaded")
     with top[3]:stat("▥",f"+{cached['attr_gain'].fillna(0).sum():g}" if not cached.empty else "—","Attributes Loaded")
-
-    st.write("")
-    eligible_note="Small saved batches replace the old 271-player marathon. Each completed batch is kept."
-    st.markdown(f"""<div class="sync-box">
-      <div class="sync-head"><div><div class="sync-title">Progression sync</div>
-      <div class="sync-sub">{eligible_note}</div></div>
-      <span class="pill"><span class="dot"></span>{len(cached)} cached</span></div>
-    </div>""",unsafe_allow_html=True)
-
-    col_btn,col_space=st.columns([1,4])
-    with col_btn:
-        do_sync=st.button(f"Sync next {batch}",type="primary",use_container_width=True)
-
+    st.markdown('<div class="section-head2"><h3>Progression sync</h3></div>',unsafe_allow_html=True)
+    b1,b2=st.columns([1,4])
+    with b1:do_sync=st.button(f"Sync next {batch}",type="primary",use_container_width=True)
     if do_sync:
-        bar=st.progress(0,text="Preparing batch…")
-        status=st.empty()
-        def prog(done,total,errs):
-            pct=done/max(total,1)
-            bar.progress(pct,text=f"{done}/{total} players in this batch")
-            status.caption(f"{errs} skipped/failed · results are saved as they complete")
+        bar=st.progress(0,text="Preparing batch…");status=st.empty()
+        def prog(done,total,errs):bar.progress(done/max(total,1),text=f"{done}/{total} players");status.caption(f"{errs} skipped/failed")
         try:
-            res=club.sync_batch(wallet,season_start,batch,prog)
-            bar.empty();status.empty()
-            if res["errors"]:
-                st.warning(f"Saved {res['saved']} players. {len(res['errors'])} were skipped/failed. Press Sync next batch to continue.")
-            else:
-                st.success(f"Saved {res['saved']} players.")
-            st.rerun()
-        except Exception as e:
-            bar.empty();status.empty()
-            st.error("MFL could not complete this batch. Nothing is stuck—the page is ready to try again.")
-            with st.expander("Technical detail"):st.code(str(e))
-
+            res=club.sync_batch(wallet,season_start,batch,prog);bar.empty();status.empty();st.success(f"Saved {res['saved']} players." if not res["errors"] else f"Saved {res['saved']}; {len(res['errors'])} skipped/failed.");st.rerun()
+        except Exception as e:bar.empty();status.empty();st.error("MFL could not complete this batch.");st.code(str(e))
     cached=club.cached(wallet)
-    if cached.empty:
-        st.markdown("""<div class="empty"><b>No progression synced yet</b>
-        Press <strong>Sync next 30</strong>. The first completed batch will immediately populate the club leaderboard.</div>""",unsafe_allow_html=True)
+    if cached.empty:st.markdown('<div class="empty"><b>No progression synced yet</b>Press Sync next 30. The old zero-only cache has been discarded.</div>',unsafe_allow_html=True)
     else:
         good=cached[cached["error"].isna()] if "error" in cached.columns else cached
-        clubs=(good.groupby("club").agg(
-            Players=("player_id","count"),OVR=("ovr_gain","sum"),Attributes=("attr_gain","sum"),
-            PAC=("pac","sum"),SHO=("sho","sum"),PAS=("pas","sum"),DRI=("dri","sum"),DEF=("defn","sum"),PHY=("phy","sum")
-        ).reset_index().sort_values(["OVR","Attributes"],ascending=False))
-
-        st.markdown('<div class="section-title">Club leaderboard</div>',unsafe_allow_html=True)
-        st.dataframe(clubs.rename(columns={"club":"Club","OVR":"OVR ↑","Attributes":"ATTR ↑"}),use_container_width=True,hide_index=True)
-
+        clubs=good.groupby("club").agg(Players=("player_id","count"),OVR=("ovr_gain","sum"),Attributes=("attr_gain","sum"),PAC=("pac","sum"),SHO=("sho","sum"),PAS=("pas","sum"),DRI=("dri","sum"),DEF=("defn","sum"),PHY=("phy","sum")).reset_index().sort_values(["OVR","Attributes"],ascending=False)
+        st.markdown('<div class="section-head2"><h3>Top developing clubs</h3><span class="small-note2">Loaded Season 17 data</span></div>',unsafe_allow_html=True)
+        topclubs=clubs.head(3);cols=st.columns(3);mx=max(float(topclubs["Attributes"].max()) if not topclubs.empty else 1,1)
+        for i,(col,row) in enumerate(zip(cols,topclubs.to_dict("records")),1):
+            pct=min(100,max(5,float(row["Attributes"])/mx*100))
+            html_box=f'<div class="club-card2"><div class="club-pos2">#{i} DEVELOPMENT</div><div class="club-name2">{esc(row["club"])}</div><div class="club-total2">+{row["OVR"]:g} OVR</div><div class="club-sub2">{int(row["Players"])} players · +{row["Attributes"]:g} attributes</div><div class="progress-track2"><div class="progress-fill2" style="width:{pct:.0f}%"></div></div></div>'
+            with col:st.markdown(html_box,unsafe_allow_html=True)
+        st.markdown('<div class="section-head2"><h3>Club leaderboard</h3></div>',unsafe_allow_html=True)
+        st.dataframe(clubs.rename(columns={"club":"Club","OVR":"OVR ↑","Attributes":"ATTR ↑"}),use_container_width=True,hide_index=True,height=min(520,75+35*len(clubs)))
         if not clubs.empty:
-            st.write("")
-            left,right=st.columns([1.4,1])
+            left,right=st.columns([1.55,1])
             with left:
-                choice=st.selectbox("Club detail",clubs["club"].tolist())
-                detail=good[good.club==choice].sort_values(["ovr_gain","attr_gain"],ascending=False)
-                st.dataframe(detail[["player","start_ovr","current_ovr","ovr_gain","attr_gain","pac","sho","pas","dri","defn","phy"]]
-                             .rename(columns={"player":"Player","start_ovr":"S17 Start","current_ovr":"Current","ovr_gain":"OVR ↑","attr_gain":"ATTR ↑",
-                                              "pac":"PAC ↑","sho":"SHO ↑","pas":"PAS ↑","dri":"DRI ↑","defn":"DEF ↑","phy":"PHY ↑"}),
-                             use_container_width=True,hide_index=True)
+                choice=st.selectbox("Club detail",clubs["club"].tolist());detail=good[good.club==choice].sort_values(["ovr_gain","attr_gain"],ascending=False);st.dataframe(detail[["player","start_ovr","current_ovr","ovr_gain","attr_gain","pac","sho","pas","dri","defn","phy"]].rename(columns={"player":"Player","start_ovr":"S17 Start","current_ovr":"Current","ovr_gain":"OVR ↑","attr_gain":"ATTR ↑","pac":"PAC ↑","sho":"SHO ↑","pas":"PAS ↑","dri":"DRI ↑","defn":"DEF ↑","phy":"PHY ↑"}),use_container_width=True,hide_index=True)
             with right:
-                st.markdown('<div class="section-title">Owned clubs</div>',unsafe_allow_html=True)
                 body=""
                 for i,x in enumerate(mine,1):
-                    body+=f'<div class="rank-row"><div class="rank-pos">{i}</div><div class="rank-name">{esc(x["name"])}</div><div class="rank-gain">Owned</div></div>'
+                    crow=clubs[clubs.club==x["name"]];gain=float(crow.iloc[0]["OVR"]) if not crow.empty else 0;body+=f'<div class="rank-row"><div class="rank-pos">{i}</div><div class="rank-name">{esc(x["name"])}</div><div class="rank-gain">+{gain:g}</div></div>'
                 st.markdown(f'<div class="panel">{body}</div>',unsafe_allow_html=True)
+        st.caption("Progression is rebuilt cumulatively from MFL events in this version. Continue syncing batches until coverage is complete.")
+

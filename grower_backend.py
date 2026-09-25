@@ -163,7 +163,7 @@ def event_stats(event: dict) -> dict[str, Any]:
     # Progression records have previously exposed OVR/attributes either directly
     # or inside metadata/data. Keep this tolerant of both shapes.
     candidates = [event]
-    for key in ("metadata", "attributes", "player", "data", "after", "newValues"):
+    for key in ("values", "metadata", "attributes", "player", "data", "after", "newValues"):
         if isinstance(event.get(key), dict):
             candidates.append(event[key])
     result = {"overall": None, **{f: None for f in STAT_FIELDS}}
@@ -421,74 +421,52 @@ def latest_snapshot(conn: sqlite3.Connection, player_id: int) -> sqlite3.Row | N
     ).fetchone()
 
 
-def ensure_baseline(conn: sqlite3.Connection, player_id: int) -> sqlite3.Row | None:
-    """Lock baseline from MFL progression history at the configured competition start."""
-    row = conn.execute("SELECT * FROM baselines WHERE player_id=?", (player_id,)).fetchone()
-    if row:
-        return row
-
-    start_raw = os.getenv("GROWER_START", "2026-09-22T00:00:00Z")
+def _parse_event_dt(raw):
+    if raw is None: return None
     try:
-        start_dt = datetime.fromisoformat(start_raw.replace("Z","+00:00"))
-        if start_dt.tzinfo is None:
-            start_dt = start_dt.replace(tzinfo=timezone.utc)
-    except Exception:
-        start_dt = datetime(2026,9,22,tzinfo=timezone.utc)
+        txt=str(raw)
+        if txt.replace('.', '', 1).isdigit():
+            x=float(txt)
+            if x>1e10: x/=1000
+            return datetime.fromtimestamp(x,tz=timezone.utc)
+        dt=datetime.fromisoformat(txt.replace('Z','+00:00'))
+        if dt.tzinfo is None: dt=dt.replace(tzinfo=timezone.utc)
+        return dt
+    except Exception: return None
 
-    prog = conn.execute(
-        "SELECT * FROM progression WHERE player_id=? AND overall IS NOT NULL ORDER BY rowid",
-        (player_id,)
-    ).fetchall()
 
-    parsed=[]
-    for r in prog:
-        raw=r["occurred_at"]
-        dt=None
-        try:
-            if raw is not None and str(raw).isdigit():
-                x=float(raw)
-                if x>1e10:x/=1000
-                dt=datetime.fromtimestamp(x,tz=timezone.utc)
-            elif raw:
-                dt=datetime.fromisoformat(str(raw).replace("Z","+00:00"))
-                if dt.tzinfo is None:dt=dt.replace(tzinfo=timezone.utc)
-        except Exception:
-            dt=None
-        if dt:
-            parsed.append((dt,r))
+def reconstructed_progress_states(conn,player_id):
+    rows=conn.execute("SELECT rowid,* FROM progression WHERE player_id=? ORDER BY rowid",(player_id,)).fetchall()
+    ordered=[]
+    for r in rows:
+        dt=_parse_event_dt(r['occurred_at'])
+        if dt: ordered.append((dt,r))
+    ordered.sort(key=lambda x:(x[0],x[1]['rowid']))
+    state={}; out=[]
+    for dt,r in ordered:
+        for key in ('overall',)+STAT_FIELDS:
+            if r[key] is not None: state[key]=float(r[key])
+        if state: out.append((dt,state.copy()))
+    return out
 
-    chosen=None
-    before=[x for x in parsed if x[0] <= start_dt]
-    if before:
-        chosen=sorted(before,key=lambda x:x[0])[-1]
-    elif parsed:
-        chosen=sorted(parsed,key=lambda x:x[0])[0]
 
+def ensure_baseline(conn: sqlite3.Connection, player_id: int) -> sqlite3.Row | None:
+    raw=os.getenv('GROWER_START','2026-09-22T00:00:00Z')
+    try:
+        start_dt=datetime.fromisoformat(raw.replace('Z','+00:00'))
+        if start_dt.tzinfo is None:start_dt=start_dt.replace(tzinfo=timezone.utc)
+    except Exception:start_dt=datetime(2026,9,22,tzinfo=timezone.utc)
+    states=reconstructed_progress_states(conn,player_id)
+    before=[x for x in states if x[0] <= start_dt]
+    chosen=before[-1] if before else (states[0] if states else None)
     if chosen:
-        dt,r=chosen
-        conn.execute(
-            """INSERT OR IGNORE INTO baselines
-            (player_id,locked_at,overall,pace,shooting,passing,dribbling,defense,physical)
-            VALUES(?,?,?,?,?,?,?,?,?)""",
-            (player_id, dt.isoformat(), r["overall"], r["pace"], r["shooting"], r["passing"],
-             r["dribbling"], r["defense"], r["physical"])
-        )
-    else:
-        first = conn.execute(
-            "SELECT * FROM snapshots WHERE player_id=? ORDER BY id ASC LIMIT 1", (player_id,)
-        ).fetchone()
-        if not first:
-            return None
-        conn.execute(
-            """INSERT OR IGNORE INTO baselines
-            (player_id,locked_at,overall,pace,shooting,passing,dribbling,defense,physical)
-            VALUES(?,?,?,?,?,?,?,?,?)""",
-            (player_id, first["captured_at"], first["overall"], first["pace"], first["shooting"],
-             first["passing"], first["dribbling"], first["defense"], first["physical"])
-        )
-    conn.commit()
-    return conn.execute("SELECT * FROM baselines WHERE player_id=?", (player_id,)).fetchone()
-
+        dt,s=chosen
+        conn.execute("INSERT OR REPLACE INTO baselines(player_id,locked_at,overall,pace,shooting,passing,dribbling,defense,physical) VALUES(?,?,?,?,?,?,?,?,?)",(player_id,dt.isoformat(),s.get('overall'),s.get('pace'),s.get('shooting'),s.get('passing'),s.get('dribbling'),s.get('defense'),s.get('physical')))
+        conn.commit();return conn.execute("SELECT * FROM baselines WHERE player_id=?",(player_id,)).fetchone()
+    first=conn.execute("SELECT * FROM snapshots WHERE player_id=? ORDER BY id ASC LIMIT 1",(player_id,)).fetchone()
+    if not first:return None
+    conn.execute("INSERT OR REPLACE INTO baselines(player_id,locked_at,overall,pace,shooting,passing,dribbling,defense,physical) VALUES(?,?,?,?,?,?,?,?,?)",(player_id,first['captured_at'],first['overall'],first['pace'],first['shooting'],first['passing'],first['dribbling'],first['defense'],first['physical']))
+    conn.commit();return conn.execute("SELECT * FROM baselines WHERE player_id=?",(player_id,)).fetchone()
 
 def first_progress_stats(conn: sqlite3.Connection, player_id: int) -> sqlite3.Row | None:
     # Prefer the MFL INITIAL record. If absent, use the oldest progression record with OVR.

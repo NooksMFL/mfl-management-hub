@@ -13,9 +13,12 @@ H={"Accept":"*/*","Origin":"https://app.playmfl.com","Referer":"https://app.play
 ATTRS=("pace","shooting","passing","dribbling","defense","physical")
 SHORT={"pace":"PAC","shooting":"SHO","passing":"PAS","dribbling":"DRI","defense":"DEF","physical":"PHY"}
 
+CACHE_VERSION="3-cumulative-progression"
+
 def db():
     c=sqlite3.connect(DB); c.row_factory=sqlite3.Row
     c.executescript("""
+    CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY,value TEXT);
     CREATE TABLE IF NOT EXISTS club_player_s17(
       wallet TEXT, player_id INTEGER, player TEXT, club TEXT,
       start_ovr REAL,current_ovr REAL,ovr_gain REAL,attr_gain REAL,
@@ -28,6 +31,10 @@ def db():
       PRIMARY KEY(wallet,club_id)
     );
     """)
+    row=c.execute("SELECT value FROM meta WHERE key='cache_version'").fetchone()
+    if not row or row["value"] != CACHE_VERSION:
+        c.execute("DELETE FROM club_player_s17")
+        c.execute("INSERT OR REPLACE INTO meta(key,value) VALUES('cache_version',?)",(CACHE_VERSION,))
     c.commit(); return c
 
 def token():
@@ -191,13 +198,18 @@ def vals(e):
     return e.get("values") if isinstance(e,dict) and isinstance(e.get("values"),dict) else {}
 
 def states(ev):
-    out=[]
+    raw=[]
     for e in ev:
-        if not isinstance(e,dict):continue
-        d=todt(e.get("date") or e.get("timestamp") or e.get("createdAt"))
-        v=vals(e)
-        if d and v:out.append((d,v))
-    out.sort(key=lambda x:x[0]); return out
+        if not isinstance(e,dict): continue
+        d=todt(e.get("date") or e.get("timestamp") or e.get("createdAt"));v=vals(e)
+        if d and v: raw.append((d,v))
+    raw.sort(key=lambda x:x[0]);current={};out=[]
+    allowed={"overall","pace","shooting","passing","dribbling","defense","physical"}
+    for d,v in raw:
+        for k,val in v.items():
+            if k in allowed and val is not None: current[k]=val
+        if current: out.append((d,current.copy()))
+    return out
 
 def num(v):
     try:return float(v)
