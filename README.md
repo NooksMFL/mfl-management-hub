@@ -1,13 +1,12 @@
-# MFL Management Hub — Home Rework v15
+# MFL Management Hub — Option 6 Logo v16
 
-Complete Home/branding pass.
+This build uses the selected Option 6 branding as a real packaged vector asset.
 
-- removed the stadium banner and “Same game. Bigger insights.”
-- replaced the blackboard/poster logo with a clean bespoke MFL shield/wordmark
-- rebuilt the Home hero, KPIs, workspace cards and network intelligence layout
-- workspace cards are clickable
-- Quick Actions are clickable
-- Home links use `?page=` and sidebar navigation reads that value
-- removed emoji-heavy feature art in favour of inline SVG icons
-- kept real top-club/top-player data
-- Grower, Agency and Club pages remain intact from prior approved builds
+Changes
+- adds `assets/mfl_management_hub_option6.svg`
+- sidebar now displays the selected Option 6 logo image instead of a CSS/SVG badge built inline
+- Home also uses the same logo asset for consistent branding
+- all approved Grower / Agency / Club / Home functionality from v15 is retained
+- clickable Home workspace cards and Quick Actions remain intact
+
+Upload the full contents of this ZIP to GitHub so the `assets` folder is included.

@@ -1,5 +1,7 @@
 
-import os, html, math
+import os
+import base64
+from pathlib import Path, html, math
 from datetime import datetime, timezone
 import pandas as pd
 import streamlit as st
@@ -371,6 +373,29 @@ a.quick-v15:hover{background:#0b222a;border-color:#2a5a65;transform:translateY(-
 </style>
 """,unsafe_allow_html=True)
 
+
+def asset_data_uri(rel_path, mime="image/svg+xml"):
+    p=Path(__file__).resolve().parent / rel_path
+    data=base64.b64encode(p.read_bytes()).decode("ascii")
+    return f"data:{mime};base64,{data}"
+
+OPTION6_LOGO_URI=asset_data_uri("assets/mfl_management_hub_option6.svg")
+
+
+st.markdown(r"""
+<style>
+/* ===== v16 selected Option 6 brand asset ===== */
+.brand-image-shell{padding:22px 17px 18px;border-bottom:1px solid #15333c}
+.brand-image-shell img{display:block;width:100%;max-width:225px;height:auto}
+.brand-image-season{font-size:.56rem;color:#536d74;letter-spacing:.11em;font-weight:800;margin-top:12px}
+
+.home-brand-row-v16{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:15px}
+.home-brand-row-v16 img{width:280px;max-width:44vw;height:auto;display:block}
+.home-brand-live-v16{font-size:.58rem;color:#90a6aa;background:#081a21;border:1px solid #1b414b;border-radius:999px;padding:7px 10px}
+.home-brand-live-v16:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#13e0b4;margin-right:7px;box-shadow:0 0 0 4px rgba(19,224,180,.08)}
+</style>
+""",unsafe_allow_html=True)
+
 def esc(x): return html.escape(str(x))
 
 def page_head(kicker,title,sub):
@@ -577,20 +602,13 @@ if query_page not in nav_pages:
     query_page="Home"
 
 with st.sidebar:
-    st.markdown("""
-    <div class="brand-clean">
-      <div class="brand-lock">
-        <svg class="brand-mark-v15" viewBox="0 0 64 64" aria-label="MFL">
-          <defs><linearGradient id="brandmint15" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4ff0ce"/><stop offset="1" stop-color="#12c79f"/></linearGradient></defs>
-          <path d="M32 4 55 12v18c0 14.8-9.4 24.8-23 30C18.4 54.8 9 44.8 9 30V12L32 4Z" fill="#081d24" stroke="#13e0b4" stroke-width="2"/>
-          <path d="M19 19h6l3 6 4-8 4 8 3-6h6l-4 10H23l-4-10Z" fill="url(#brandmint15)"/>
-          <path d="M18 36h5v11h-5V36Zm8 0h5l3 5 3-5h5v11h-5v-5l-3 4-3-4v5h-5V36Zm19 0h10v4h-5v2h4v4h-4v1h-5V36Z" fill="#f3f9f7"/>
-        </svg>
-        <div><div class="brand-mfl-v15"><span>MFL</span> Management</div><div class="brand-hub-v15">MANAGEMENT HUB</div><div class="brand-line-v15"></div></div>
-      </div>
-      <div class="brand-season-v15">SEASON 17 · LIVE WORKSPACE</div>
-    </div>
-    """,unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="brand-image-shell">'
+        f'<img src="{OPTION6_LOGO_URI}" alt="MFL Management Hub">'
+        f'<div class="brand-image-season">SEASON 17 · LIVE WORKSPACE</div>'
+        f'</div>',
+        unsafe_allow_html=True
+    )
 
     page=st.radio("Navigation",nav_pages,index=nav_pages.index(query_page),label_visibility="collapsed")
 
@@ -608,7 +626,7 @@ with st.sidebar:
             else:
                 st.error("Enter a valid 0x wallet.")
     st.markdown('</div>',unsafe_allow_html=True)
-    st.markdown("""<div class="season-box"><div class="season-top"><span>Season 17</span><span>LIVE</span></div><div class="connected"><i></i><span>MFL connected</span></div></div><div class="build">HOME REWORK · v15</div>""",unsafe_allow_html=True)
+    st.markdown("""<div class="season-box"><div class="season-top"><span>Season 17</span><span>LIVE</span></div><div class="connected"><i></i><span>MFL connected</span></div></div><div class="build">OPTION 6 LOGO · v16</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 
@@ -634,6 +652,11 @@ if page=="Home":
     total_start=float(good["start_ovr"].fillna(0).sum()) if not good.empty else 0
     total_current=float(good["current_ovr"].fillna(0).sum()) if not good.empty else 0
     synced=len(good)
+
+    st.markdown(
+        f'<div class="home-brand-row-v16"><img src="{OPTION6_LOGO_URI}" alt="MFL Management Hub"><div class="home-brand-live-v16">CONNECTED</div></div>',
+        unsafe_allow_html=True
+    )
 
     st.markdown(f"""
     <div class="home-shell">
