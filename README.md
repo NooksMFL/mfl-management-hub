@@ -1,12 +1,13 @@
-# MFL Management Hub — Polished Competition v11
+# MFL Management Hub — MFL Portraits v12
 
-This keeps the working v10 backend and replaces the Grower or Shower frontend.
+Adds the official MFL player portraits to the Grower or Shower top-three cards.
 
-- designed top-three competition cards
-- player, owner, club, OVR, rating and apps separated visually
-- Guido Di Renzo's DRI +1 appears as a clear gain badge
-- custom live standings board replaces the generic Streamlit dataframe
-- competition snapshot and development spotlight
-- cleaner controls and hierarchy
+MFL portrait URL pattern confirmed from an MFL player-card implementation:
+`https://d13e14gtps4iwl.cloudfront.net/players/v2/{player_id}/photo.webp`
 
-Home, Agency and Club Development remain intact from v10.
+Top three now use their real MFL player IDs:
+- Guido Di Renzo — 411242
+- Łukasz Kijas — 406518
+- Gilson Teixeira — 145758
+
+All existing ranking/data logic is retained.

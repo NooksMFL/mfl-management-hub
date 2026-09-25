@@ -172,6 +172,34 @@ st.markdown(r'''
 </style>
 ''', unsafe_allow_html=True)
 
+
+st.markdown(r"""
+<style>
+/* ===== v12 official MFL player portraits ===== */
+.leader-card{padding:0!important;min-height:265px!important}
+.leader-photo-zone{position:relative;height:142px;overflow:hidden;background:
+ radial-gradient(circle at 70% 35%,rgba(19,224,180,.18),transparent 45%),
+ linear-gradient(145deg,#0b252d,#07151b)}
+.second .leader-photo-zone{background:radial-gradient(circle at 70% 35%,rgba(36,169,255,.18),transparent 45%),linear-gradient(145deg,#0a2231,#07151b)}
+.third .leader-photo-zone{background:radial-gradient(circle at 70% 35%,rgba(160,101,255,.18),transparent 45%),linear-gradient(145deg,#1a1130,#07151b)}
+.leader-photo-zone:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,12,16,.88) 0%,rgba(5,12,16,.42) 42%,rgba(5,12,16,.08) 75%,rgba(5,12,16,.20) 100%)}
+.leader-photo{position:absolute;right:-4px;bottom:-12px;height:170px;width:170px;object-fit:contain;z-index:1;filter:drop-shadow(0 12px 18px rgba(0,0,0,.42))}
+.leader-photo-copy{position:absolute;left:17px;top:16px;z-index:3;max-width:58%}
+.leader-photo-rank{font-size:.54rem;letter-spacing:.14em;font-weight:900;color:#13e0b4}
+.second .leader-photo-rank{color:#24a9ff}.third .leader-photo-rank{color:#a065ff}
+.leader-photo-name{font-size:1.33rem;color:#f5faf9;font-weight:930;line-height:1.02;letter-spacing:-.045em;margin-top:8px}
+.leader-photo-owner{font-size:.62rem;color:#82969b;margin-top:5px}
+.leader-body{padding:14px 16px 16px}
+.leader-body-top{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.leader-ovr-block .leader-ovr-num{font-size:2rem}
+.photo-source{font-size:.48rem;color:#4f6a70;letter-spacing:.07em;margin-top:8px}
+@media(max-width:1000px){
+  .leader-photo{height:185px;width:185px;right:12px}
+  .leader-photo-copy{max-width:52%}
+}
+</style>
+""", unsafe_allow_html=True)
+
 def esc(x): return html.escape(str(x))
 
 def page_head(kicker,title,sub):
@@ -225,18 +253,27 @@ def grower_leader_card(rank,row):
     attr=float(row.get("attribute_growth") or 0)
     ovr_growth=float(row.get("ovr_growth") or 0)
     apps=int(row.get("apps") or 0)
+    pid=int(row["player_id"])
+    photo=f"https://d13e14gtps4iwl.cloudfront.net/players/v2/{pid}/photo.webp"
     return (
       f'<div class="leader-card {cls}">'
-      f'<div class="leader-rank">#{rank} · {esc(row["owner"])}</div>'
-      f'<div class="leader-player">{esc(row["player"])}</div>'
-      f'<div class="leader-owner">{esc(row.get("club") or "No club")} · {apps} app{"s" if apps != 1 else ""}</div>'
-      f'<div class="leader-ovr"><div><div class="leader-ovr-num">{float(row["ovr"]):g}</div><div class="leader-ovr-lab">CURRENT OVR</div></div>'
+      f'<div class="leader-photo-zone">'
+      f'<img class="leader-photo" src="{photo}" alt="{esc(row["player"])}">'
+      f'<div class="leader-photo-copy">'
+      f'<div class="leader-photo-rank">#{rank} · {esc(row["owner"])}</div>'
+      f'<div class="leader-photo-name">{esc(row["player"])}</div>'
+      f'<div class="leader-photo-owner">{esc(row.get("club") or "No club")}</div>'
+      f'</div></div>'
+      f'<div class="leader-body">'
+      f'<div class="leader-body-top"><div class="leader-ovr-block"><div class="leader-ovr-num">{float(row["ovr"]):g}</div><div class="leader-ovr-lab">CURRENT OVR</div></div>'
       f'<div class="rating-disc"><strong>{rating}</strong><span>RATING</span></div></div>'
       f'<div class="leader-stats">'
       f'<div class="ls"><span>OVR Growth</span><b class="{"up" if ovr_growth>0 else ""}">{delta_text(ovr_growth)}</b></div>'
       f'<div class="ls"><span>Attributes</span><b class="{"up" if attr>0 else ""}">{delta_text(attr)}</b></div>'
       f'<div class="ls"><span>Apps</span><b>{apps}</b></div></div>'
-      f'<div class="gain-pills">{grower_gain_html(row)}</div></div>'
+      f'<div class="gain-pills">{grower_gain_html(row)}</div>'
+      f'<div class="photo-source">MFL PLAYER PORTRAIT · ID {pid}</div>'
+      f'</div></div>'
     )
 
 def grower_standings_html(rows):
@@ -309,7 +346,7 @@ with st.sidebar:
       <div class="season-top"><span>Season 17</span><span>⌄</span></div>
       <div class="connected"><i></i><span>Connected</span></div>
     </div>
-    <div class="build">POLISHED COMPETITION · v11</div>""",unsafe_allow_html=True)
+    <div class="build">MFL PORTRAITS · v12</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 
