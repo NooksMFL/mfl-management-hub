@@ -229,7 +229,7 @@ with st.sidebar:
 
     st.divider()
     st.markdown('<span class="pill"><span class="dot"></span>Season 17</span>',unsafe_allow_html=True)
-    st.caption("RESILIENT SYNC v5")
+    st.caption("ONE-CLICK SLOW SYNC v6")
 
 wallet=st.session_state.wallet
 
@@ -438,7 +438,7 @@ elif page=="Club Development":
         mins=max(1,math.ceil(remaining/60))
         st.info(f"MFL cooldown active — wait about {mins} minute(s). Your {len(cached)} synced players are still saved.")
     b1,b2=st.columns([1,4])
-    with b1:do_sync=st.button(f"Sync next {batch}",type="primary",use_container_width=True,disabled=remaining>0)
+    with b1:do_sync=st.button("Sync all remaining",type="primary",use_container_width=True,disabled=remaining>0)
     if do_sync:
         bar=st.progress(0,text="Preparing batch…");status=st.empty()
         def prog(done,total,errs):bar.progress(done/max(total,1),text=f"{done}/{total} players");status.caption(f"{errs} skipped/failed")
@@ -446,9 +446,9 @@ elif page=="Club Development":
             res=club.sync_batch(wallet,season_start,batch,prog);bar.empty();status.empty()
             if res.get("rate_limited"):
                 mins=max(1,math.ceil(res.get("cooldown",0)/60))
-                st.warning(f"MFL rate limit reached. {res['saved']} completed player(s) were kept. Wait about {mins} minute(s), then continue.")
+                st.warning(f"MFL finally imposed a rate limit after {res['saved']} new player(s). Everything completed is saved. Wait about {mins} minute(s); one click will resume the remaining players.")
             elif any("MFL_TIMEOUT" in str(x[1]) for x in res.get("errors",[])):
-                st.warning(f"MFL timed out on one player after automatic retries. {res['saved']} completed player(s) were kept. Press Sync again later and it will resume from the unsynced player.")
+                st.warning(f"The full run finished with {len(res['errors'])} slow player(s) left for the next run. {res['saved']} player(s) were saved.")
             elif res["errors"]:
                 st.warning(f"Saved {res['saved']}; {len(res['errors'])} player(s) skipped.")
             else:

@@ -13,7 +13,7 @@ H={"Accept":"*/*","Origin":"https://app.playmfl.com","Referer":"https://app.play
 ATTRS=("pace","shooting","passing","dribbling","defense","physical")
 SHORT={"pace":"PAC","shooting":"SHO","passing":"PAS","dribbling":"DRI","defense":"DEF","physical":"PHY"}
 
-RATE_DELAY_SECONDS=2.0
+RATE_DELAY_SECONDS=3.0
 DEFAULT_COOLDOWN_SECONDS=180
 
 def _meta_get(key,default=None):
@@ -286,7 +286,7 @@ def cached(wallet):
     c.close()
     return pd.DataFrame([dict(r) for r in rows])
 
-def sync_batch(wallet,season_start,batch_size=10,progress=None):
+def sync_batch(wallet,season_start,batch_size=None,progress=None):
     remaining=cooldown_remaining()
     if remaining>0:
         return {"saved":0,"errors":[],"batch":0,"eligible":0,"excluded":0,"owned":owned_clubs(wallet),
@@ -313,17 +313,22 @@ def sync_batch(wallet,season_start,batch_size=10,progress=None):
     ).fetchall()}
     c.close()
 
-    todo=[r for r in eligible if r["player_id"] not in checked][:int(batch_size)]
-    if not todo:
-        # Once baseline coverage is complete, refresh only a small oldest slice.
+    remaining_players=[r for r in eligible if r["player_id"] not in checked]
+    if remaining_players:
+        todo=remaining_players if batch_size is None else remaining_players[:int(batch_size)]
+    else:
+        # Full coverage exists: a one-click refresh walks every owned-club player,
+        # oldest cached first, at the same conservative pace.
         c=db()
         old=[r[0] for r in c.execute(
-            "SELECT player_id FROM club_player_s17 WHERE wallet=? AND error IS NULL ORDER BY checked_at LIMIT ?",
-            (wallet.lower(),int(batch_size))
+            "SELECT player_id FROM club_player_s17 WHERE wallet=? AND error IS NULL ORDER BY checked_at",
+            (wallet.lower(),)
         ).fetchall()]
         c.close()
-        wanted=set(old)
-        todo=[r for r in eligible if r["player_id"] in wanted]
+        wanted_order={pid:i for i,pid in enumerate(old)}
+        todo=sorted(eligible,key=lambda r:wanted_order.get(r["player_id"],999999))
+        if batch_size is not None:
+            todo=todo[:int(batch_size)]
 
     errors=[]; saved=0; done=0; rate_limited=False; cooldown=0
     total=len(todo)
@@ -351,12 +356,13 @@ def sync_batch(wallet,season_start,batch_size=10,progress=None):
                 if progress: progress(done,total,len(errors))
                 break
             if "MFL_TIMEOUT" in msg:
-                # Leave this player unsynced. Completed players stay saved and the
-                # next run resumes here instead of losing the whole batch.
+                # One slow player must not kill an hours-long full sync.
+                # Leave it unsynced for the next run, pause, then continue.
                 errors.append((r["player_id"],msg))
                 done+=1
                 if progress: progress(done,total,len(errors))
-                break
+                time.sleep(8)
+                continue
             errors.append((r["player_id"],msg))
         done+=1
         if progress: progress(done,total,len(errors))
