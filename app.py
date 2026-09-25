@@ -156,10 +156,10 @@ st.markdown(r'''
 .leader-rank{font-size:.56rem;letter-spacing:.14em;font-weight:900;color:#13e0b4}.second .leader-rank{color:#24a9ff}.third .leader-rank{color:#a065ff}
 .leader-player{font-size:1.35rem;color:#f4f9f8;font-weight:920;letter-spacing:-.045em;margin-top:11px}.leader-owner{font-size:.67rem;color:#758c92;margin-top:3px}
 .leader-ovr{display:flex;align-items:flex-end;justify-content:space-between;margin-top:17px}.leader-ovr-num{font-size:2.25rem;color:#fff;font-weight:950;letter-spacing:-.07em;line-height:.9}.leader-ovr-lab{font-size:.54rem;color:#5f787f;margin-top:5px}
-.rating-disc{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;background:radial-gradient(circle at 35% 28%,#123c39,#09221f 65%);border:1px solid #1d5c51}
-.rating-disc strong{font-size:1.10rem;color:#d9fff4}.rating-disc span{font-size:.48rem;color:#6f9d91;letter-spacing:.09em}
-.leader-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:15px}.ls{background:#0a2028;border:1px solid #173b45;border-radius:8px;padding:8px}.ls span{display:block;font-size:.49rem;color:#58737a;text-transform:uppercase;letter-spacing:.08em}.ls b{display:block;font-size:.77rem;color:#e1ecea;margin-top:3px}.ls b.up{color:#13e0b4}
-.gain-pills{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}.gain-pill{font-size:.56rem;padding:4px 6px;border-radius:6px;color:#657e85;background:#0b2028;border:1px solid #173840}.gain-pill.up{color:#13e0b4;background:rgba(19,224,180,.045);border-color:rgba(19,224,180,.22)}
+.rating-disc{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;background:radial-gradient(circle at 35% 28%,#123c39,#09221f 65%);border:1px solid #1d5c51}
+.rating-disc strong{font-size:.98rem;color:#d9fff4}.rating-disc span{font-size:.48rem;color:#6f9d91;letter-spacing:.09em}
+.leader-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}.ls{background:#0a2028;border:1px solid #173b45;border-radius:8px;padding:7px}.ls span{display:block;font-size:.49rem;color:#58737a;text-transform:uppercase;letter-spacing:.08em}.ls b{display:block;font-size:.77rem;color:#e1ecea;margin-top:3px}.ls b.up{color:#13e0b4}
+.gain-pills{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}.gain-pill{font-size:.56rem;padding:4px 6px;border-radius:6px;color:#657e85;background:#0b2028;border:1px solid #173840}.gain-pill.up{color:#13e0b4;background:rgba(19,224,180,.045);border-color:rgba(19,224,180,.22)}
 .comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:13px}.comp-card{background:#07161d;border:1px solid #173843;border-radius:11px;padding:14px}.comp-title{font-size:.72rem;color:#e8f0ef;font-weight:800}.comp-big{font-size:1.7rem;color:#13e0b4;font-weight:930;letter-spacing:-.05em;margin-top:10px}.comp-sub{font-size:.59rem;color:#607a80;margin-top:2px}
 .standing-wrap{background:#061219;border:1px solid #173843;border-radius:12px;overflow:hidden}.standing-head,.standing-row{display:grid;grid-template-columns:46px 1fr 1.3fr 80px 84px 90px 72px 1.55fr;gap:10px;align-items:center}
 .standing-head{padding:10px 13px;background:#091a22;border-bottom:1px solid #173843;font-size:.52rem;color:#60777d;text-transform:uppercase;letter-spacing:.09em;font-weight:900}
@@ -176,25 +176,25 @@ st.markdown(r'''
 st.markdown(r"""
 <style>
 /* ===== v12 official MFL player portraits ===== */
-.leader-card{padding:0!important;min-height:265px!important}
-.leader-photo-zone{position:relative;height:142px;overflow:hidden;background:
+.leader-card{padding:0!important;min-height:0!important}
+.leader-photo-zone{position:relative;height:122px;overflow:hidden;background:
  radial-gradient(circle at 70% 35%,rgba(19,224,180,.18),transparent 45%),
  linear-gradient(145deg,#0b252d,#07151b)}
 .second .leader-photo-zone{background:radial-gradient(circle at 70% 35%,rgba(36,169,255,.18),transparent 45%),linear-gradient(145deg,#0a2231,#07151b)}
 .third .leader-photo-zone{background:radial-gradient(circle at 70% 35%,rgba(160,101,255,.18),transparent 45%),linear-gradient(145deg,#1a1130,#07151b)}
 .leader-photo-zone:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,12,16,.88) 0%,rgba(5,12,16,.42) 42%,rgba(5,12,16,.08) 75%,rgba(5,12,16,.20) 100%)}
-.leader-photo{position:absolute;right:-4px;bottom:-12px;height:170px;width:170px;object-fit:contain;z-index:1;filter:drop-shadow(0 12px 18px rgba(0,0,0,.42))}
-.leader-photo-copy{position:absolute;left:17px;top:16px;z-index:3;max-width:58%}
+.leader-photo{position:absolute;right:2px;bottom:-1px;height:145px;width:145px;object-fit:contain;object-position:center bottom;z-index:1;filter:drop-shadow(0 10px 16px rgba(0,0,0,.40))}
+.leader-photo-copy{position:absolute;left:16px;top:13px;z-index:3;max-width:60%}
 .leader-photo-rank{font-size:.54rem;letter-spacing:.14em;font-weight:900;color:#13e0b4}
 .second .leader-photo-rank{color:#24a9ff}.third .leader-photo-rank{color:#a065ff}
-.leader-photo-name{font-size:1.33rem;color:#f5faf9;font-weight:930;line-height:1.02;letter-spacing:-.045em;margin-top:8px}
+.leader-photo-name{font-size:1.18rem;color:#f5faf9;font-weight:930;line-height:1.02;letter-spacing:-.045em;margin-top:7px}
 .leader-photo-owner{font-size:.62rem;color:#82969b;margin-top:5px}
-.leader-body{padding:14px 16px 16px}
+.leader-body{padding:11px 14px 13px}
 .leader-body-top{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
-.leader-ovr-block .leader-ovr-num{font-size:2rem}
-.photo-source{font-size:.48rem;color:#4f6a70;letter-spacing:.07em;margin-top:8px}
+.leader-ovr-block .leader-ovr-num{font-size:1.72rem}
+.photo-source{display:none}
 @media(max-width:1000px){
-  .leader-photo{height:185px;width:185px;right:12px}
+  .leader-photo{height:150px;width:150px;right:8px}
   .leader-photo-copy{max-width:52%}
 }
 </style>
@@ -346,7 +346,7 @@ with st.sidebar:
       <div class="season-top"><span>Season 17</span><span>⌄</span></div>
       <div class="connected"><i></i><span>Connected</span></div>
     </div>
-    <div class="build">MFL PORTRAITS · v12</div>""",unsafe_allow_html=True)
+    <div class="build">COMPACT PORTRAITS · v12.1</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 
