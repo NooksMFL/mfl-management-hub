@@ -1,12 +1,9 @@
-# MFL Management Hub — Option 6 Logo v16
+# MFL Management Hub — Option 6 Logo v16.1
 
-This build uses the selected Option 6 branding as a real packaged vector asset.
+Hotfix for the v16 startup error.
 
-Changes
-- adds `assets/mfl_management_hub_option6.svg`
-- sidebar now displays the selected Option 6 logo image instead of a CSS/SVG badge built inline
-- Home also uses the same logo asset for consistent branding
-- all approved Grower / Agency / Club / Home functionality from v15 is retained
-- clickable Home workspace cards and Quick Actions remain intact
+Fixed:
+- `Path`, `html`, and `math` are now imported correctly.
+- Option 6 logo asset and all v16 functionality are unchanged.
 
-Upload the full contents of this ZIP to GitHub so the `assets` folder is included.
+Upload the full ZIP contents over v16, including the `assets` folder.

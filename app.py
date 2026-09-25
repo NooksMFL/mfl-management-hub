@@ -1,7 +1,9 @@
 
 import os
 import base64
-from pathlib import Path, html, math
+from pathlib import Path
+import html
+import math
 from datetime import datetime, timezone
 import pandas as pd
 import streamlit as st
@@ -626,7 +628,7 @@ with st.sidebar:
             else:
                 st.error("Enter a valid 0x wallet.")
     st.markdown('</div>',unsafe_allow_html=True)
-    st.markdown("""<div class="season-box"><div class="season-top"><span>Season 17</span><span>LIVE</span></div><div class="connected"><i></i><span>MFL connected</span></div></div><div class="build">OPTION 6 LOGO · v16</div>""",unsafe_allow_html=True)
+    st.markdown("""<div class="season-box"><div class="season-top"><span>Season 17</span><span>LIVE</span></div><div class="connected"><i></i><span>MFL connected</span></div></div><div class="build">OPTION 6 LOGO · v16.1</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 
