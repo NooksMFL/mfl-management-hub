@@ -229,7 +229,7 @@ with st.sidebar:
 
     st.divider()
     st.markdown('<span class="pill"><span class="dot"></span>Season 17</span>',unsafe_allow_html=True)
-    st.caption("ONE-CLICK SLOW SYNC v6")
+    st.caption("TRUE ALL-REMAINING v6.1")
 
 wallet=st.session_state.wallet
 
@@ -423,7 +423,8 @@ elif page=="Agency Development":
 elif page=="Club Development":
     page_head("CLUB ANALYTICS · SEASON 17","Club Development","Which of your owned clubs is producing the most development?")
     with st.expander("Season settings"):
-        season_start=st.text_input("Season 17 baseline (UTC)",value=st.session_state.get("season_start","2026-09-22T00:00:00Z"));st.session_state.season_start=season_start;batch=int(st.selectbox("Players per sync",[5,10,15],index=1))
+        season_start=st.text_input("Season 17 baseline (UTC)",value=st.session_state.get("season_start","2026-09-22T00:00:00Z"));st.session_state.season_start=season_start
+        st.caption("One click processes every remaining owned-club player slowly and automatically.")
     try:mine=club.owned_clubs(wallet)
     except Exception:mine=[]
     cached=club.cached(wallet)
@@ -443,7 +444,7 @@ elif page=="Club Development":
         bar=st.progress(0,text="Preparing batch…");status=st.empty()
         def prog(done,total,errs):bar.progress(done/max(total,1),text=f"{done}/{total} players");status.caption(f"{errs} skipped/failed")
         try:
-            res=club.sync_batch(wallet,season_start,batch,prog);bar.empty();status.empty()
+            res=club.sync_batch(wallet,season_start,None,prog);bar.empty();status.empty()
             if res.get("rate_limited"):
                 mins=max(1,math.ceil(res.get("cooldown",0)/60))
                 st.warning(f"MFL finally imposed a rate limit after {res['saved']} new player(s). Everything completed is saved. Wait about {mins} minute(s); one click will resume the remaining players.")
