@@ -1,11 +1,14 @@
-# MFL Management Hub — True All-Remaining v6.1
+# MFL Management Hub — Full Redesign v8
 
-Fixes a leftover UI variable in v6 which was still passing the selected value
-10 into club_backend.sync_batch(), despite the button saying Sync all remaining.
+This build keeps the working v6.1 backends and one-click slow Club sync.
 
-v6.1:
-- removes the 5/10/15 selector entirely
-- calls sync_batch(..., None, ...) explicitly
-- processes the complete unsynced player list in one slow run
-- preserves the conservative 3-second spacing, retries, timeout handling,
-  rate-limit cooldown and immediate per-player saves from v6
+Frontend overhaul:
+- bespoke vector MFL shield/crown logo (no placeholder M)
+- premium fixed dark sidebar and branded lockup
+- dashboard-first Season 17 command centre
+- redesigned KPI, workspace, Grower and Club cards
+- improved navigation, controls, tabs, tables and spacing
+- visual club intelligence on Home
+- consistent mint/blue/violet football-management design language
+
+Deploy all files over v6.1 and reboot Streamlit.

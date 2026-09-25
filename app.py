@@ -23,135 +23,144 @@ try:
 except Exception:
     pass
 
-# ---------------- THEME ----------------
+# ---------------- DESIGN SYSTEM ----------------
 st.markdown("""
 <style>
 :root{
-  --bg:#071118;
-  --panel:#0b1820;
-  --panel2:#0d1c25;
-  --line:#17333d;
-  --muted:#829aa2;
-  --text:#eff8f6;
-  --mint:#20deb7;
-  --blue:#2b9cff;
-  --violet:#a85cff;
+ --bg:#050d12; --bg-soft:#071219; --panel:#091820; --panel2:#0c1d26;
+ --line:#163640; --line2:#22505c; --text:#f5fbfa; --muted:#789097;
+ --mint:#20e2b5; --mint-soft:#8ff6df; --blue:#4ba6ff; --violet:#9a72ff;
 }
-html,body,[class*="css"]{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+html,body,[class*="css"]{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 .stApp{
-  background:
-    radial-gradient(circle at 96% 0%,rgba(32,222,183,.055),transparent 28rem),
-    radial-gradient(circle at 22% 100%,rgba(43,156,255,.035),transparent 30rem),
-    var(--bg);
-  color:var(--text);
+ background:
+ radial-gradient(900px 500px at 82% -8%,rgba(32,226,181,.075),transparent 60%),
+ radial-gradient(700px 520px at 0% 100%,rgba(75,166,255,.045),transparent 65%),
+ linear-gradient(180deg,#050d12,#071118 62%,#061016);
+ color:var(--text)
 }
-[data-testid="stHeader"]{background:rgba(7,17,24,.92);border-bottom:1px solid rgba(23,51,61,.45);}
+[data-testid="stHeader"]{background:rgba(5,13,18,.78);backdrop-filter:blur(16px);border-bottom:1px solid rgba(22,54,64,.45)}
+[data-testid="stToolbar"]{opacity:.55}
 [data-testid="stSidebar"]{
-  background:#08131a;
-  border-right:1px solid var(--line);
-  min-width:245px!important;
+ background:linear-gradient(180deg,#061118 0%,#07151c 100%)!important;
+ border-right:1px solid #15343e!important; min-width:278px!important
 }
-[data-testid="stSidebarContent"]{padding:1.15rem .9rem;}
-.block-container{max-width:1420px;padding-top:2rem;padding-bottom:4rem;}
-h1,h2,h3,h4{color:var(--text);letter-spacing:-.035em;}
-p,label,.stCaption{color:var(--muted)!important;}
-hr{border-color:var(--line)!important;}
+[data-testid="stSidebarContent"]{padding:1.05rem 1rem 1rem!important}
+.block-container{max-width:1500px!important;padding:2rem 2.6rem 4rem!important}
+h1,h2,h3,h4{color:var(--text);letter-spacing:-.04em}
+p,label,.stCaption{color:var(--muted)!important}
+hr{border-color:#15343e!important}
 
-.brand{padding:6px 8px 24px;margin-bottom:18px;border-bottom:1px solid var(--line);}
-.logo{font-size:2rem;font-weight:950;letter-spacing:-.075em;color:#fff;line-height:.95;}
-.logo .crown{color:var(--mint);font-size:1rem;vertical-align:top;margin-left:4px;}
-.logo-sub{margin-top:7px;font-size:.68rem;font-weight:850;letter-spacing:.14em;color:#d9e9e6;}
-.logo-line{margin-top:10px;width:68px;height:4px;border-radius:99px;background:var(--mint);}
+/* Logo */
+.mfl-brand{padding:5px 3px 23px;margin-bottom:14px;border-bottom:1px solid #15343e}
+.mfl-lockup{display:flex;align-items:center;gap:13px}
+.mfl-shield{width:55px;height:55px;filter:drop-shadow(0 10px 22px rgba(32,226,181,.13))}
+.mfl-wordmark{line-height:1}
+.mfl-wordmark-main{font-size:1.03rem;font-weight:950;color:#f6fcfb;letter-spacing:-.035em}
+.mfl-wordmark-sub{font-size:.60rem;font-weight:850;color:#6f8a91;letter-spacing:.18em;margin-top:7px}
+.mfl-seasonline{display:flex;align-items:center;gap:8px;margin-top:17px;color:#769198;font-size:.64rem;font-weight:750}
+.mfl-seasonline:before{content:"";width:27px;height:2px;border-radius:99px;background:#20e2b5}
 
-[data-testid="stSidebar"] [role="radiogroup"]{gap:5px;}
+/* Sidebar navigation */
+[data-testid="stSidebar"] [role="radiogroup"]{gap:5px}
 [data-testid="stSidebar"] [role="radiogroup"] label{
-  border-radius:10px;
-  padding:10px 12px;
-  transition:.15s ease;
+ border:1px solid transparent;border-radius:11px;padding:10px 12px!important;transition:.16s ease
 }
-[data-testid="stSidebar"] [role="radiogroup"] label:hover{background:#0d2029;}
+[data-testid="stSidebar"] [role="radiogroup"] label:hover{background:#0a1e26!important;border-color:#173c47!important}
 [data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked){
-  background:linear-gradient(90deg,rgba(32,222,183,.18),rgba(32,222,183,.06));
-  border:1px solid rgba(32,222,183,.28);
+ background:linear-gradient(90deg,rgba(32,226,181,.14),rgba(32,226,181,.025))!important;
+ border-color:rgba(32,226,181,.24)!important;box-shadow:inset 3px 0 0 #20e2b5
 }
-[data-testid="stSidebar"] [role="radiogroup"] label > div:first-child{display:none;}
-[data-testid="stSidebar"] [role="radiogroup"] p{font-weight:650!important;color:#c7d7da!important;}
+[data-testid="stSidebar"] [role="radiogroup"] label > div:first-child{display:none!important}
+[data-testid="stSidebar"] [role="radiogroup"] p{font-size:.82rem!important;font-weight:720!important;color:#a7babd!important}
+[data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) p{color:#f0faf8!important}
+.side-label{font-size:.58rem;letter-spacing:.16em;color:#536f76;font-weight:900;margin:19px 0 8px}
+.wallet-card{background:#091a22;border:1px solid #173b46;border-radius:11px;padding:11px 12px;color:#c7d7d9;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.72rem;overflow:hidden}
+.side-status{display:flex;align-items:center;gap:8px;color:#8ca4a9;font-size:.66rem;margin-top:15px}
+.side-dot{width:7px;height:7px;border-radius:50%;background:#20e2b5;box-shadow:0 0 0 4px rgba(32,226,181,.08)}
 
-.eyebrow{color:var(--mint);font-size:.68rem;letter-spacing:.16em;font-weight:850;text-transform:uppercase;}
-.page-title{font-size:2.1rem;line-height:1.05;font-weight:900;color:#f8fcfb;letter-spacing:-.05em;margin-top:5px;}
-.page-sub{font-size:.93rem;color:#8ea4aa;margin-top:7px;margin-bottom:22px;}
-.topbar{
- display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:4px;
-}
-.pill{
- display:inline-flex;align-items:center;gap:7px;border:1px solid #21444e;background:#0a1921;
- color:#bdd0d2;border-radius:999px;padding:8px 12px;font-size:.76rem;font-weight:700;
-}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 4px rgba(32,222,183,.08);}
+/* Header */
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:8px}
+.eyebrow{display:flex;align-items:center;gap:8px;color:#20e2b5;font-size:.62rem;letter-spacing:.17em;font-weight:900;text-transform:uppercase}
+.eyebrow:before{content:"";width:18px;height:2px;border-radius:99px;background:#20e2b5}
+.page-title{font-size:2.35rem;line-height:1.02;font-weight:930;color:#f8fcfb;letter-spacing:-.055em;margin-top:9px}
+.page-sub{font-size:.89rem;color:#789198;margin-top:8px;margin-bottom:23px}
+.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid #204650;background:#091a22;color:#9db5b9;border-radius:999px;padding:8px 11px;font-size:.67rem;font-weight:800;letter-spacing:.03em}
+.dot{width:7px;height:7px;border-radius:50%;background:#20e2b5;box-shadow:0 0 0 4px rgba(32,226,181,.08)}
 
-.stat{
- background:linear-gradient(145deg,#0b1921,#09161d);
- border:1px solid var(--line);
- border-radius:15px;padding:18px 19px;min-height:125px;
- box-shadow:0 10px 30px rgba(0,0,0,.10);
-}
-.stat-icon{font-size:1.1rem;color:var(--mint);font-weight:900;}
-.stat-value{font-size:2rem;font-weight:900;letter-spacing:-.045em;color:#f8fcfb;line-height:1;margin-top:12px;}
-.stat-label{font-size:.77rem;color:#8fa4a9;margin-top:7px;}
+/* Dashboard hero */
+.command-hero{position:relative;overflow:hidden;min-height:245px;background:
+ linear-gradient(118deg,#0c2029 0%,#091820 65%,#08151c 100%);
+ border:1px solid #1b414c;border-radius:20px;padding:30px 31px;box-shadow:0 24px 70px rgba(0,0,0,.15)}
+.command-hero:before{content:"";position:absolute;right:-65px;top:-100px;width:350px;height:350px;border-radius:50%;
+ background:radial-gradient(circle,rgba(32,226,181,.13),rgba(32,226,181,.02) 48%,transparent 70%)}
+.command-hero:after{content:"";position:absolute;right:155px;bottom:-135px;width:270px;height:270px;border-radius:50%;border:42px solid rgba(75,166,255,.025)}
+.hero-kicker{font-size:.62rem;color:#20e2b5;font-weight:900;letter-spacing:.17em}
+.hero-title{font-size:2.42rem;color:#f7fcfb;font-weight:950;letter-spacing:-.06em;line-height:1.03;margin-top:11px;max-width:650px}
+.hero-copy{font-size:.86rem;color:#81999f;line-height:1.65;max-width:610px;margin-top:13px}
+.hero-pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
+.hero-pill{background:#0d252e;border:1px solid #214852;border-radius:999px;padding:7px 10px;color:#9eb4b8;font-size:.66rem}
+.hero-pill b{color:#20e2b5}
 
-.section-title{font-size:1.05rem;font-weight:800;color:#eff8f6;margin:6px 0 12px;}
-.panel{
- background:#09161e;border:1px solid var(--line);border-radius:15px;padding:18px;
-}
-.tool-card{
- background:linear-gradient(145deg,#0b1921,#09161e);border:1px solid var(--line);
- border-radius:15px;padding:20px;min-height:145px;
-}
-.tool-icon{width:36px;height:36px;border-radius:10px;background:rgba(32,222,183,.10);color:var(--mint);
- display:flex;align-items:center;justify-content:center;font-weight:900;margin-bottom:14px;}
-.tool-card h4{margin:0 0 6px;color:#f6fbfa;font-size:1.02rem;}
-.tool-card p{font-size:.82rem;line-height:1.5;margin:0;color:#81969d!important;}
+/* KPI */
+.stat{position:relative;overflow:hidden;background:linear-gradient(145deg,#0b1d25,#08161d);border:1px solid #173944;border-radius:16px;padding:18px 19px;min-height:128px;box-shadow:0 14px 38px rgba(0,0,0,.1)}
+.stat:after{content:"";position:absolute;right:-34px;top:-45px;width:100px;height:100px;border-radius:50%;border:18px solid rgba(32,226,181,.028)}
+.stat-icon{width:31px;height:31px;border-radius:9px;background:rgba(32,226,181,.07);border:1px solid rgba(32,226,181,.13);display:flex;align-items:center;justify-content:center;color:#20e2b5;font-size:.72rem;font-weight:900}
+.stat-value{font-size:1.95rem;font-weight:930;letter-spacing:-.05em;color:#f7fcfb;line-height:1;margin-top:16px}
+.stat-label{font-size:.70rem;color:#708a91;margin-top:7px;font-weight:650}
 
-.empty{
- border:1px dashed #274852;border-radius:14px;padding:28px;background:rgba(10,25,33,.45);
- text-align:center;color:#8ea4aa;
-}
-.empty b{display:block;color:#e9f4f2;font-size:1rem;margin-bottom:6px;}
+/* Sections/cards */
+.section-title{font-size:1.02rem;font-weight:850;color:#edf7f5;margin:27px 0 11px;display:flex;align-items:center;justify-content:space-between}
+.section-title span{font-size:.62rem;letter-spacing:.1em;color:#58747b;font-weight:800}
+.panel,.sync-box{background:linear-gradient(145deg,#091a22,#08161d);border:1px solid #173944;border-radius:16px;padding:18px}
+.tool-card{position:relative;overflow:hidden;background:linear-gradient(145deg,#0b1d25,#08161d);border:1px solid #173944;border-radius:16px;padding:20px;min-height:165px;transition:.16s ease}
+.tool-card:hover{border-color:#285b67;transform:translateY(-1px)}
+.tool-card:after{content:"↗";position:absolute;right:18px;top:16px;color:#45656c;font-size:.9rem}
+.tool-icon{width:38px;height:38px;border-radius:11px;background:rgba(32,226,181,.075);border:1px solid rgba(32,226,181,.1);color:#20e2b5;display:flex;align-items:center;justify-content:center;font-weight:900;margin-bottom:17px}
+.tool-card h4{margin:0 0 7px;color:#f4faf8;font-size:1rem}
+.tool-card p{font-size:.76rem!important;line-height:1.55!important;margin:0;color:#708990!important}
+.empty{border:1px dashed #27505a;border-radius:15px;padding:29px;background:rgba(9,24,32,.48);text-align:center;color:#80989e}
+.empty b{display:block;color:#eaf5f3;font-size:.96rem;margin-bottom:6px}
+.sync-head{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.sync-title{font-weight:830;color:#edf7f5}
+.sync-sub{font-size:.72rem;color:#708a91;margin-top:4px}
 
-.sync-box{
- background:linear-gradient(145deg,#0b1921,#0a161d);border:1px solid #1a3943;border-radius:15px;
- padding:18px 20px;margin-bottom:18px;
-}
-.sync-head{display:flex;align-items:center;justify-content:space-between;gap:16px;}
-.sync-title{font-weight:800;color:#eef8f6;}
-.sync-sub{font-size:.78rem;color:#83999f;margin-top:3px;}
+/* Grower */
+.hero-card{position:relative;overflow:hidden;background:linear-gradient(145deg,#0b1d25,#08161d);border:1px solid #1a3c46;border-radius:17px;padding:20px;min-height:205px}
+.hero-card:after{content:"";position:absolute;right:-35px;bottom:-50px;width:120px;height:120px;border-radius:50%;border:21px solid rgba(32,226,181,.025)}
+.podium-1{border-color:rgba(32,226,181,.48)!important;box-shadow:0 18px 45px rgba(32,226,181,.055)}
+.podium-2{border-color:rgba(75,166,255,.38)!important}.podium-3{border-color:rgba(154,114,255,.38)!important}
+.hero-label{color:#20e2b5;font-size:.61rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase}
+.hero-name{font-size:1.32rem;font-weight:920;color:#f7fbfa;margin-top:10px;letter-spacing:-.04em}
+.hero-player{font-size:.76rem;color:#82999e;margin-top:4px}
+.hero-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.chip{background:#0d252e;border:1px solid #214852;border-radius:999px;color:#a9bdc0;padding:6px 8px;font-size:.65rem}.chip strong{color:#20e2b5}
+.attr-strip{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}.attr-pill{font-size:.60rem;padding:4px 6px;border-radius:6px;background:#0d232b;color:#688188}.attr-up{color:#20e2b5;border:1px solid rgba(32,226,181,.2);background:rgba(32,226,181,.04)}
 
-.rank-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #142b33;}
-.rank-row:last-child{border-bottom:0;}
-.rank-pos{width:25px;height:25px;border-radius:50%;background:#10242d;color:#bfd1d4;display:flex;align-items:center;justify-content:center;font-size:.72rem;}
-.rank-name{flex:1;color:#dde9e8;font-size:.86rem;}
-.rank-gain{color:var(--mint);font-size:.85rem;font-weight:850;}
+/* Club */
+.club-card2{position:relative;overflow:hidden;background:linear-gradient(145deg,#0b1d25,#08161d);border:1px solid #173944;border-radius:17px;padding:20px;min-height:160px}
+.club-card2:after{content:"";position:absolute;right:-32px;bottom:-46px;width:120px;height:120px;border-radius:50%;border:22px solid rgba(32,226,181,.025)}
+.club-pos2{color:#20e2b5;font-weight:900;font-size:.60rem;letter-spacing:.14em}.club-name2{font-size:1.05rem;color:#f3faf8;font-weight:880;margin-top:9px}
+.club-total2{font-size:1.75rem;font-weight:930;color:#20e2b5;margin-top:12px;letter-spacing:-.045em}.club-sub2{font-size:.68rem;color:#748e94}
+.progress-track2{height:5px;background:#102730;border-radius:99px;margin-top:14px;overflow:hidden}.progress-fill2{height:100%;background:linear-gradient(90deg,#20e2b5,#4ba6ff);border-radius:99px}
+.section-head2{display:flex;align-items:center;justify-content:space-between;margin:27px 0 11px}.section-head2 h3{margin:0;font-size:1.02rem}.small-note2{font-size:.62rem;color:#5c777e;letter-spacing:.08em}
 
-.stButton>button{
- background:#0c1d25;color:#dce9e8;border:1px solid #244752;border-radius:10px;font-weight:750;
- min-height:40px;
-}
-.stButton>button:hover{border-color:var(--mint);color:var(--mint);background:#0d222a;}
-.stButton>button[kind="primary"]{
- background:var(--mint);color:#062018;border-color:var(--mint);
-}
-.stButton>button[kind="primary"]:hover{background:#38e7c5;color:#062018;border-color:#38e7c5;}
+/* Lists */
+.rank-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #12303a}.rank-row:last-child{border-bottom:0}
+.rank-pos{width:26px;height:26px;border-radius:8px;background:#0f2831;color:#9cb2b6;display:flex;align-items:center;justify-content:center;font-size:.67rem;font-weight:850}
+.rank-name{flex:1;color:#dce9e7;font-size:.80rem;font-weight:700}.rank-gain{color:#20e2b5;font-size:.78rem;font-weight:900}
 
-div[data-testid="stMetric"]{background:#0b1921;border:1px solid var(--line);border-radius:14px;padding:16px;}
-div[data-testid="stMetricValue"]{color:var(--mint);}
-[data-testid="stDataFrame"]{border:1px solid var(--line);border-radius:12px;overflow:hidden;}
-[data-testid="stExpander"]{background:#09161e;border:1px solid var(--line);border-radius:12px;}
-div[data-baseweb="select"]>div,.stTextInput input{
- background:#0b1921!important;border-color:#244752!important;color:#eef8f6!important;
-}
-.stProgress>div>div>div>div{background-color:var(--mint)!important;}
-
-.hero-card{background:linear-gradient(145deg,#0b1921,#09161e);border:1px solid #1b3640;border-radius:15px;padding:22px;min-height:200px}.podium-1{border-color:rgba(32,222,183,.6)!important}.podium-2{border-color:rgba(43,156,255,.45)!important}.podium-3{border-color:rgba(168,92,255,.45)!important}.hero-label{color:#20deb7;font-size:.68rem;font-weight:850;letter-spacing:.14em;text-transform:uppercase}.hero-name{font-size:1.48rem;font-weight:900;color:#f7fbfa;margin-top:8px}.hero-player{font-size:.88rem;color:#9aafb3;margin-top:3px}.hero-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:15px}.chip{background:#10232c;border:1px solid #234954;border-radius:999px;color:#cfe0e0;padding:6px 9px;font-size:.72rem}.chip strong{color:#20deb7}.attr-strip{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}.attr-pill{font-size:.66rem;padding:3px 6px;border-radius:6px;background:#10232b;color:#789096}.attr-up{color:#20deb7;border:1px solid rgba(32,222,183,.22)}.club-card2{background:linear-gradient(145deg,#0b1921,#09161e);border:1px solid #1b3640;border-radius:15px;padding:18px;min-height:145px}.club-pos2{color:#20deb7;font-weight:900;font-size:.68rem;letter-spacing:.12em}.club-name2{font-size:1.08rem;color:#f3faf8;font-weight:850;margin-top:8px}.club-total2{font-size:1.8rem;font-weight:900;color:#20deb7;margin-top:10px}.club-sub2{font-size:.73rem;color:#81979d}.progress-track2{height:6px;background:#10242c;border-radius:99px;margin-top:13px;overflow:hidden}.progress-fill2{height:100%;background:linear-gradient(90deg,#20deb7,#2b9cff);border-radius:99px}.section-head2{display:flex;align-items:center;justify-content:space-between;margin:21px 0 10px}.section-head2 h3{margin:0;font-size:1.06rem}.small-note2{font-size:.72rem;color:#758d93}
+/* Native controls */
+.stButton>button{background:#0b2028!important;color:#d7e5e3!important;border:1px solid #234b56!important;border-radius:10px!important;font-weight:760!important;min-height:40px}
+.stButton>button:hover{border-color:#20e2b5!important;color:#20e2b5!important}
+.stButton>button[kind="primary"]{background:linear-gradient(135deg,#20e2b5,#17c99f)!important;color:#032119!important;border-color:#20e2b5!important;box-shadow:0 9px 24px rgba(32,226,181,.11)!important}
+[data-testid="stDataFrame"]{border:1px solid #173944!important;border-radius:13px!important;overflow:hidden!important}
+[data-testid="stExpander"]{background:#08171e!important;border:1px solid #173944!important;border-radius:12px!important}
+div[data-baseweb="select"]>div,.stTextInput input{background:#091a22!important;border-color:#204751!important;color:#edf7f5!important;border-radius:10px!important}
+.stProgress>div>div>div>div{background:linear-gradient(90deg,#20e2b5,#4ba6ff)!important}
+[data-baseweb="tab-list"]{gap:6px!important;background:#08171e!important;border:1px solid #173944!important;border-radius:11px!important;padding:5px!important}
+[data-baseweb="tab"]{border-radius:8px!important;padding:7px 12px!important}
+[data-baseweb="tab"][aria-selected="true"]{background:#0e2831!important;color:#20e2b5!important}
 </style>
 """,unsafe_allow_html=True)
 
@@ -162,15 +171,15 @@ def page_head(kicker,title,sub,live=True):
     st.markdown(f"""
     <div class="topbar">
       <div>
-        <div class="eyebrow premium-eyebrow">{esc(kicker)}</div>
-        <div class="page-title premium-title">{esc(title)}</div>
-        <div class="page-sub premium-sub">{esc(sub)}</div>
+        <div class="eyebrow">{esc(kicker)}</div>
+        <div class="page-title">{esc(title)}</div>
+        <div class="page-sub">{esc(sub)}</div>
       </div>
       <div>{live_html}</div>
     </div>""",unsafe_allow_html=True)
 
 def stat(icon,value,label):
-    st.markdown(f'<div class="stat premium-stat"><div class="stat-icon">{esc(icon)}</div><div class="stat-value">{esc(value)}</div><div class="stat-label">{esc(label)}</div></div>',unsafe_allow_html=True)
+    st.markdown(f'<div class="stat"><div class="stat-icon">{esc(icon)}</div><div class="stat-value">{esc(value)}</div><div class="stat-label">{esc(label)}</div></div>',unsafe_allow_html=True)
 
 def delta_text(v):
     try:
@@ -188,7 +197,7 @@ def podium_card(rank,row):
         if v is not None and float(v)>0:gains.append(f'<span class="attr-pill attr-up">{label} +{float(v):g}</span>')
     attrs="".join(gains) or '<span class="attr-pill">No attribute gain</span>'
     cls={1:"podium-1",2:"podium-2",3:"podium-3"}.get(rank,"")
-    html_box=f'<div class="hero-card premium-player {cls}"><div class="hero-label">#{rank} · {esc(row["owner"])}</div><div class="hero-name">{esc(row["player"])}</div><div class="hero-player">OVR {esc(row["ovr"])} · {esc(row.get("club") or "—")}</div><div class="hero-chips"><span class="chip">OVR <strong>{delta_text(row["ovr_growth"])}</strong></span><span class="chip">ATTR <strong>{delta_text(row.get("attribute_growth",0))}</strong></span><span class="chip">Rating <strong>{fmt_rating(row.get("avg_rating"))}</strong></span><span class="chip">Apps <strong>{esc(row.get("apps") or 0)}</strong></span></div><div class="attr-strip">{attrs}</div></div>'
+    html_box=f'<div class="hero-card {cls}"><div class="hero-label">#{rank} · {esc(row["owner"])}</div><div class="hero-name">{esc(row["player"])}</div><div class="hero-player">OVR {esc(row["ovr"])} · {esc(row.get("club") or "—")}</div><div class="hero-chips"><span class="chip">OVR <strong>{delta_text(row["ovr_growth"])}</strong></span><span class="chip">ATTR <strong>{delta_text(row.get("attribute_growth",0))}</strong></span><span class="chip">Rating <strong>{fmt_rating(row.get("avg_rating"))}</strong></span><span class="chip">Apps <strong>{esc(row.get("apps") or 0)}</strong></span></div><div class="attr-strip">{attrs}</div></div>'
     st.markdown(html_box,unsafe_allow_html=True)
 
 def valid_wallet(v):
@@ -200,7 +209,28 @@ if "wallet" not in st.session_state: st.session_state.wallet=DEFAULT_WALLET
 
 # ---------------- SIDEBAR ----------------
 with st.sidebar:
-    st.markdown("""<div class="brand premium-brand"><div class="brand-lockup"><div class="brand-icon">M</div><div><div class="brand-title">MFL Management</div><div class="brand-caption">PERFORMANCE HUB</div></div></div></div>""",unsafe_allow_html=True)
+    st.markdown("""
+    <div class="mfl-brand">
+      <div class="mfl-lockup">
+        <svg class="mfl-shield" viewBox="0 0 64 64" aria-label="MFL Management Hub logo">
+          <defs>
+            <linearGradient id="mintg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#57f2d1"/>
+              <stop offset="1" stop-color="#14bf98"/>
+            </linearGradient>
+          </defs>
+          <path d="M32 3 56 12v18c0 15-9.6 25.1-24 31C17.6 55.1 8 45 8 30V12L32 3Z" fill="#0a2028" stroke="#20e2b5" stroke-width="2"/>
+          <path d="M20 20h5l3 6 4-8 4 8 3-6h5l-3 9H23l-3-9Z" fill="url(#mintg)"/>
+          <path d="M18 35h5v11h-5V35Zm8 0h5l3 5 3-5h5v11h-5v-5l-3 4-3-4v5h-5V35Zm19 0h10v4h-5v2h4v4h-4v1h-5V35Z" fill="#f4fbfa"/>
+        </svg>
+        <div class="mfl-wordmark">
+          <div class="mfl-wordmark-main">MFL Management</div>
+          <div class="mfl-wordmark-sub">PERFORMANCE HUB</div>
+        </div>
+      </div>
+      <div class="mfl-seasonline">SEASON 17 · LIVE WORKSPACE</div>
+    </div>
+    """,unsafe_allow_html=True)
 
     page=st.radio(
         "Navigation",
@@ -208,9 +238,8 @@ with st.sidebar:
         label_visibility="collapsed"
     )
 
-    st.divider()
-    st.caption("WALLET")
-    st.code(st.session_state.wallet,language=None)
+    st.markdown('<div class="side-label">ACTIVE WALLET</div>',unsafe_allow_html=True)
+    st.markdown(f'<div class="wallet-card">{esc(st.session_state.wallet)}</div>',unsafe_allow_html=True)
     if st.button("Change wallet",use_container_width=True):
         st.session_state.edit_wallet=not st.session_state.get("edit_wallet",False)
     if st.session_state.get("edit_wallet"):
@@ -223,52 +252,13 @@ with st.sidebar:
             else:
                 st.error("Enter a valid 0x wallet.")
 
-    st.divider()
-    st.markdown('<span class="pill"><span class="dot"></span>Season 17</span>',unsafe_allow_html=True)
-    st.caption("DESIGNED BUILD v7")
+    st.markdown('<div class="side-status"><span class="side-dot"></span> MFL API connected</div>',unsafe_allow_html=True)
+    st.caption("FULL REDESIGN · v8")
 
 wallet=st.session_state.wallet
 
-st.markdown("""
-<style>
-/* MFL Management Hub — designed build v7 */
-:root{--mint:#23e4b7;--ink:#061016;--card:#0b1a22;--card2:#0e222b;--line:#193c47;--muted:#789299;--text:#f3fbf9;}
-.stApp{background:radial-gradient(900px 500px at 78% -12%,rgba(35,228,183,.09),transparent 60%),radial-gradient(700px 500px at 0% 100%,rgba(55,148,255,.055),transparent 60%),linear-gradient(180deg,#061016,#07131a)!important;}
-[data-testid="stHeader"]{background:rgba(6,16,22,.76)!important;backdrop-filter:blur(18px);border-bottom:1px solid rgba(25,60,71,.45)!important}
-[data-testid="stSidebar"]{background:linear-gradient(180deg,#07131a,#08171e)!important;border-right:1px solid #173640!important;min-width:270px!important}
-[data-testid="stSidebarContent"]{padding:1.1rem 1rem!important}
-.block-container{max-width:1520px!important;padding:2.2rem 2.8rem 4rem!important}
-.premium-brand{padding:7px 7px 24px!important;margin-bottom:15px!important}
-.brand-lockup{display:flex;align-items:center;gap:11px}.brand-icon{width:43px;height:43px;border-radius:13px;background:linear-gradient(145deg,#25e7bb,#12b18d);display:flex;align-items:center;justify-content:center;color:#032119;font-weight:950;box-shadow:0 12px 32px rgba(35,228,183,.18)}
-.brand-title{color:#f5fbfa;font-size:1.08rem;font-weight:900;letter-spacing:-.035em}.brand-caption{color:#67858c;font-size:.61rem;font-weight:900;letter-spacing:.16em;margin-top:4px}
-[data-testid="stSidebar"] [role="radiogroup"]{gap:6px!important}[data-testid="stSidebar"] [role="radiogroup"] label{border:1px solid transparent!important;border-radius:11px!important;padding:10px 12px!important}
-[data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked){background:linear-gradient(90deg,rgba(35,228,183,.16),rgba(35,228,183,.035))!important;border-color:rgba(35,228,183,.23)!important;box-shadow:inset 3px 0 0 #23e4b7}
-[data-testid="stSidebar"] [role="radiogroup"] label:hover{background:#0c2029!important;border-color:#183d48!important}
-.premium-eyebrow{display:flex;align-items:center;gap:8px!important;color:#23e4b7!important}.premium-eyebrow:before{content:"";width:18px;height:2px;background:#23e4b7;border-radius:99px}
-.premium-title{font-size:2.45rem!important;font-weight:930!important;letter-spacing:-.06em!important;line-height:1.02!important;margin-top:8px!important}.premium-sub{font-size:.91rem!important;color:#789299!important;margin-top:8px!important;margin-bottom:26px!important}
-.pill{background:rgba(35,228,183,.07)!important;border-color:rgba(35,228,183,.22)!important;color:#afe7dc!important}
-.premium-stat{position:relative;overflow:hidden;background:linear-gradient(145deg,#0c1d25,#091820)!important;border:1px solid #183b46!important;border-radius:17px!important;padding:20px!important;min-height:132px!important;box-shadow:0 18px 45px rgba(0,0,0,.12)!important}
-.premium-stat:after{content:"";position:absolute;width:100px;height:100px;border-radius:50%;right:-44px;top:-47px;border:18px solid rgba(35,228,183,.035)}.stat-value{font-size:2.15rem!important}.stat-icon{width:31px;height:31px;border-radius:9px;background:rgba(35,228,183,.08);border:1px solid rgba(35,228,183,.14);display:flex;align-items:center;justify-content:center;font-size:.78rem!important}
-.premium-section{font-size:1.03rem!important;font-weight:850!important;margin:13px 0!important}.premium-tool{position:relative;background:linear-gradient(145deg,#0c1e27,#091820)!important;border:1px solid #183b46!important;border-radius:17px!important;padding:22px!important;min-height:176px!important;box-shadow:0 15px 40px rgba(0,0,0,.09)}.premium-tool:hover{border-color:#2b5a66!important;transform:translateY(-1px)}
-.premium-tool .tool-icon{width:40px!important;height:40px!important;border-radius:12px!important;margin-bottom:18px!important}.premium-tool h4{font-size:1.05rem!important}.premium-tool p{font-size:.78rem!important;line-height:1.6!important}
-.premium-panel{background:linear-gradient(145deg,#0b1b23,#091820)!important;border:1px solid #183b46!important;border-radius:17px!important;padding:18px!important}
-.premium-player{background:linear-gradient(145deg,#0c1d25,#091820)!important;border-radius:17px!important;min-height:218px!important;padding:21px!important;box-shadow:0 16px 42px rgba(0,0,0,.11)}.hero-name{font-size:1.35rem!important}.hero-chips{margin-top:18px!important}.chip{background:#102731!important;border-color:#214a55!important;padding:7px 9px!important}.attr-pill{padding:4px 7px!important}
-.premium-club{background:linear-gradient(145deg,#0c1d25,#091820)!important;border-radius:17px!important;min-height:170px!important;padding:21px!important;box-shadow:0 16px 42px rgba(0,0,0,.1)}.club-total2{font-size:2rem!important}.progress-fill2{background:linear-gradient(90deg,#23e4b7,#3b9fff)!important}
-.premium-section-head{margin-top:29px!important;margin-bottom:13px!important}.premium-section-head h3{font-size:1.03rem!important;font-weight:850!important}.small-note2{letter-spacing:.08em!important;text-transform:uppercase!important;font-size:.62rem!important}
-[data-testid="stDataFrame"]{border:1px solid #183b46!important;border-radius:15px!important;overflow:hidden!important;box-shadow:0 14px 38px rgba(0,0,0,.08)}
-[data-testid="stExpander"]{background:#091920!important;border:1px solid #183b46!important;border-radius:13px!important}
-[data-baseweb="tab-list"]{gap:7px!important;background:#081820!important;border:1px solid #183b46!important;border-radius:12px!important;padding:5px!important}[data-baseweb="tab"]{border-radius:8px!important;padding:8px 14px!important}[data-baseweb="tab"][aria-selected="true"]{background:#102832!important;color:#23e4b7!important}
-.stButton>button{border-radius:10px!important;border-color:#24505b!important;background:#0c2028!important}.stButton>button[kind="primary"]{background:linear-gradient(135deg,#23e4b7,#19c79f)!important;color:#032119!important;border-color:#23e4b7!important;box-shadow:0 8px 24px rgba(35,228,183,.12)!important}
-/* Home gets a designed command-centre banner */
-.command-hero{position:relative;overflow:hidden;background:linear-gradient(120deg,#0d232c,#081820);border:1px solid #1b424d;border-radius:20px;padding:27px 29px;margin:2px 0 26px;min-height:190px}.command-hero:after{content:"";position:absolute;right:-60px;top:-90px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(35,228,183,.13),rgba(35,228,183,.015) 54%,transparent 70%)}
-.command-over{color:#23e4b7;font-size:.64rem;font-weight:900;letter-spacing:.16em}.command-title{color:#f7fcfb;font-size:2.05rem;font-weight:930;letter-spacing:-.055em;line-height:1.05;margin-top:10px}.command-copy{color:#7f999f;font-size:.85rem;line-height:1.6;max-width:590px;margin-top:10px}.command-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:17px}.command-badge{background:#0c222b;border:1px solid #214852;border-radius:999px;padding:7px 10px;color:#9db3b7;font-size:.67rem}.command-badge b{color:#23e4b7}
-</style>
-""",unsafe_allow_html=True)
-
 # ---------------- HOME ----------------
 if page=="Home":
-    page_head("MFL · MANAGEMENT HUB","Good to see you!","Track. Analyse. Develop. All in one place.")
-    st.markdown("""<div class="command-hero"><div class="command-over">SEASON 17 · COMMAND CENTRE</div><div class="command-title">Your MFL network,<br>in one place.</div><div class="command-copy">Development, competition performance and club progression presented as a management dashboard — not a spreadsheet.</div><div class="command-badges"><span class="command-badge"><b>LIVE</b> club development</span><span class="command-badge"><b>14</b> Grower entrants</span><span class="command-badge"><b>S17</b> progression</span></div></div>""",unsafe_allow_html=True)
     try:
         c=agency.db();agency.init(c);agency.ensure_v2(c)
         players=c.execute("SELECT COUNT(*) FROM ownership_v65 WHERE wallet=?",(wallet.lower(),)).fetchone()[0]
@@ -277,55 +267,60 @@ if page=="Home":
     except Exception:
         players=0;improved=0
 
-    try:
-        mine=club.owned_clubs(wallet)
-    except Exception:
-        mine=[]
-
+    try: mine=club.owned_clubs(wallet)
+    except Exception: mine=[]
     cached=club.cached(wallet)
     ovr=float(cached["ovr_gain"].fillna(0).sum()) if not cached.empty else 0
+    attrs=float(cached["attr_gain"].fillna(0).sum()) if not cached.empty else 0
 
+    st.markdown(f"""
+    <div class="command-hero">
+      <div class="hero-kicker">MFL · SEASON 17 COMMAND CENTRE</div>
+      <div class="hero-title">Manage the network.<br>See what is developing.</div>
+      <div class="hero-copy">Your agency, owned clubs and Grower or Shower competition in one live workspace — focused on progression, not admin.</div>
+      <div class="hero-pills">
+        <span class="hero-pill"><b>{len(mine) if mine else "—"}</b> owned clubs</span>
+        <span class="hero-pill"><b>{players or "—"}</b> agency players</span>
+        <span class="hero-pill"><b>+{ovr:g}</b> club OVR</span>
+        <span class="hero-pill"><b>+{attrs:g}</b> attributes</span>
+      </div>
+    </div>""",unsafe_allow_html=True)
+
+    st.markdown('<div class="section-title">Season overview <span>LIVE SAVED DATA</span></div>',unsafe_allow_html=True)
     cols=st.columns(4)
-    with cols[0]: stat("◆",len(mine) if mine else "—","Owned Clubs")
-    with cols[1]: stat("●",players or "—","Players Tracked")
-    with cols[2]: stat("▲",f"+{ovr:g}" if not cached.empty else "—","Club OVR Loaded")
-    with cols[3]: stat("▥",improved,"Agency Players Improved")
+    with cols[0]: stat("CL",len(mine) if mine else "—","Owned Clubs")
+    with cols[1]: stat("PL",players or "—","Players Tracked")
+    with cols[2]: stat("↑",f"+{ovr:g}" if not cached.empty else "—","Club OVR Gained")
+    with cols[3]: stat("DV",improved,"Agency Players Improved")
 
-    st.write("")
-    st.markdown('<div class="section-title premium-section">Your tools</div>',unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Workspaces <span>MANAGEMENT TOOLS</span></div>',unsafe_allow_html=True)
     a,b,c=st.columns(3)
     with a:
-        st.markdown("""<div class="tool-card premium-tool"><div class="tool-icon">G</div><h4>Grower or Shower</h4>
-        <p>Competition standings, OVR growth, attribute gains and Season 17 ratings.</p></div>""",unsafe_allow_html=True)
+        st.markdown('<div class="tool-card"><div class="tool-icon">GS</div><h4>Grower or Shower</h4><p>Competition ranking, player ratings and every OVR or attribute gain.</p></div>',unsafe_allow_html=True)
     with b:
-        st.markdown("""<div class="tool-card premium-tool"><div class="tool-icon" style="color:#2b9cff;background:rgba(43,156,255,.10)">A</div><h4>Agency Development</h4>
-        <p>Player baselines, new mints, tags, notes and development history.</p></div>""",unsafe_allow_html=True)
+        st.markdown('<div class="tool-card"><div class="tool-icon" style="color:#4ba6ff;background:rgba(75,166,255,.07);border-color:rgba(75,166,255,.12)">AD</div><h4>Agency Development</h4><p>Track ownership baselines, new mints, priority players and progression.</p></div>',unsafe_allow_html=True)
     with c:
-        st.markdown("""<div class="tool-card premium-tool"><div class="tool-icon" style="color:#a85cff;background:rgba(168,92,255,.10)">C</div><h4>Club Development</h4>
-        <p>Season 17 development across clubs verified as MFL_OWNER only.</p></div>""",unsafe_allow_html=True)
+        st.markdown('<div class="tool-card"><div class="tool-icon" style="color:#9a72ff;background:rgba(154,114,255,.07);border-color:rgba(154,114,255,.12)">CD</div><h4>Club Development</h4><p>Compare Season 17 development across your entire owned-club network.</p></div>',unsafe_allow_html=True)
 
-    st.write("")
-    left,right=st.columns([1.45,1])
+    st.markdown('<div class="section-title">Club intelligence <span>TOP DEVELOPMENT</span></div>',unsafe_allow_html=True)
+    left,right=st.columns([1.6,1])
     with left:
-        st.markdown('<div class="section-title premium-section">Club development coverage</div>',unsafe_allow_html=True)
+        st.markdown('<div class="panel">',unsafe_allow_html=True)
         if cached.empty:
-            st.markdown('<div class="empty"><b>No club progression synced yet</b>Open Club Development and sync the first batch.</div>',unsafe_allow_html=True)
+            st.markdown('<div class="empty"><b>No club development loaded</b>Run Club Development sync to populate the dashboard.</div>',unsafe_allow_html=True)
         else:
-            temp=cached.copy()
-            temp["checked_at"]=pd.to_datetime(temp["checked_at"],utc=True,errors="coerce")
-            daily=temp.groupby(temp["checked_at"].dt.date)["ovr_gain"].sum().cumsum()
-            if len(daily)>1: st.line_chart(daily,height=260)
-            else: st.bar_chart(temp.groupby("club")["ovr_gain"].sum().sort_values(ascending=False).head(8),height=260)
+            chart=cached.groupby("club")["ovr_gain"].sum().sort_values(ascending=False).head(8)
+            st.bar_chart(chart,height=285)
+        st.markdown('</div>',unsafe_allow_html=True)
     with right:
-        st.markdown('<div class="section-title premium-section">Top clubs loaded</div>',unsafe_allow_html=True)
         if cached.empty:
-            st.markdown('<div class="empty"><b>Waiting for club data</b>Your first synced batch will appear here.</div>',unsafe_allow_html=True)
+            st.markdown('<div class="panel"><div class="empty"><b>Top clubs</b>Waiting for synced data.</div></div>',unsafe_allow_html=True)
         else:
-            rank=cached.groupby("club")["ovr_gain"].sum().sort_values(ascending=False).head(5)
+            ranks=cached.groupby("club").agg(ovr=("ovr_gain","sum"),attrs=("attr_gain","sum"),players=("player_id","count")).sort_values(["ovr","attrs"],ascending=False).head(5)
             body=""
-            for i,(name,gain) in enumerate(rank.items(),1):
-                body+=f'<div class="rank-row"><div class="rank-pos">{i}</div><div class="rank-name">{esc(name)}</div><div class="rank-gain">+{gain:g}</div></div>'
-            st.markdown(f'<div class="panel premium-panel">{body}</div>',unsafe_allow_html=True)
+            for i,(name,row) in enumerate(ranks.iterrows(),1):
+                body += f'<div class="rank-row"><div class="rank-pos">{i}</div><div class="rank-name">{esc(name)}<div style="font-size:.61rem;color:#5f7b82;margin-top:2px">{int(row["players"])} players · +{row["attrs"]:g} attributes</div></div><div class="rank-gain">+{row["ovr"]:g}</div></div>'
+            st.markdown(f'<div class="panel">{body}</div>',unsafe_allow_html=True)
 
 # ---------------- GROWER ----------------
 elif page=="Grower or Shower":
@@ -350,21 +345,21 @@ elif page=="Grower or Shower":
         cols=st.columns(3)
         for col,(rank,row) in zip(cols,enumerate(rows[:3],1)):
             with col:podium_card(rank,row)
-        st.markdown('<div class="section-head2 premium-section-head"><h3>Live standings</h3><span class="small-note2">OVR → ATTR → Rating</span></div>',unsafe_allow_html=True)
+        st.markdown('<div class="section-head2"><h3>Live standings</h3><span class="small-note2">OVR → ATTR → Rating</span></div>',unsafe_allow_html=True)
         table=[]
         for i,r in enumerate(rows,1):
             table.append({"#":i,"Owner":r["owner"],"Player":r["player"],"OVR":r["ovr"],"OVR ↑":delta_text(r["ovr_growth"]),"ATTR ↑":delta_text(r.get("attribute_growth",0)),"Rating":r["avg_rating"],"Apps":r["apps"],"PAC ↑":delta_text(r["pace_growth"]),"SHO ↑":delta_text(r["shooting_growth"]),"PAS ↑":delta_text(r["passing_growth"]),"DRI ↑":delta_text(r["dribbling_growth"]),"DEF ↑":delta_text(r["defense_growth"]),"PHY ↑":delta_text(r["physical_growth"])})
         st.dataframe(pd.DataFrame(table),use_container_width=True,hide_index=True,height=560)
         growers=[r for r in rows if (r.get("attribute_growth") or 0)>0]
         if growers:
-            st.markdown('<div class="section-head2 premium-section-head"><h3>Attribute growers</h3></div>',unsafe_allow_html=True)
+            st.markdown('<div class="section-head2"><h3>Attribute growers</h3></div>',unsafe_allow_html=True)
             gc=st.columns(min(3,len(growers)))
             for col,row in zip(gc,growers[:3]):
                 gains=[]
                 for key,label in [("pace_growth","PAC"),("shooting_growth","SHO"),("passing_growth","PAS"),("dribbling_growth","DRI"),("defense_growth","DEF"),("physical_growth","PHY")]:
                     v=row.get(key)
                     if v is not None and float(v)>0:gains.append(f"{label} +{float(v):g}")
-                with col:st.markdown(f'<div class="tool-card premium-tool"><div class="tool-icon">↑</div><h4>{esc(row["player"])}</h4><p><strong style="color:#20deb7">{esc(row["owner"])}</strong><br>{" · ".join(gains)}<br>Rating {fmt_rating(row.get("avg_rating"))} · {row.get("apps") or 0} apps</p></div>',unsafe_allow_html=True)
+                with col:st.markdown(f'<div class="tool-card"><div class="tool-icon">↑</div><h4>{esc(row["player"])}</h4><p><strong style="color:#20deb7">{esc(row["owner"])}</strong><br>{" · ".join(gains)}<br>Rating {fmt_rating(row.get("avg_rating"))} · {row.get("apps") or 0} apps</p></div>',unsafe_allow_html=True)
     conn.close()
 
 # ---------------- AGENCY ----------------
@@ -466,7 +461,7 @@ elif page=="Club Development":
     with top[1]:stat("●",len(cached),"Players Synced")
     with top[2]:stat("▲",f"+{cached['ovr_gain'].fillna(0).sum():g}" if not cached.empty else "—","S17 OVR Loaded")
     with top[3]:stat("▥",f"+{cached['attr_gain'].fillna(0).sum():g}" if not cached.empty else "—","Attributes Loaded")
-    st.markdown('<div class="section-head2 premium-section-head"><h3>Progression sync</h3><span class="small-note2">Resumes from your existing saved players</span></div>',unsafe_allow_html=True)
+    st.markdown('<div class="section-head2"><h3>Progression sync</h3><span class="small-note2">Resumes from your existing saved players</span></div>',unsafe_allow_html=True)
     remaining=club.cooldown_remaining()
     if remaining>0:
         mins=max(1,math.ceil(remaining/60))
@@ -501,13 +496,13 @@ elif page=="Club Development":
     else:
         good=cached[cached["error"].isna()] if "error" in cached.columns else cached
         clubs=good.groupby("club").agg(Players=("player_id","count"),OVR=("ovr_gain","sum"),Attributes=("attr_gain","sum"),PAC=("pac","sum"),SHO=("sho","sum"),PAS=("pas","sum"),DRI=("dri","sum"),DEF=("defn","sum"),PHY=("phy","sum")).reset_index().sort_values(["OVR","Attributes"],ascending=False)
-        st.markdown('<div class="section-head2 premium-section-head"><h3>Top developing clubs</h3><span class="small-note2">Loaded Season 17 data</span></div>',unsafe_allow_html=True)
+        st.markdown('<div class="section-head2"><h3>Top developing clubs</h3><span class="small-note2">Loaded Season 17 data</span></div>',unsafe_allow_html=True)
         topclubs=clubs.head(3);cols=st.columns(3);mx=max(float(topclubs["Attributes"].max()) if not topclubs.empty else 1,1)
         for i,(col,row) in enumerate(zip(cols,topclubs.to_dict("records")),1):
             pct=min(100,max(5,float(row["Attributes"])/mx*100))
-            html_box=f'<div class="club-card2 premium-club"><div class="club-pos2">#{i} DEVELOPMENT</div><div class="club-name2">{esc(row["club"])}</div><div class="club-total2">+{row["OVR"]:g} OVR</div><div class="club-sub2">{int(row["Players"])} players · +{row["Attributes"]:g} attributes</div><div class="progress-track2"><div class="progress-fill2" style="width:{pct:.0f}%"></div></div></div>'
+            html_box=f'<div class="club-card2"><div class="club-pos2">#{i} DEVELOPMENT</div><div class="club-name2">{esc(row["club"])}</div><div class="club-total2">+{row["OVR"]:g} OVR</div><div class="club-sub2">{int(row["Players"])} players · +{row["Attributes"]:g} attributes</div><div class="progress-track2"><div class="progress-fill2" style="width:{pct:.0f}%"></div></div></div>'
             with col:st.markdown(html_box,unsafe_allow_html=True)
-        st.markdown('<div class="section-head2 premium-section-head"><h3>Club leaderboard</h3></div>',unsafe_allow_html=True)
+        st.markdown('<div class="section-head2"><h3>Club leaderboard</h3></div>',unsafe_allow_html=True)
         st.dataframe(clubs.rename(columns={"club":"Club","OVR":"OVR ↑","Attributes":"ATTR ↑"}),use_container_width=True,hide_index=True,height=min(520,75+35*len(clubs)))
         if not clubs.empty:
             left,right=st.columns([1.55,1])
@@ -517,6 +512,6 @@ elif page=="Club Development":
                 body=""
                 for i,x in enumerate(mine,1):
                     crow=clubs[clubs.club==x["name"]];gain=float(crow.iloc[0]["OVR"]) if not crow.empty else 0;body+=f'<div class="rank-row"><div class="rank-pos">{i}</div><div class="rank-name">{esc(x["name"])}</div><div class="rank-gain">+{gain:g}</div></div>'
-                st.markdown(f'<div class="panel premium-panel">{body}</div>',unsafe_allow_html=True)
+                st.markdown(f'<div class="panel">{body}</div>',unsafe_allow_html=True)
         st.caption("Progression is rebuilt cumulatively from MFL events in this version. Continue syncing batches until coverage is complete.")
 
