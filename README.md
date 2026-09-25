@@ -1,15 +1,12 @@
-# MFL Management Hub — Mockup Match v10
+# MFL Management Hub — Polished Competition v11
 
-Visual rebuild against the selected mock-up while retaining the proven v6.1 backend.
+This keeps the working v10 backend and replaces the Grower or Shower frontend.
 
-- large blackboard-style MFL logo treatment
-- stadium-style top banner
-- four KPI cards
-- three visual workspace cards
-- OVR progression panel
-- Top 5 Clubs and Top 5 Players panels
-- Recent Activity and Quick Actions
-- existing Grower, Agency and Club Development backends retained
-- one-click slow Club Development sync retained
+- designed top-three competition cards
+- player, owner, club, OVR, rating and apps separated visually
+- Guido Di Renzo's DRI +1 appears as a clear gain badge
+- custom live standings board replaces the generic Streamlit dataframe
+- competition snapshot and development spotlight
+- cleaner controls and hierarchy
 
-Note: Streamlit Community Cloud local SQLite cache is ephemeral across redeployments.
+Home, Agency and Club Development remain intact from v10.

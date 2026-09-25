@@ -141,6 +141,37 @@ div[data-baseweb="select"]>div,.stTextInput input{background:#07171e!important;b
 </style>
 """,unsafe_allow_html=True)
 
+
+st.markdown(r'''
+<style>
+.grower-hero{position:relative;overflow:hidden;border:1px solid #173944;border-radius:14px;background:linear-gradient(120deg,#07151c 0%,#07151c 45%,#09232c 100%);min-height:168px;padding:22px 24px;margin-bottom:13px}
+.grower-hero:after{content:"";position:absolute;right:-40px;top:-60px;width:270px;height:270px;border-radius:50%;border:42px solid rgba(19,224,180,.035)}
+.gh-kicker{font-size:.56rem;letter-spacing:.16em;color:#13e0b4;font-weight:900}.gh-title{font-size:1.85rem;color:#f7fbfa;font-weight:930;letter-spacing:-.055em;margin-top:7px}
+.gh-copy{font-size:.72rem;color:#758c92;line-height:1.55;margin-top:7px;max-width:650px}.gh-badges{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px}
+.gh-badge{font-size:.58rem;color:#a6b7ba;background:#0c252d;border:1px solid #1e4650;border-radius:999px;padding:6px 8px}.gh-badge b{color:#13e0b4}
+.leader-grid{display:grid;grid-template-columns:1.18fr .91fr .91fr;gap:12px;margin-bottom:14px}
+.leader-card{position:relative;overflow:hidden;background:linear-gradient(145deg,#08171e,#061219);border:1px solid #173944;border-radius:13px;min-height:220px;padding:18px}
+.leader-card.first{border-color:#13c79f}.leader-card.second{border-color:#1888c9}.leader-card.third{border-color:#6b39a4}
+.leader-card:after{content:"";position:absolute;right:-43px;top:-38px;width:120px;height:120px;border-radius:50%;border:20px solid rgba(255,255,255,.018)}
+.leader-rank{font-size:.56rem;letter-spacing:.14em;font-weight:900;color:#13e0b4}.second .leader-rank{color:#24a9ff}.third .leader-rank{color:#a065ff}
+.leader-player{font-size:1.35rem;color:#f4f9f8;font-weight:920;letter-spacing:-.045em;margin-top:11px}.leader-owner{font-size:.67rem;color:#758c92;margin-top:3px}
+.leader-ovr{display:flex;align-items:flex-end;justify-content:space-between;margin-top:17px}.leader-ovr-num{font-size:2.25rem;color:#fff;font-weight:950;letter-spacing:-.07em;line-height:.9}.leader-ovr-lab{font-size:.54rem;color:#5f787f;margin-top:5px}
+.rating-disc{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;background:radial-gradient(circle at 35% 28%,#123c39,#09221f 65%);border:1px solid #1d5c51}
+.rating-disc strong{font-size:1.10rem;color:#d9fff4}.rating-disc span{font-size:.48rem;color:#6f9d91;letter-spacing:.09em}
+.leader-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:15px}.ls{background:#0a2028;border:1px solid #173b45;border-radius:8px;padding:8px}.ls span{display:block;font-size:.49rem;color:#58737a;text-transform:uppercase;letter-spacing:.08em}.ls b{display:block;font-size:.77rem;color:#e1ecea;margin-top:3px}.ls b.up{color:#13e0b4}
+.gain-pills{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}.gain-pill{font-size:.56rem;padding:4px 6px;border-radius:6px;color:#657e85;background:#0b2028;border:1px solid #173840}.gain-pill.up{color:#13e0b4;background:rgba(19,224,180,.045);border-color:rgba(19,224,180,.22)}
+.comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:13px}.comp-card{background:#07161d;border:1px solid #173843;border-radius:11px;padding:14px}.comp-title{font-size:.72rem;color:#e8f0ef;font-weight:800}.comp-big{font-size:1.7rem;color:#13e0b4;font-weight:930;letter-spacing:-.05em;margin-top:10px}.comp-sub{font-size:.59rem;color:#607a80;margin-top:2px}
+.standing-wrap{background:#061219;border:1px solid #173843;border-radius:12px;overflow:hidden}.standing-head,.standing-row{display:grid;grid-template-columns:46px 1fr 1.3fr 80px 84px 90px 72px 1.55fr;gap:10px;align-items:center}
+.standing-head{padding:10px 13px;background:#091a22;border-bottom:1px solid #173843;font-size:.52rem;color:#60777d;text-transform:uppercase;letter-spacing:.09em;font-weight:900}
+.standing-row{padding:10px 13px;border-bottom:1px solid #102c34;min-height:57px}.standing-row:last-child{border-bottom:0}
+.s-rank{width:28px;height:28px;border-radius:8px;background:#0d242c;color:#aab9bc;display:flex;align-items:center;justify-content:center;font-size:.67rem;font-weight:850}.s-rank.top{background:linear-gradient(145deg,#0c6a55,#0a463a);color:#eafff8;border:1px solid #12c89f}
+.s-owner{font-size:.69rem;color:#dfe9e8;font-weight:800}.s-player{font-size:.70rem;color:#e3eceb;font-weight:730}.s-club{font-size:.55rem;color:#5e777d;margin-top:2px}.s-num{font-size:.69rem;color:#cbd8d8;font-weight:750}.s-up{font-size:.69rem;color:#13e0b4;font-weight:900}
+.s-rating{display:inline-flex;align-items:center;gap:5px;font-size:.68rem;color:#eef6f4;font-weight:850}.rating-dot{width:7px;height:7px;border-radius:50%;background:#13e0b4}.s-apps{font-size:.68rem;color:#9db0b3}.s-gains{display:flex;gap:4px;flex-wrap:wrap}.s-gain{font-size:.52rem;color:#657d83;background:#0a2028;border:1px solid #173841;border-radius:5px;padding:3px 5px}.s-gain.up{color:#13e0b4;border-color:rgba(19,224,180,.22);background:rgba(19,224,180,.04)}
+.development-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.dev-card{background:#07161d;border:1px solid #173843;border-radius:11px;padding:13px}.dev-player{font-size:.76rem;color:#edf5f4;font-weight:820}.dev-owner{font-size:.57rem;color:#607980;margin-top:2px}.dev-gain{font-size:1.35rem;color:#13e0b4;font-weight:930;margin-top:10px}.dev-sub{font-size:.56rem;color:#637c82;margin-top:2px}
+@media(max-width:1000px){.leader-grid{grid-template-columns:1fr}.standing-head,.standing-row{grid-template-columns:40px 1fr 1.2fr 70px 80px 70px}.standing-head>*:nth-child(7),.standing-head>*:nth-child(8),.standing-row>*:nth-child(7),.standing-row>*:nth-child(8){display:none}}
+</style>
+''', unsafe_allow_html=True)
+
 def esc(x): return html.escape(str(x))
 
 def page_head(kicker,title,sub):
@@ -177,6 +208,63 @@ def podium_card(rank,row):
     cls={1:"podium-1",2:"podium-2",3:"podium-3"}.get(rank,"")
     html_box=f'<div class="hero-card {cls}"><div class="hero-label">#{rank} · {esc(row["owner"])}</div><div class="hero-name">{esc(row["player"])}</div><div class="hero-player">OVR {esc(row["ovr"])} · {esc(row.get("club") or "—")}</div><div class="hero-chips"><span class="chip">OVR <strong>{delta_text(row["ovr_growth"])}</strong></span><span class="chip">ATTR <strong>{delta_text(row.get("attribute_growth",0))}</strong></span><span class="chip">Rating <strong>{fmt_rating(row.get("avg_rating"))}</strong></span><span class="chip">Apps <strong>{esc(row.get("apps") or 0)}</strong></span></div><div class="attr-strip">{attrs}</div></div>'
     st.markdown(html_box,unsafe_allow_html=True)
+
+
+def grower_gain_html(row):
+    pills=[]
+    for key,label in [("pace_growth","PAC"),("shooting_growth","SHO"),("passing_growth","PAS"),
+                      ("dribbling_growth","DRI"),("defense_growth","DEF"),("physical_growth","PHY")]:
+        v=float(row.get(key) or 0)
+        if v>0:
+            pills.append(f'<span class="gain-pill up">{label} +{v:g}</span>')
+    return "".join(pills) or '<span class="gain-pill">No attribute gain</span>'
+
+def grower_leader_card(rank,row):
+    cls={1:"first",2:"second",3:"third"}.get(rank,"")
+    rating=fmt_rating(row.get("avg_rating"))
+    attr=float(row.get("attribute_growth") or 0)
+    ovr_growth=float(row.get("ovr_growth") or 0)
+    apps=int(row.get("apps") or 0)
+    return (
+      f'<div class="leader-card {cls}">'
+      f'<div class="leader-rank">#{rank} · {esc(row["owner"])}</div>'
+      f'<div class="leader-player">{esc(row["player"])}</div>'
+      f'<div class="leader-owner">{esc(row.get("club") or "No club")} · {apps} app{"s" if apps != 1 else ""}</div>'
+      f'<div class="leader-ovr"><div><div class="leader-ovr-num">{float(row["ovr"]):g}</div><div class="leader-ovr-lab">CURRENT OVR</div></div>'
+      f'<div class="rating-disc"><strong>{rating}</strong><span>RATING</span></div></div>'
+      f'<div class="leader-stats">'
+      f'<div class="ls"><span>OVR Growth</span><b class="{"up" if ovr_growth>0 else ""}">{delta_text(ovr_growth)}</b></div>'
+      f'<div class="ls"><span>Attributes</span><b class="{"up" if attr>0 else ""}">{delta_text(attr)}</b></div>'
+      f'<div class="ls"><span>Apps</span><b>{apps}</b></div></div>'
+      f'<div class="gain-pills">{grower_gain_html(row)}</div></div>'
+    )
+
+def grower_standings_html(rows):
+    out=['<div class="standing-wrap"><div class="standing-head"><div>#</div><div>Owner</div><div>Player</div><div>OVR</div><div>Growth</div><div>Rating</div><div>Apps</div><div>Attribute gains</div></div>']
+    for i,r in enumerate(rows,1):
+        gains=[]
+        for key,label in [("pace_growth","PAC"),("shooting_growth","SHO"),("passing_growth","PAS"),
+                          ("dribbling_growth","DRI"),("defense_growth","DEF"),("physical_growth","PHY")]:
+            v=float(r.get(key) or 0)
+            if v>0:
+                gains.append(f'<span class="s-gain up">{label} +{v:g}</span>')
+        gain_html="".join(gains) or '<span class="s-gain">—</span>'
+        rank_cls=" top" if i<=3 else ""
+        growth=float(r.get("ovr_growth") or 0)
+        out.append(
+          f'<div class="standing-row">'
+          f'<div><div class="s-rank{rank_cls}">{i}</div></div>'
+          f'<div class="s-owner">{esc(r["owner"])}</div>'
+          f'<div><div class="s-player">{esc(r["player"])}</div><div class="s-club">{esc(r.get("club") or "—")}</div></div>'
+          f'<div class="s-num">{float(r["ovr"]):g}</div>'
+          f'<div class="{"s-up" if growth>0 else "s-num"}">{delta_text(growth)}</div>'
+          f'<div class="s-rating"><span class="rating-dot"></span>{fmt_rating(r.get("avg_rating"))}</div>'
+          f'<div class="s-apps">{int(r.get("apps") or 0)}</div>'
+          f'<div class="s-gains">{gain_html}</div></div>'
+        )
+    out.append("</div>")
+    return "".join(out)
+
 
 def valid_wallet(v):
     v=(v or "").strip()
@@ -221,7 +309,7 @@ with st.sidebar:
       <div class="season-top"><span>Season 17</span><span>⌄</span></div>
       <div class="connected"><i></i><span>Connected</span></div>
     </div>
-    <div class="build">MOCKUP MATCH · v10</div>""",unsafe_allow_html=True)
+    <div class="build">POLISHED COMPETITION · v11</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 
@@ -367,42 +455,90 @@ if page=="Home":
 
 # ---------------- GROWER ----------------
 elif page=="Grower or Shower":
-    page_head("WORKTHESPACE · SEASON 17","Grower or Shower","Live development race · OVR first, attribute growth second, rating next.")
-    with st.expander("Competition settings"):
-        grower_start=st.text_input("Competition / Season 17 baseline (UTC)",value=st.session_state.get("grower_start","2026-09-22T00:00:00Z"));st.session_state.grower_start=grower_start;os.environ["GROWER_START"]=grower_start
     conn=grower.db();grower.init_db(conn)
-    c1,c2=st.columns([1,4])
-    with c1:refresh=st.button("Refresh entrants",type="primary",use_container_width=True)
+    rows=grower.leaderboard(conn)
+    leader=rows[0] if rows else None
+    total_attr=sum(float(r.get("attribute_growth") or 0) for r in rows) if rows else 0
+    total_apps=sum(int(r.get("apps") or 0) for r in rows) if rows else 0
+
+    st.markdown(
+        f'<div class="grower-hero"><div class="gh-kicker">WORKTHESPACE · SEASON 17</div>'
+        f'<div class="gh-title">Grower or Shower</div>'
+        f'<div class="gh-copy">A live development race. OVR growth decides the winner, total attribute growth breaks ties, then Season 17 rating.</div>'
+        f'<div class="gh-badges"><span class="gh-badge"><b>{len(rows) if rows else 14}</b> entrants</span>'
+        f'<span class="gh-badge"><b>+{total_attr:g}</b> attribute growth</span>'
+        f'<span class="gh-badge"><b>{total_apps}</b> rated apps</span>'
+        f'<span class="gh-badge">Leader <b>{esc(leader["owner"]) if leader else "—"}</b></span></div></div>',
+        unsafe_allow_html=True
+    )
+
+    controls=st.columns([1.25,1.1,4])
+    with controls[0]:
+        refresh=st.button("↻ Refresh competition",type="primary",use_container_width=True)
+    with controls[1]:
+        with st.popover("Competition settings",use_container_width=True):
+            grower_start=st.text_input("Season 17 baseline (UTC)",value=st.session_state.get("grower_start","2026-09-22T00:00:00Z"))
+            st.session_state.grower_start=grower_start
+            os.environ["GROWER_START"]=grower_start
+
     if refresh:
         try:
-            tok=grower.refresh_access_token();bar=st.progress(0,text="Refreshing 14 entrants…");errs=[]
+            tok=grower.refresh_access_token()
+            bar=st.progress(0,text="Refreshing entrants…")
+            errs=[]
             for i,(pid,owner) in enumerate(grower.ENTRANTS.items(),1):
-                try:grower.sync_player(conn,tok,pid,owner)
-                except Exception:errs.append(owner)
+                try:
+                    grower.sync_player(conn,tok,pid,owner)
+                except Exception:
+                    errs.append(owner)
                 bar.progress(i/len(grower.ENTRANTS),text=f"{i}/{len(grower.ENTRANTS)} entrants")
-            bar.empty();st.success("Competition refreshed." if not errs else f"Refreshed with {len(errs)} skipped entrant(s).")
-        except Exception as e:st.error("MFL could not refresh the competition.");st.code(str(e))
-    rows=grower.leaderboard(conn)
-    if not rows:st.markdown('<div class="empty"><b>No competition data yet</b>Press Refresh entrants once.</div>',unsafe_allow_html=True)
+            bar.empty()
+            if errs:
+                st.warning(f"Updated competition with {len(errs)} entrant(s) skipped.")
+            else:
+                st.success("Competition refreshed.")
+            rows=grower.leaderboard(conn)
+        except Exception as e:
+            st.error("MFL could not refresh the competition.")
+            with st.expander("Technical detail"):
+                st.code(str(e))
+
+    if not rows:
+        st.markdown('<div class="empty"><b>No competition data yet</b>Refresh the competition once to build the standings.</div>',unsafe_allow_html=True)
     else:
-        cols=st.columns(3)
-        for col,(rank,row) in zip(cols,enumerate(rows[:3],1)):
-            with col:podium_card(rank,row)
-        st.markdown('<div class="section-head2"><h3>Live standings</h3><span class="small-note2">OVR → ATTR → Rating</span></div>',unsafe_allow_html=True)
-        table=[]
-        for i,r in enumerate(rows,1):
-            table.append({"#":i,"Owner":r["owner"],"Player":r["player"],"OVR":r["ovr"],"OVR ↑":delta_text(r["ovr_growth"]),"ATTR ↑":delta_text(r.get("attribute_growth",0)),"Rating":r["avg_rating"],"Apps":r["apps"],"PAC ↑":delta_text(r["pace_growth"]),"SHO ↑":delta_text(r["shooting_growth"]),"PAS ↑":delta_text(r["passing_growth"]),"DRI ↑":delta_text(r["dribbling_growth"]),"DEF ↑":delta_text(r["defense_growth"]),"PHY ↑":delta_text(r["physical_growth"])})
-        st.dataframe(pd.DataFrame(table),use_container_width=True,hide_index=True,height=560)
-        growers=[r for r in rows if (r.get("attribute_growth") or 0)>0]
-        if growers:
-            st.markdown('<div class="section-head2"><h3>Attribute growers</h3></div>',unsafe_allow_html=True)
-            gc=st.columns(min(3,len(growers)))
-            for col,row in zip(gc,growers[:3]):
+        st.markdown('<div class="section-head2"><h3>Front runners</h3><span class="small-note2">OVR → ATTR → RATING</span></div>',unsafe_allow_html=True)
+        cards="".join(grower_leader_card(i,r) for i,r in enumerate(rows[:3],1))
+        st.markdown(f'<div class="leader-grid">{cards}</div>',unsafe_allow_html=True)
+
+        best_rating=max((float(r.get("avg_rating") or 0) for r in rows),default=0)
+        growers=sum(1 for r in rows if float(r.get("attribute_growth") or 0)>0)
+        st.markdown(
+            f'<div class="comp-grid">'
+            f'<div class="comp-card"><div class="comp-title">Players showing development</div><div class="comp-big">{growers}</div><div class="comp-sub">Entrants with a recorded attribute gain</div></div>'
+            f'<div class="comp-card"><div class="comp-title">Best Season 17 rating</div><div class="comp-big">{best_rating:.2f}</div><div class="comp-sub">Highest current competition average</div></div></div>',
+            unsafe_allow_html=True
+        )
+
+        st.markdown('<div class="section-head2"><h3>Live standings</h3><span class="small-note2">ALL ENTRANTS</span></div>',unsafe_allow_html=True)
+        st.markdown(grower_standings_html(rows),unsafe_allow_html=True)
+
+        developed=[r for r in rows if float(r.get("attribute_growth") or 0)>0 or float(r.get("ovr_growth") or 0)>0]
+        if developed:
+            st.markdown('<div class="section-head2"><h3>Development spotlight</h3><span class="small-note2">RECORDED THIS COMPETITION</span></div>',unsafe_allow_html=True)
+            spotlight=[]
+            for r in developed[:3]:
                 gains=[]
                 for key,label in [("pace_growth","PAC"),("shooting_growth","SHO"),("passing_growth","PAS"),("dribbling_growth","DRI"),("defense_growth","DEF"),("physical_growth","PHY")]:
-                    v=row.get(key)
-                    if v is not None and float(v)>0:gains.append(f"{label} +{float(v):g}")
-                with col:st.markdown(f'<div class="tool-card"><div class="tool-icon">↑</div><h4>{esc(row["player"])}</h4><p><strong style="color:#20deb7">{esc(row["owner"])}</strong><br>{" · ".join(gains)}<br>Rating {fmt_rating(row.get("avg_rating"))} · {row.get("apps") or 0} apps</p></div>',unsafe_allow_html=True)
+                    v=float(r.get(key) or 0)
+                    if v>0:
+                        gains.append(f"{label} +{v:g}")
+                spotlight.append(
+                    f'<div class="dev-card"><div class="dev-player">{esc(r["player"])}</div>'
+                    f'<div class="dev-owner">{esc(r["owner"])}</div>'
+                    f'<div class="dev-gain">+{float(r.get("attribute_growth") or 0):g}</div>'
+                    f'<div class="dev-sub">{" · ".join(gains) if gains else "OVR development"}</div></div>'
+                )
+            st.markdown(f'<div class="development-strip">{"".join(spotlight)}</div>',unsafe_allow_html=True)
     conn.close()
 
 # ---------------- AGENCY ----------------
