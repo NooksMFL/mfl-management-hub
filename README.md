@@ -1,9 +1,8 @@
-# MFL Management Hub — Option 6 Logo v16.1
+# MFL Management Hub — Option 6 Logo v16.2
 
-Hotfix for the v16 startup error.
+Fixes the Streamlit Cloud FileNotFoundError.
 
-Fixed:
-- `Path`, `html`, and `math` are now imported correctly.
-- Option 6 logo asset and all v16 functionality are unchanged.
+The selected Option 6 logo is now embedded directly inside `app.py` as a base64 SVG data URI.
+There is no `assets` folder dependency anymore, so GitHub/Streamlit cannot lose the logo file.
 
-Upload the full ZIP contents over v16, including the `assets` folder.
+Upload the contents of this ZIP over the existing repository and reboot the app.

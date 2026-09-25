@@ -1,7 +1,6 @@
 
 import os
 import base64
-from pathlib import Path
 import html
 import math
 from datetime import datetime, timezone
@@ -376,27 +375,28 @@ a.quick-v15:hover{background:#0b222a;border-color:#2a5a65;transform:translateY(-
 """,unsafe_allow_html=True)
 
 
-def asset_data_uri(rel_path, mime="image/svg+xml"):
-    p=Path(__file__).resolve().parent / rel_path
-    data=base64.b64encode(p.read_bytes()).decode("ascii")
-    return f"data:{mime};base64,{data}"
+OPTION6_LOGO_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 360">
+  <defs>
+    <linearGradient id="mint" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5BF1D1"/>
+      <stop offset="1" stop-color="#13C9A1"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(35 48)">
+    <path d="M25 225V35h45l86 78 86-78h45v190h-56V111l-75 67-75-67v114z" fill="#F7FBFA"/>
+    <rect x="154" y="154" width="33" height="71" rx="2" fill="url(#mint)"/>
+    <rect x="193" y="120" width="33" height="105" rx="2" fill="url(#mint)"/>
+    <rect x="232" y="79" width="33" height="146" rx="2" fill="url(#mint)"/>
+  </g>
+  <g transform="translate(355 0)">
+    <text x="0" y="172" font-family="Inter, Arial, Helvetica, sans-serif"
+          font-size="126" font-weight="900" letter-spacing="2" fill="#F7FBFA">MFL</text>
+    <text x="3" y="252" font-family="Inter, Arial, Helvetica, sans-serif"
+          font-size="56" font-weight="500" letter-spacing="1" fill="#F7FBFA">Management Hub</text>
+  </g>
+</svg>"""
 
-OPTION6_LOGO_URI=asset_data_uri("assets/mfl_management_hub_option6.svg")
-
-
-st.markdown(r"""
-<style>
-/* ===== v16 selected Option 6 brand asset ===== */
-.brand-image-shell{padding:22px 17px 18px;border-bottom:1px solid #15333c}
-.brand-image-shell img{display:block;width:100%;max-width:225px;height:auto}
-.brand-image-season{font-size:.56rem;color:#536d74;letter-spacing:.11em;font-weight:800;margin-top:12px}
-
-.home-brand-row-v16{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:15px}
-.home-brand-row-v16 img{width:280px;max-width:44vw;height:auto;display:block}
-.home-brand-live-v16{font-size:.58rem;color:#90a6aa;background:#081a21;border:1px solid #1b414b;border-radius:999px;padding:7px 10px}
-.home-brand-live-v16:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#13e0b4;margin-right:7px;box-shadow:0 0 0 4px rgba(19,224,180,.08)}
-</style>
-""",unsafe_allow_html=True)
+OPTION6_LOGO_URI = "data:image/svg+xml;base64," + base64.b64encode(OPTION6_LOGO_SVG.encode("utf-8")).decode("ascii")
 
 def esc(x): return html.escape(str(x))
 
@@ -628,7 +628,7 @@ with st.sidebar:
             else:
                 st.error("Enter a valid 0x wallet.")
     st.markdown('</div>',unsafe_allow_html=True)
-    st.markdown("""<div class="season-box"><div class="season-top"><span>Season 17</span><span>LIVE</span></div><div class="connected"><i></i><span>MFL connected</span></div></div><div class="build">OPTION 6 LOGO · v16.1</div>""",unsafe_allow_html=True)
+    st.markdown("""<div class="season-box"><div class="season-top"><span>Season 17</span><span>LIVE</span></div><div class="connected"><i></i><span>MFL connected</span></div></div><div class="build">OPTION 6 LOGO · v16.2.2</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 
