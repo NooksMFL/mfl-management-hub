@@ -162,15 +162,15 @@ def page_head(kicker,title,sub,live=True):
     st.markdown(f"""
     <div class="topbar">
       <div>
-        <div class="eyebrow">{esc(kicker)}</div>
-        <div class="page-title">{esc(title)}</div>
-        <div class="page-sub">{esc(sub)}</div>
+        <div class="eyebrow premium-eyebrow">{esc(kicker)}</div>
+        <div class="page-title premium-title">{esc(title)}</div>
+        <div class="page-sub premium-sub">{esc(sub)}</div>
       </div>
       <div>{live_html}</div>
     </div>""",unsafe_allow_html=True)
 
 def stat(icon,value,label):
-    st.markdown(f'<div class="stat"><div class="stat-icon">{esc(icon)}</div><div class="stat-value">{esc(value)}</div><div class="stat-label">{esc(label)}</div></div>',unsafe_allow_html=True)
+    st.markdown(f'<div class="stat premium-stat"><div class="stat-icon">{esc(icon)}</div><div class="stat-value">{esc(value)}</div><div class="stat-label">{esc(label)}</div></div>',unsafe_allow_html=True)
 
 def delta_text(v):
     try:
@@ -188,7 +188,7 @@ def podium_card(rank,row):
         if v is not None and float(v)>0:gains.append(f'<span class="attr-pill attr-up">{label} +{float(v):g}</span>')
     attrs="".join(gains) or '<span class="attr-pill">No attribute gain</span>'
     cls={1:"podium-1",2:"podium-2",3:"podium-3"}.get(rank,"")
-    html_box=f'<div class="hero-card {cls}"><div class="hero-label">#{rank} · {esc(row["owner"])}</div><div class="hero-name">{esc(row["player"])}</div><div class="hero-player">OVR {esc(row["ovr"])} · {esc(row.get("club") or "—")}</div><div class="hero-chips"><span class="chip">OVR <strong>{delta_text(row["ovr_growth"])}</strong></span><span class="chip">ATTR <strong>{delta_text(row.get("attribute_growth",0))}</strong></span><span class="chip">Rating <strong>{fmt_rating(row.get("avg_rating"))}</strong></span><span class="chip">Apps <strong>{esc(row.get("apps") or 0)}</strong></span></div><div class="attr-strip">{attrs}</div></div>'
+    html_box=f'<div class="hero-card premium-player {cls}"><div class="hero-label">#{rank} · {esc(row["owner"])}</div><div class="hero-name">{esc(row["player"])}</div><div class="hero-player">OVR {esc(row["ovr"])} · {esc(row.get("club") or "—")}</div><div class="hero-chips"><span class="chip">OVR <strong>{delta_text(row["ovr_growth"])}</strong></span><span class="chip">ATTR <strong>{delta_text(row.get("attribute_growth",0))}</strong></span><span class="chip">Rating <strong>{fmt_rating(row.get("avg_rating"))}</strong></span><span class="chip">Apps <strong>{esc(row.get("apps") or 0)}</strong></span></div><div class="attr-strip">{attrs}</div></div>'
     st.markdown(html_box,unsafe_allow_html=True)
 
 def valid_wallet(v):
@@ -200,11 +200,7 @@ if "wallet" not in st.session_state: st.session_state.wallet=DEFAULT_WALLET
 
 # ---------------- SIDEBAR ----------------
 with st.sidebar:
-    st.markdown("""<div class="brand">
-      <div class="logo">MFL<span class="crown">♛</span></div>
-      <div class="logo-sub">MANAGEMENT HUB</div>
-      <div class="logo-line"></div>
-    </div>""",unsafe_allow_html=True)
+    st.markdown("""<div class="brand premium-brand"><div class="brand-lockup"><div class="brand-icon">M</div><div><div class="brand-title">MFL Management</div><div class="brand-caption">PERFORMANCE HUB</div></div></div></div>""",unsafe_allow_html=True)
 
     page=st.radio(
         "Navigation",
@@ -229,13 +225,50 @@ with st.sidebar:
 
     st.divider()
     st.markdown('<span class="pill"><span class="dot"></span>Season 17</span>',unsafe_allow_html=True)
-    st.caption("TRUE ALL-REMAINING v6.1")
+    st.caption("DESIGNED BUILD v7")
 
 wallet=st.session_state.wallet
+
+st.markdown("""
+<style>
+/* MFL Management Hub — designed build v7 */
+:root{--mint:#23e4b7;--ink:#061016;--card:#0b1a22;--card2:#0e222b;--line:#193c47;--muted:#789299;--text:#f3fbf9;}
+.stApp{background:radial-gradient(900px 500px at 78% -12%,rgba(35,228,183,.09),transparent 60%),radial-gradient(700px 500px at 0% 100%,rgba(55,148,255,.055),transparent 60%),linear-gradient(180deg,#061016,#07131a)!important;}
+[data-testid="stHeader"]{background:rgba(6,16,22,.76)!important;backdrop-filter:blur(18px);border-bottom:1px solid rgba(25,60,71,.45)!important}
+[data-testid="stSidebar"]{background:linear-gradient(180deg,#07131a,#08171e)!important;border-right:1px solid #173640!important;min-width:270px!important}
+[data-testid="stSidebarContent"]{padding:1.1rem 1rem!important}
+.block-container{max-width:1520px!important;padding:2.2rem 2.8rem 4rem!important}
+.premium-brand{padding:7px 7px 24px!important;margin-bottom:15px!important}
+.brand-lockup{display:flex;align-items:center;gap:11px}.brand-icon{width:43px;height:43px;border-radius:13px;background:linear-gradient(145deg,#25e7bb,#12b18d);display:flex;align-items:center;justify-content:center;color:#032119;font-weight:950;box-shadow:0 12px 32px rgba(35,228,183,.18)}
+.brand-title{color:#f5fbfa;font-size:1.08rem;font-weight:900;letter-spacing:-.035em}.brand-caption{color:#67858c;font-size:.61rem;font-weight:900;letter-spacing:.16em;margin-top:4px}
+[data-testid="stSidebar"] [role="radiogroup"]{gap:6px!important}[data-testid="stSidebar"] [role="radiogroup"] label{border:1px solid transparent!important;border-radius:11px!important;padding:10px 12px!important}
+[data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked){background:linear-gradient(90deg,rgba(35,228,183,.16),rgba(35,228,183,.035))!important;border-color:rgba(35,228,183,.23)!important;box-shadow:inset 3px 0 0 #23e4b7}
+[data-testid="stSidebar"] [role="radiogroup"] label:hover{background:#0c2029!important;border-color:#183d48!important}
+.premium-eyebrow{display:flex;align-items:center;gap:8px!important;color:#23e4b7!important}.premium-eyebrow:before{content:"";width:18px;height:2px;background:#23e4b7;border-radius:99px}
+.premium-title{font-size:2.45rem!important;font-weight:930!important;letter-spacing:-.06em!important;line-height:1.02!important;margin-top:8px!important}.premium-sub{font-size:.91rem!important;color:#789299!important;margin-top:8px!important;margin-bottom:26px!important}
+.pill{background:rgba(35,228,183,.07)!important;border-color:rgba(35,228,183,.22)!important;color:#afe7dc!important}
+.premium-stat{position:relative;overflow:hidden;background:linear-gradient(145deg,#0c1d25,#091820)!important;border:1px solid #183b46!important;border-radius:17px!important;padding:20px!important;min-height:132px!important;box-shadow:0 18px 45px rgba(0,0,0,.12)!important}
+.premium-stat:after{content:"";position:absolute;width:100px;height:100px;border-radius:50%;right:-44px;top:-47px;border:18px solid rgba(35,228,183,.035)}.stat-value{font-size:2.15rem!important}.stat-icon{width:31px;height:31px;border-radius:9px;background:rgba(35,228,183,.08);border:1px solid rgba(35,228,183,.14);display:flex;align-items:center;justify-content:center;font-size:.78rem!important}
+.premium-section{font-size:1.03rem!important;font-weight:850!important;margin:13px 0!important}.premium-tool{position:relative;background:linear-gradient(145deg,#0c1e27,#091820)!important;border:1px solid #183b46!important;border-radius:17px!important;padding:22px!important;min-height:176px!important;box-shadow:0 15px 40px rgba(0,0,0,.09)}.premium-tool:hover{border-color:#2b5a66!important;transform:translateY(-1px)}
+.premium-tool .tool-icon{width:40px!important;height:40px!important;border-radius:12px!important;margin-bottom:18px!important}.premium-tool h4{font-size:1.05rem!important}.premium-tool p{font-size:.78rem!important;line-height:1.6!important}
+.premium-panel{background:linear-gradient(145deg,#0b1b23,#091820)!important;border:1px solid #183b46!important;border-radius:17px!important;padding:18px!important}
+.premium-player{background:linear-gradient(145deg,#0c1d25,#091820)!important;border-radius:17px!important;min-height:218px!important;padding:21px!important;box-shadow:0 16px 42px rgba(0,0,0,.11)}.hero-name{font-size:1.35rem!important}.hero-chips{margin-top:18px!important}.chip{background:#102731!important;border-color:#214a55!important;padding:7px 9px!important}.attr-pill{padding:4px 7px!important}
+.premium-club{background:linear-gradient(145deg,#0c1d25,#091820)!important;border-radius:17px!important;min-height:170px!important;padding:21px!important;box-shadow:0 16px 42px rgba(0,0,0,.1)}.club-total2{font-size:2rem!important}.progress-fill2{background:linear-gradient(90deg,#23e4b7,#3b9fff)!important}
+.premium-section-head{margin-top:29px!important;margin-bottom:13px!important}.premium-section-head h3{font-size:1.03rem!important;font-weight:850!important}.small-note2{letter-spacing:.08em!important;text-transform:uppercase!important;font-size:.62rem!important}
+[data-testid="stDataFrame"]{border:1px solid #183b46!important;border-radius:15px!important;overflow:hidden!important;box-shadow:0 14px 38px rgba(0,0,0,.08)}
+[data-testid="stExpander"]{background:#091920!important;border:1px solid #183b46!important;border-radius:13px!important}
+[data-baseweb="tab-list"]{gap:7px!important;background:#081820!important;border:1px solid #183b46!important;border-radius:12px!important;padding:5px!important}[data-baseweb="tab"]{border-radius:8px!important;padding:8px 14px!important}[data-baseweb="tab"][aria-selected="true"]{background:#102832!important;color:#23e4b7!important}
+.stButton>button{border-radius:10px!important;border-color:#24505b!important;background:#0c2028!important}.stButton>button[kind="primary"]{background:linear-gradient(135deg,#23e4b7,#19c79f)!important;color:#032119!important;border-color:#23e4b7!important;box-shadow:0 8px 24px rgba(35,228,183,.12)!important}
+/* Home gets a designed command-centre banner */
+.command-hero{position:relative;overflow:hidden;background:linear-gradient(120deg,#0d232c,#081820);border:1px solid #1b424d;border-radius:20px;padding:27px 29px;margin:2px 0 26px;min-height:190px}.command-hero:after{content:"";position:absolute;right:-60px;top:-90px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(35,228,183,.13),rgba(35,228,183,.015) 54%,transparent 70%)}
+.command-over{color:#23e4b7;font-size:.64rem;font-weight:900;letter-spacing:.16em}.command-title{color:#f7fcfb;font-size:2.05rem;font-weight:930;letter-spacing:-.055em;line-height:1.05;margin-top:10px}.command-copy{color:#7f999f;font-size:.85rem;line-height:1.6;max-width:590px;margin-top:10px}.command-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:17px}.command-badge{background:#0c222b;border:1px solid #214852;border-radius:999px;padding:7px 10px;color:#9db3b7;font-size:.67rem}.command-badge b{color:#23e4b7}
+</style>
+""",unsafe_allow_html=True)
 
 # ---------------- HOME ----------------
 if page=="Home":
     page_head("MFL · MANAGEMENT HUB","Good to see you!","Track. Analyse. Develop. All in one place.")
+    st.markdown("""<div class="command-hero"><div class="command-over">SEASON 17 · COMMAND CENTRE</div><div class="command-title">Your MFL network,<br>in one place.</div><div class="command-copy">Development, competition performance and club progression presented as a management dashboard — not a spreadsheet.</div><div class="command-badges"><span class="command-badge"><b>LIVE</b> club development</span><span class="command-badge"><b>14</b> Grower entrants</span><span class="command-badge"><b>S17</b> progression</span></div></div>""",unsafe_allow_html=True)
     try:
         c=agency.db();agency.init(c);agency.ensure_v2(c)
         players=c.execute("SELECT COUNT(*) FROM ownership_v65 WHERE wallet=?",(wallet.lower(),)).fetchone()[0]
@@ -259,22 +292,22 @@ if page=="Home":
     with cols[3]: stat("▥",improved,"Agency Players Improved")
 
     st.write("")
-    st.markdown('<div class="section-title">Your tools</div>',unsafe_allow_html=True)
+    st.markdown('<div class="section-title premium-section">Your tools</div>',unsafe_allow_html=True)
     a,b,c=st.columns(3)
     with a:
-        st.markdown("""<div class="tool-card"><div class="tool-icon">G</div><h4>Grower or Shower</h4>
+        st.markdown("""<div class="tool-card premium-tool"><div class="tool-icon">G</div><h4>Grower or Shower</h4>
         <p>Competition standings, OVR growth, attribute gains and Season 17 ratings.</p></div>""",unsafe_allow_html=True)
     with b:
-        st.markdown("""<div class="tool-card"><div class="tool-icon" style="color:#2b9cff;background:rgba(43,156,255,.10)">A</div><h4>Agency Development</h4>
+        st.markdown("""<div class="tool-card premium-tool"><div class="tool-icon" style="color:#2b9cff;background:rgba(43,156,255,.10)">A</div><h4>Agency Development</h4>
         <p>Player baselines, new mints, tags, notes and development history.</p></div>""",unsafe_allow_html=True)
     with c:
-        st.markdown("""<div class="tool-card"><div class="tool-icon" style="color:#a85cff;background:rgba(168,92,255,.10)">C</div><h4>Club Development</h4>
+        st.markdown("""<div class="tool-card premium-tool"><div class="tool-icon" style="color:#a85cff;background:rgba(168,92,255,.10)">C</div><h4>Club Development</h4>
         <p>Season 17 development across clubs verified as MFL_OWNER only.</p></div>""",unsafe_allow_html=True)
 
     st.write("")
     left,right=st.columns([1.45,1])
     with left:
-        st.markdown('<div class="section-title">Club development coverage</div>',unsafe_allow_html=True)
+        st.markdown('<div class="section-title premium-section">Club development coverage</div>',unsafe_allow_html=True)
         if cached.empty:
             st.markdown('<div class="empty"><b>No club progression synced yet</b>Open Club Development and sync the first batch.</div>',unsafe_allow_html=True)
         else:
@@ -284,7 +317,7 @@ if page=="Home":
             if len(daily)>1: st.line_chart(daily,height=260)
             else: st.bar_chart(temp.groupby("club")["ovr_gain"].sum().sort_values(ascending=False).head(8),height=260)
     with right:
-        st.markdown('<div class="section-title">Top clubs loaded</div>',unsafe_allow_html=True)
+        st.markdown('<div class="section-title premium-section">Top clubs loaded</div>',unsafe_allow_html=True)
         if cached.empty:
             st.markdown('<div class="empty"><b>Waiting for club data</b>Your first synced batch will appear here.</div>',unsafe_allow_html=True)
         else:
@@ -292,7 +325,7 @@ if page=="Home":
             body=""
             for i,(name,gain) in enumerate(rank.items(),1):
                 body+=f'<div class="rank-row"><div class="rank-pos">{i}</div><div class="rank-name">{esc(name)}</div><div class="rank-gain">+{gain:g}</div></div>'
-            st.markdown(f'<div class="panel">{body}</div>',unsafe_allow_html=True)
+            st.markdown(f'<div class="panel premium-panel">{body}</div>',unsafe_allow_html=True)
 
 # ---------------- GROWER ----------------
 elif page=="Grower or Shower":
@@ -317,21 +350,21 @@ elif page=="Grower or Shower":
         cols=st.columns(3)
         for col,(rank,row) in zip(cols,enumerate(rows[:3],1)):
             with col:podium_card(rank,row)
-        st.markdown('<div class="section-head2"><h3>Live standings</h3><span class="small-note2">OVR → ATTR → Rating</span></div>',unsafe_allow_html=True)
+        st.markdown('<div class="section-head2 premium-section-head"><h3>Live standings</h3><span class="small-note2">OVR → ATTR → Rating</span></div>',unsafe_allow_html=True)
         table=[]
         for i,r in enumerate(rows,1):
             table.append({"#":i,"Owner":r["owner"],"Player":r["player"],"OVR":r["ovr"],"OVR ↑":delta_text(r["ovr_growth"]),"ATTR ↑":delta_text(r.get("attribute_growth",0)),"Rating":r["avg_rating"],"Apps":r["apps"],"PAC ↑":delta_text(r["pace_growth"]),"SHO ↑":delta_text(r["shooting_growth"]),"PAS ↑":delta_text(r["passing_growth"]),"DRI ↑":delta_text(r["dribbling_growth"]),"DEF ↑":delta_text(r["defense_growth"]),"PHY ↑":delta_text(r["physical_growth"])})
         st.dataframe(pd.DataFrame(table),use_container_width=True,hide_index=True,height=560)
         growers=[r for r in rows if (r.get("attribute_growth") or 0)>0]
         if growers:
-            st.markdown('<div class="section-head2"><h3>Attribute growers</h3></div>',unsafe_allow_html=True)
+            st.markdown('<div class="section-head2 premium-section-head"><h3>Attribute growers</h3></div>',unsafe_allow_html=True)
             gc=st.columns(min(3,len(growers)))
             for col,row in zip(gc,growers[:3]):
                 gains=[]
                 for key,label in [("pace_growth","PAC"),("shooting_growth","SHO"),("passing_growth","PAS"),("dribbling_growth","DRI"),("defense_growth","DEF"),("physical_growth","PHY")]:
                     v=row.get(key)
                     if v is not None and float(v)>0:gains.append(f"{label} +{float(v):g}")
-                with col:st.markdown(f'<div class="tool-card"><div class="tool-icon">↑</div><h4>{esc(row["player"])}</h4><p><strong style="color:#20deb7">{esc(row["owner"])}</strong><br>{" · ".join(gains)}<br>Rating {fmt_rating(row.get("avg_rating"))} · {row.get("apps") or 0} apps</p></div>',unsafe_allow_html=True)
+                with col:st.markdown(f'<div class="tool-card premium-tool"><div class="tool-icon">↑</div><h4>{esc(row["player"])}</h4><p><strong style="color:#20deb7">{esc(row["owner"])}</strong><br>{" · ".join(gains)}<br>Rating {fmt_rating(row.get("avg_rating"))} · {row.get("apps") or 0} apps</p></div>',unsafe_allow_html=True)
     conn.close()
 
 # ---------------- AGENCY ----------------
@@ -433,7 +466,7 @@ elif page=="Club Development":
     with top[1]:stat("●",len(cached),"Players Synced")
     with top[2]:stat("▲",f"+{cached['ovr_gain'].fillna(0).sum():g}" if not cached.empty else "—","S17 OVR Loaded")
     with top[3]:stat("▥",f"+{cached['attr_gain'].fillna(0).sum():g}" if not cached.empty else "—","Attributes Loaded")
-    st.markdown('<div class="section-head2"><h3>Progression sync</h3><span class="small-note2">Resumes from your existing saved players</span></div>',unsafe_allow_html=True)
+    st.markdown('<div class="section-head2 premium-section-head"><h3>Progression sync</h3><span class="small-note2">Resumes from your existing saved players</span></div>',unsafe_allow_html=True)
     remaining=club.cooldown_remaining()
     if remaining>0:
         mins=max(1,math.ceil(remaining/60))
@@ -468,13 +501,13 @@ elif page=="Club Development":
     else:
         good=cached[cached["error"].isna()] if "error" in cached.columns else cached
         clubs=good.groupby("club").agg(Players=("player_id","count"),OVR=("ovr_gain","sum"),Attributes=("attr_gain","sum"),PAC=("pac","sum"),SHO=("sho","sum"),PAS=("pas","sum"),DRI=("dri","sum"),DEF=("defn","sum"),PHY=("phy","sum")).reset_index().sort_values(["OVR","Attributes"],ascending=False)
-        st.markdown('<div class="section-head2"><h3>Top developing clubs</h3><span class="small-note2">Loaded Season 17 data</span></div>',unsafe_allow_html=True)
+        st.markdown('<div class="section-head2 premium-section-head"><h3>Top developing clubs</h3><span class="small-note2">Loaded Season 17 data</span></div>',unsafe_allow_html=True)
         topclubs=clubs.head(3);cols=st.columns(3);mx=max(float(topclubs["Attributes"].max()) if not topclubs.empty else 1,1)
         for i,(col,row) in enumerate(zip(cols,topclubs.to_dict("records")),1):
             pct=min(100,max(5,float(row["Attributes"])/mx*100))
-            html_box=f'<div class="club-card2"><div class="club-pos2">#{i} DEVELOPMENT</div><div class="club-name2">{esc(row["club"])}</div><div class="club-total2">+{row["OVR"]:g} OVR</div><div class="club-sub2">{int(row["Players"])} players · +{row["Attributes"]:g} attributes</div><div class="progress-track2"><div class="progress-fill2" style="width:{pct:.0f}%"></div></div></div>'
+            html_box=f'<div class="club-card2 premium-club"><div class="club-pos2">#{i} DEVELOPMENT</div><div class="club-name2">{esc(row["club"])}</div><div class="club-total2">+{row["OVR"]:g} OVR</div><div class="club-sub2">{int(row["Players"])} players · +{row["Attributes"]:g} attributes</div><div class="progress-track2"><div class="progress-fill2" style="width:{pct:.0f}%"></div></div></div>'
             with col:st.markdown(html_box,unsafe_allow_html=True)
-        st.markdown('<div class="section-head2"><h3>Club leaderboard</h3></div>',unsafe_allow_html=True)
+        st.markdown('<div class="section-head2 premium-section-head"><h3>Club leaderboard</h3></div>',unsafe_allow_html=True)
         st.dataframe(clubs.rename(columns={"club":"Club","OVR":"OVR ↑","Attributes":"ATTR ↑"}),use_container_width=True,hide_index=True,height=min(520,75+35*len(clubs)))
         if not clubs.empty:
             left,right=st.columns([1.55,1])
@@ -484,6 +517,6 @@ elif page=="Club Development":
                 body=""
                 for i,x in enumerate(mine,1):
                     crow=clubs[clubs.club==x["name"]];gain=float(crow.iloc[0]["OVR"]) if not crow.empty else 0;body+=f'<div class="rank-row"><div class="rank-pos">{i}</div><div class="rank-name">{esc(x["name"])}</div><div class="rank-gain">+{gain:g}</div></div>'
-                st.markdown(f'<div class="panel">{body}</div>',unsafe_allow_html=True)
+                st.markdown(f'<div class="panel premium-panel">{body}</div>',unsafe_allow_html=True)
         st.caption("Progression is rebuilt cumulatively from MFL events in this version. Continue syncing batches until coverage is complete.")
 
