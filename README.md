@@ -1,14 +1,14 @@
-# MFL Management Hub — Full Redesign v8
+# MFL Management Hub — Product UI v9
 
-This build keeps the working v6.1 backends and one-click slow Club sync.
+Frontend rebuild on the working v6.1 backend:
+- custom HTML/CSS dashboard
+- bespoke vector MFL shield/crown lockup
+- compact navigation and page hierarchy
+- dashboard hero + performance snapshot
+- proper KPI/workspace/top-club components
+- existing Grower, Agency and Club logic retained
+- one-click slow Club sync retained
 
-Frontend overhaul:
-- bespoke vector MFL shield/crown logo (no placeholder M)
-- premium fixed dark sidebar and branded lockup
-- dashboard-first Season 17 command centre
-- redesigned KPI, workspace, Grower and Club cards
-- improved navigation, controls, tabs, tables and spacing
-- visual club intelligence on Home
-- consistent mint/blue/violet football-management design language
-
-Deploy all files over v6.1 and reboot Streamlit.
+Note: Streamlit Community Cloud runtime SQLite is ephemeral across redeploys. This build
+does not deliberately clear club cache, but permanent cross-deployment cache persistence
+requires a persistent data store.
