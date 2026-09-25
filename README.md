@@ -1,23 +1,17 @@
-# MFL Management Hub — Clean Start
+# MFL Management Hub — Clean Dark v2
 
-This is a fresh single-app build. It does NOT execute or embed any of the old Streamlit app UIs.
+Fresh native Streamlit app. No old app UIs are embedded.
 
-Pages:
-- Home
-- Grower or Shower
-- Agency Development
-- Club Development
+Key fixes:
+- clean dark layout matching the selected minimal dark mockup direction
+- sidebar navigation without radio-button dots
+- Club Development no longer uses the rejected `withLeague` parameter
+- verified MFL_OWNER filtering
+- known 12-club fallback for the primary wallet if MFL club discovery is temporarily unavailable
+- Club Development syncs in saved batches instead of attempting hundreds of player histories in one run
 
-Club Development now uses small saved batches instead of attempting hundreds of MFL progression-history calls in one page load.
+Deploy all files to a brand-new repository root.
+Main file: app.py
 
-## Streamlit secret
+Streamlit secret:
 MFL_REFRESH_TOKEN = "your current refresh token"
-
-Optional:
-DISCORD_WEBHOOK_URL = "your webhook"
-
-## Deploy
-Create a brand-new GitHub repository and upload every file from this folder to the repository root.
-Main Streamlit file: app.py
-
-Grower or Shower reconstructs its baseline from MFL progression history using the configurable Season 17/competition start shown in the app.

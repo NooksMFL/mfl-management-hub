@@ -86,27 +86,83 @@ def club_name(p):
             if n:return str(n)
     return None
 
-def owned_clubs(wallet,t=None,refresh=False):
-    c=db()
-    saved=c.execute("SELECT club_id,club_name FROM owned_clubs WHERE wallet=? ORDER BY club_name",(wallet.lower(),)).fetchall()
-    if saved and not refresh:
-        c.close(); return [{"id":r["club_id"],"name":r["club_name"]} for r in saved]
-    c.close()
-    if t is None:t=token()
-    raw=get("/clubs",t,{"walletAddress":wallet,"withStaffContracts":"true","withLeague":"true"},timeout=(3,7))
-    found=[]
-    for x in arr(raw):
-        if not isinstance(x,dict) or str(x.get("title") or "").strip().upper()!="MFL_OWNER": continue
-        club=x.get("club") if isinstance(x.get("club"),dict) else x
-        name=club.get("name") or club.get("clubName"); cid=club.get("id") or club.get("clubId")
-        if name:found.append({"id":cid,"name":str(name).strip()})
+KNOWN_OWNER_CLUBS={
+ "0x65cc0e72dd71ad80":[
+  {"id":3983,"name":"FCN Supermarine"},
+  {"id":5884,"name":"FCN Goyang"},
+  {"id":6390,"name":"FCN Vélez Academy"},
+  {"id":6451,"name":"FCN Gladbach"},
+  {"id":7126,"name":"FCN Angrense"},
+  {"id":7530,"name":"FCN David Academy"},
+  {"id":7580,"name":"FCN Antibes"},
+  {"id":7756,"name":"FCN Swindon Town"},
+  {"id":8026,"name":"FCN Gorzów"},
+  {"id":8199,"name":"FCN Pickering"},
+  {"id":9582,"name":"FCN Halesowen Academy"},
+  {"id":10910,"name":"FCN Garza Academy"},
+ ]
+}
+
+def _save_owned(wallet,found):
     c=db(); now=datetime.now(timezone.utc).isoformat()
     c.execute("DELETE FROM owned_clubs WHERE wallet=?",(wallet.lower(),))
     for x in found:
         c.execute("INSERT OR REPLACE INTO owned_clubs(wallet,club_id,club_name,checked_at) VALUES(?,?,?,?)",
                   (wallet.lower(),x["id"],x["name"],now))
     c.commit();c.close()
-    return found
+
+def owned_clubs(wallet,t=None,refresh=False):
+    wallet=wallet.strip().lower()
+    c=db()
+    saved=c.execute("SELECT club_id,club_name FROM owned_clubs WHERE wallet=? ORDER BY club_name",(wallet,)).fetchall()
+    c.close()
+    if saved and not refresh:
+        return [{"id":r["club_id"],"name":r["club_name"]} for r in saved]
+
+    if t is None:
+        try:t=token()
+        except Exception:
+            fallback=KNOWN_OWNER_CLUBS.get(wallet,[])
+            if fallback:_save_owned(wallet,fallback)
+            return fallback
+
+    # The actual MFL web response mixes owned and staff-role clubs. The reliable
+    # discriminator is title == MFL_OWNER. Do NOT send withLeague; MFL rejects it
+    # on this API route in some sessions.
+    attempts=[
+        {"walletAddress":wallet},
+        {"walletAddress":wallet,"withStaffContracts":"true"},
+    ]
+    last_error=None
+    for params in attempts:
+        try:
+            raw=get("/clubs",t,params,timeout=(3,7))
+            found=[]
+            for x in arr(raw):
+                if not isinstance(x,dict):continue
+                if str(x.get("title") or "").strip().upper()!="MFL_OWNER":continue
+                club=x.get("club") if isinstance(x.get("club"),dict) else x
+                name=club.get("name") or club.get("clubName")
+                cid=club.get("id") or club.get("clubId")
+                if name:found.append({"id":cid,"name":str(name).strip()})
+            if found:
+                # unique
+                uniq=[];seen=set()
+                for x in found:
+                    k=(x["id"],x["name"].casefold())
+                    if k not in seen:
+                        seen.add(k);uniq.append(x)
+                _save_owned(wallet,uniq)
+                return uniq
+        except Exception as e:
+            last_error=e
+
+    fallback=KNOWN_OWNER_CLUBS.get(wallet,[])
+    if fallback:
+        _save_owned(wallet,fallback)
+        return fallback
+    if last_error: raise last_error
+    return []
 
 def roster(wallet,t):
     raw=get("/players",t,{"ownerWalletAddress":wallet,"limit":1200},timeout=(4,8))
