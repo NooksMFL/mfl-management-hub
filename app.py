@@ -403,6 +403,47 @@ st.markdown(r"""
 </style>
 """,unsafe_allow_html=True)
 
+
+st.markdown(r"""
+<style>
+/* ===== v17.3 Public polish ===== */
+.wallet-load-warning{margin-top:8px;padding:9px 10px;border-radius:8px;background:#211a08;border:1px solid #5b4818;color:#d8c68c;font-size:.61rem;line-height:1.45}
+.wallet-load-warning b{color:#ffe39a}
+
+.home-dashboard-v15{grid-template-columns:1.05fr .78fr 1.05fr!important}
+.dev-breakdown-v173{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:5px}
+.dev-metric-v173{background:#081b23;border:1px solid #173943;border-radius:9px;padding:11px}
+.dev-metric-lab-v173{font-size:.58rem;color:#5c767d;text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+.dev-metric-val-v173{font-size:1.35rem;color:#f1f8f6;font-weight:930;margin-top:5px;letter-spacing:-.04em}
+.dev-metric-val-v173.mint{color:#13e0b4}.dev-metric-val-v173.blue{color:#38afff}.dev-metric-val-v173.violet{color:#ad76ff}
+.attr-bars-v173{margin-top:13px}
+.attr-row-v173{display:grid;grid-template-columns:38px 1fr 38px;gap:8px;align-items:center;margin:8px 0}
+.attr-name-v173{font-size:.58rem;color:#718990;font-weight:800}
+.attr-track-v173{height:7px;background:#0b252d;border-radius:99px;overflow:hidden}
+.attr-fill-v173{height:100%;border-radius:99px;background:linear-gradient(90deg,#13e0b4,#38afff)}
+.attr-val-v173{font-size:.61rem;color:#c9d6d6;font-weight:800;text-align:right}
+
+.progressor-list-v173{display:flex;flex-direction:column;gap:7px}
+.progressor-v173{display:grid;grid-template-columns:32px 44px 1fr auto;gap:9px;align-items:center;background:#081820;border:1px solid #163842;border-radius:9px;padding:7px 9px}
+.progress-rank-v173{width:27px;height:27px;border-radius:8px;background:#0d252d;color:#aab9bb;display:flex;align-items:center;justify-content:center;font-size:.61rem;font-weight:850}
+.progress-photo-v173{width:42px;height:42px;border-radius:8px;overflow:hidden;background:#0a2028;border:1px solid #1a404a}
+.progress-photo-v173 img{width:100%;height:100%;object-fit:contain;object-position:center top}
+.progress-name-v173{font-size:.69rem;color:#e1e9e8;font-weight:800}
+.progress-club-v173{font-size:.54rem;color:#617a80;margin-top:2px}
+.progress-gains-v173{text-align:right}.progress-ovr-v173{font-size:.66rem;color:#13e0b4;font-weight:900}.progress-attr-v173{font-size:.55rem;color:#8da2a6;margin-top:2px}
+
+.highlight-grid-v173{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.highlight-v173{background:#081820;border:1px solid #173843;border-radius:9px;padding:11px;min-height:76px}
+.highlight-kicker-v173{font-size:.52rem;color:#58747a;text-transform:uppercase;letter-spacing:.09em;font-weight:850}
+.highlight-main-v173{font-size:.84rem;color:#edf5f4;font-weight:850;margin-top:6px;line-height:1.2}
+.highlight-sub-v173{font-size:.56rem;color:#647d83;margin-top:4px}
+
+.export-row-v173{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 12px}
+@media(max-width:1000px){.home-dashboard-v15{grid-template-columns:1fr!important}}
+@media(max-width:700px){.highlight-grid-v173,.dev-breakdown-v173{grid-template-columns:1fr}}
+</style>
+""",unsafe_allow_html=True)
+
 def esc(x): return html.escape(str(x))
 
 def page_head(kicker,title,sub):
@@ -639,6 +680,7 @@ with st.sidebar:
     if st.session_state.get("edit_wallet",False):
         nw=st.text_input("MFL wallet",value="" if not st.session_state.wallet else st.session_state.wallet,
                          placeholder="0x…",label_visibility="collapsed",key="public_wallet_input")
+        st.markdown('<div class="wallet-load-warning"><b>First-time wallet load can take several minutes.</b><br>MFL has to fetch and analyse your players/clubs. Keep the page open while it loads; later visits use cached data where available.</div>',unsafe_allow_html=True)
         if st.button("Use wallet",type="primary",use_container_width=True,key="public_wallet_use"):
             if valid_wallet(nw):
                 st.session_state.wallet=nw.strip().lower()
@@ -652,18 +694,12 @@ with st.sidebar:
       <div class="season-top"><span>Season 17</span><span>PUBLIC</span></div>
       <div class="connected"><i></i><span>MFL API ready</span></div>
     </div>
-    <div class="build">PUBLIC FIX · v17.1</div>""",unsafe_allow_html=True)
+    <div class="build">PUBLIC POLISH · v17.3</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 
 # ---------------- HOME ----------------
 if page=="Home":
-    st.markdown("""<div class="public-home-head">
-      <div class="public-home-kicker">MFL MANAGEMENT HUB · SEASON 17</div>
-      <div class="public-home-title">Track your MFL network.</div>
-      <div class="public-home-copy">Grower or Shower is available immediately. Connect an MFL wallet to load your own agency and owned-club development.</div>
-    </div>""",unsafe_allow_html=True)
-
     if not wallet:
         st.markdown("""<div class="public-connect">
           <div class="public-connect-kicker">CONNECT YOUR WALLET</div>
@@ -700,7 +736,7 @@ if page=="Home":
       <div class="home-hero-v15">
         <div>
           <div class="home-eyebrow-v15">YOUR SEASON 17 WORKSPACE</div>
-          <div class="home-title-v15">Development at a glance.</div>
+          <div class="home-title-v15">Track your MFL network.</div>
           <div class="home-copy-v15">Competition tracking is public. Connect a wallet to unlock personal agency and club development views.</div>
           <div class="home-meta-v15">
             <span class="home-pill-v15"><b>{len(mine) if mine else "—"}</b> owned clubs</span>
@@ -744,40 +780,95 @@ if page=="Home":
     """,unsafe_allow_html=True)
 
     club_rows=""
-    player_rows=""
-    if not good.empty:
-        clubs_rank=(good.groupby("club").agg(ovr=("ovr_gain","sum"),attrs=("attr_gain","sum"),players=("player_id","count")).reset_index().sort_values(["ovr","attrs"],ascending=False).head(5))
-        for i,r in enumerate(clubs_rank.to_dict("records"),1):
-            club_rows += f'<div class="home-list-row"><div class="home-list-rank">{i}</div><div><div class="home-list-main">{esc(r["club"])}</div><div class="home-list-sub">{int(r["players"])} players · +{float(r["attrs"]):g} attributes</div></div><div class="home-list-value">+{float(r["ovr"]):g}</div></div>'
-        top_players=good.sort_values(["attr_gain","ovr_gain"],ascending=False).head(5)
-        for i,(_,r) in enumerate(top_players.iterrows(),1):
-            player_rows += f'<div class="home-list-row"><div class="home-list-rank">{i}</div><div><div class="home-list-main">{esc(r["player"])}</div><div class="home-list-sub">{esc(r["club"])}</div></div><div class="home-list-value">+{float(r["attr_gain"] or 0):g}</div></div>'
-    if not club_rows:
-        club_rows='<div style="color:#5a7279;font-size:.64rem;padding:34px 4px;text-align:center">Sync Club Development to populate this panel.</div>'
-    if not player_rows:
-        player_rows='<div style="color:#5a7279;font-size:.64rem;padding:34px 4px;text-align:center">Player development will appear after club sync.</div>'
+    progressor_rows=""
+    highlights_html=""
+    attr_html=""
+    developing_players=0
 
-    if total_start>0:
-        lo=min(total_start,total_current); hi=max(total_start,total_current); rng=max(hi-lo,1)
-        y1=145-(total_start-lo)/rng*100; y2=145-(total_current-lo)/rng*100
-        chart_svg = (
-            f'<svg class="spark-svg-v15" viewBox="0 0 500 155" preserveAspectRatio="none">'
-            f'<defs><linearGradient id="homearea15" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#13e0b4" stop-opacity=".28"/><stop offset="1" stop-color="#13e0b4" stop-opacity="0"/></linearGradient></defs>'
-            f'<path d="M18,{y1:.1f} L482,{y2:.1f} L482,153 L18,153 Z" fill="url(#homearea15)"/>'
-            f'<path d="M18,{y1:.1f} L482,{y2:.1f}" fill="none" stroke="#13e0b4" stroke-width="3"/>'
-            f'<circle cx="18" cy="{y1:.1f}" r="5" fill="#13e0b4"/><circle cx="482" cy="{y2:.1f}" r="5" fill="#13e0b4"/></svg>'
+    if not good.empty:
+        clubs_rank=(good.groupby("club").agg(
+            ovr=("ovr_gain","sum"),attrs=("attr_gain","sum"),players=("player_id","count")
+        ).reset_index().sort_values(["ovr","attrs"],ascending=False).head(5))
+
+        for i,r in enumerate(clubs_rank.to_dict("records"),1):
+            club_rows += (
+                f'<div class="home-list-row"><div class="home-list-rank">{i}</div>'
+                f'<div><div class="home-list-main">{esc(r["club"])}</div>'
+                f'<div class="home-list-sub">{int(r["players"])} players · +{float(r["attrs"]):g} attributes</div></div>'
+                f'<div class="home-list-value">+{float(r["ovr"]):g}</div></div>'
+            )
+
+        # Top Progressors = OVR gain first, then total attribute gain.
+        top_progressors=good.sort_values(["ovr_gain","attr_gain","current_ovr"],ascending=False).head(5)
+        for i,(_,r) in enumerate(top_progressors.iterrows(),1):
+            pid=int(r["player_id"])
+            portrait=f"https://d13e14gtps4iwl.cloudfront.net/players/v2/{pid}/photo.webp"
+            progressor_rows += (
+                f'<div class="progressor-v173">'
+                f'<div class="progress-rank-v173">{i}</div>'
+                f'<div class="progress-photo-v173"><img src="{portrait}" alt="{esc(r["player"])}"></div>'
+                f'<div><div class="progress-name-v173">{esc(r["player"])}</div><div class="progress-club-v173">{esc(r["club"])}</div></div>'
+                f'<div class="progress-gains-v173"><div class="progress-ovr-v173">+{float(r["ovr_gain"] or 0):g} OVR</div>'
+                f'<div class="progress-attr-v173">+{float(r["attr_gain"] or 0):g} attributes</div></div></div>'
+            )
+
+        attr_totals={
+            "PAC":float(good["pac"].fillna(0).sum()),
+            "SHO":float(good["sho"].fillna(0).sum()),
+            "PAS":float(good["pas"].fillna(0).sum()),
+            "DRI":float(good["dri"].fillna(0).sum()),
+            "DEF":float(good["defn"].fillna(0).sum()),
+            "PHY":float(good["phy"].fillna(0).sum()),
+        }
+        max_attr=max(max(attr_totals.values()),1)
+        for lab,val in attr_totals.items():
+            pct=max(3,(val/max_attr)*100) if val>0 else 0
+            attr_html += (
+                f'<div class="attr-row-v173"><div class="attr-name-v173">{lab}</div>'
+                f'<div class="attr-track-v173"><div class="attr-fill-v173" style="width:{pct:.1f}%"></div></div>'
+                f'<div class="attr-val-v173">+{val:g}</div></div>'
+            )
+
+        developing_players=int(((good["ovr_gain"].fillna(0)>0) | (good["attr_gain"].fillna(0)>0)).sum())
+        best_club=clubs_rank.iloc[0] if not clubs_rank.empty else None
+        best_player=top_progressors.iloc[0] if not top_progressors.empty else None
+        best_attr=max(attr_totals,key=attr_totals.get)
+
+        highlights_html = (
+            f'<div class="highlight-grid-v173">'
+            f'<div class="highlight-v173"><div class="highlight-kicker-v173">Most developed club</div>'
+            f'<div class="highlight-main-v173">{esc(best_club["club"]) if best_club is not None else "—"}</div>'
+            f'<div class="highlight-sub-v173">+{float(best_club["ovr"]):g} OVR · +{float(best_club["attrs"]):g} attributes</div></div>'
+            f'<div class="highlight-v173"><div class="highlight-kicker-v173">Top progressor</div>'
+            f'<div class="highlight-main-v173">{esc(best_player["player"]) if best_player is not None else "—"}</div>'
+            f'<div class="highlight-sub-v173">+{float(best_player["ovr_gain"]):g} OVR · +{float(best_player["attr_gain"]):g} attributes</div></div>'
+            f'<div class="highlight-v173"><div class="highlight-kicker-v173">Players developing</div>'
+            f'<div class="highlight-main-v173">{developing_players}</div>'
+            f'<div class="highlight-sub-v173">of {len(good)} synced players</div></div>'
+            f'<div class="highlight-v173"><div class="highlight-kicker-v173">Strongest attribute</div>'
+            f'<div class="highlight-main-v173">{best_attr}</div>'
+            f'<div class="highlight-sub-v173">+{attr_totals.get(best_attr,0):g} total gains</div></div>'
+            f'</div>'
         )
-        chart_meta=f"{total_start:g} → {total_current:g} OVR"
     else:
-        chart_svg='<div style="color:#5a7279;font-size:.64rem;padding:75px 10px;text-align:center">Waiting for Season 17 club progression data.</div>'
-        chart_meta="NO CLUB DATA YET"
+        club_rows='<div style="color:#5a7279;font-size:.64rem;padding:34px 4px;text-align:center">Sync Club Development to populate this panel.</div>'
+        progressor_rows='<div style="color:#5a7279;font-size:.64rem;padding:34px 4px;text-align:center">Top progressors will appear after club sync.</div>'
+        attr_html='<div style="color:#5a7279;font-size:.64rem;padding:34px 4px;text-align:center">Attribute development will appear after club sync.</div>'
+        highlights_html='<div style="color:#5a7279;font-size:.64rem;padding:34px 4px;text-align:center">Network highlights will appear after club sync.</div>'
 
     st.markdown(
         '<div class="home-section-v15"><h3>Network intelligence</h3><span>SEASON 17</span></div>'
-        f'<div class="home-dashboard-v15"><div class="home-panel-v15"><div class="hp-head"><div class="hp-title">OVR progression</div><div class="hp-meta">{esc(chart_meta)}</div></div>'
-        f'<div class="spark-chart-v15"><div class="spark-grid-v15"></div>{chart_svg}<div class="spark-labels-v15"><span>S17 Start</span><span>Current</span></div></div></div>'
+        f'<div class="home-dashboard-v15">'
+        f'<div class="home-panel-v15"><div class="hp-head"><div class="hp-title">Development breakdown</div><div class="hp-meta">WHAT IS IMPROVING</div></div>'
+        f'<div class="dev-breakdown-v173">'
+        f'<div class="dev-metric-v173"><div class="dev-metric-lab-v173">OVR gained</div><div class="dev-metric-val-v173 mint">+{total_ovr:g}</div></div>'
+        f'<div class="dev-metric-v173"><div class="dev-metric-lab-v173">Attribute gains</div><div class="dev-metric-val-v173 violet">+{total_attr:g}</div></div>'
+        f'<div class="dev-metric-v173"><div class="dev-metric-lab-v173">Players developing</div><div class="dev-metric-val-v173 blue">{developing_players}</div></div>'
+        f'<div class="dev-metric-v173"><div class="dev-metric-lab-v173">Players synced</div><div class="dev-metric-val-v173">{synced}</div></div>'
+        f'</div><div class="attr-bars-v173">{attr_html}</div></div>'
         f'<div class="home-panel-v15"><div class="hp-head"><div class="hp-title">Top 5 clubs</div><div class="hp-meta">OVR GAINED</div></div>{club_rows}</div>'
-        f'<div class="home-panel-v15"><div class="hp-head"><div class="hp-title">Top 5 players</div><div class="hp-meta">ATTRIBUTES GAINED</div></div>{player_rows}</div></div>',
+        f'<div class="home-panel-v15"><div class="hp-head"><div class="hp-title">Top 5 Progressors</div><div class="hp-meta">OVR → ATTRIBUTES</div></div>'
+        f'<div class="progressor-list-v173">{progressor_rows}</div></div></div>',
         unsafe_allow_html=True
     )
 
@@ -793,15 +884,9 @@ if page=="Home":
           </div>
         </div>
         <div class="home-panel-v15">
-          <div class="hp-head"><div class="hp-title">Workspace status</div><div class="hp-meta">LIVE</div></div>
+          <div class="hp-head"><div class="hp-title">Network highlights</div><div class="hp-meta">LIVE DEVELOPMENT</div></div>
     """,unsafe_allow_html=True)
-
-    st.markdown(
-        f'<div class="home-list-row"><div class="home-list-rank">1</div><div><div class="home-list-main">Grower or Shower</div><div class="home-list-sub">Competition tracker ready</div></div><div class="home-list-value">LIVE</div></div>'
-        f'<div class="home-list-row"><div class="home-list-rank">2</div><div><div class="home-list-main">Agency Development</div><div class="home-list-sub">{players or 0} players available</div></div><div class="home-list-value">LIVE</div></div>'
-        f'<div class="home-list-row"><div class="home-list-rank">3</div><div><div class="home-list-main">Club Development</div><div class="home-list-sub">{synced} player records cached</div></div><div class="home-list-value">{"READY" if synced else "SYNC"}</div></div></div></div></div>',
-        unsafe_allow_html=True
-    )
+    st.markdown(f'{highlights_html}</div></div>',unsafe_allow_html=True)
 
 # ---------------- GROWER ----------------
 elif page=="Grower or Shower":
@@ -914,7 +999,7 @@ elif page=="Agency Development":
         st.markdown("""<div class="public-connect">
           <div class="public-connect-kicker">FIRST-TIME AGENCY LOAD</div>
           <div class="public-connect-title">Build this wallet's agency</div>
-          <div class="public-connect-copy">This wallet has not been cached yet. Load a small first batch now; you can continue refreshing safely from the Agency page.</div>
+          <div class="public-connect-copy">This wallet has not been cached yet. <strong>The first load can take several minutes</strong> because MFL player history has to be analysed. Keep this page open while it runs. Start with a small batch below, then continue safely from the Agency page.</div>
         </div>""",unsafe_allow_html=True)
         if st.button("Load first 4 players",type="primary",key="public_agency_first_load"):
             bar=st.progress(0,text="Loading agency safely…")
@@ -973,6 +1058,25 @@ elif page=="Agency Development":
             f'<div class="ag-kpi"><div class="ag-kpi-label">Priority list</div><div class="ag-kpi-value violet">{priority}</div></div>'
             f'</div>',
             unsafe_allow_html=True
+        )
+
+        agency_export=df[[
+            "player_id","player_name","age","position","club","source","Acquired","Initial date",
+            "start_ovr","current_ovr","OVR ↑","PAC ↑","SHO ↑","PAS ↑","DRI ↑","DEF ↑","PHY ↑","tag","note"
+        ]].copy()
+        agency_export=agency_export.rename(columns={
+            "player_id":"Player ID","player_name":"Player","age":"Age","position":"Position","club":"Club",
+            "source":"Ownership","Initial date":"Joined Agency","start_ovr":"Start OVR",
+            "current_ovr":"Current OVR","tag":"Tag","note":"Note"
+        })
+        for col in ["Acquired","Joined Agency"]:
+            agency_export[col]=pd.to_datetime(agency_export[col],utc=True,errors="coerce").dt.strftime("%Y-%m-%d %H:%M UTC").fillna("")
+        st.download_button(
+            "↓ Export Agency Development CSV",
+            data=agency_export.to_csv(index=False).encode("utf-8-sig"),
+            file_name=f"mfl_agency_development_{short_wallet(wallet).replace('…','_')}.csv",
+            mime="text/csv",
+            key="agency_export_csv"
         )
 
         movers=df[df["OVR ↑"]>0].sort_values(["OVR ↑","current_ovr"],ascending=False).head(4)
@@ -1174,6 +1278,39 @@ elif page=="Club Development":
             PAC=("pac","sum"),SHO=("sho","sum"),PAS=("pas","sum"),DRI=("dri","sum"),DEF=("defn","sum"),PHY=("phy","sum")
         ).reset_index().sort_values(["OVR","Attributes"],ascending=False))
         clubs=clubs.rename(columns={"club":"Club","OVR":"OVR ↑","Attributes":"ATTR ↑"})
+
+        club_players_export=good[[
+            "player_id","player","club","start_ovr","current_ovr","ovr_gain","attr_gain",
+            "pac","sho","pas","dri","defn","phy","baseline_at","last_progression","checked_at"
+        ]].copy()
+        club_players_export=club_players_export.rename(columns={
+            "player_id":"Player ID","player":"Player","club":"Club","start_ovr":"S17 Start OVR",
+            "current_ovr":"Current OVR","ovr_gain":"OVR ↑","attr_gain":"ATTR ↑","pac":"PAC ↑",
+            "sho":"SHO ↑","pas":"PAS ↑","dri":"DRI ↑","defn":"DEF ↑","phy":"PHY ↑",
+            "baseline_at":"Baseline Date","last_progression":"Last Progression","checked_at":"Last Checked"
+        })
+        for col in ["Baseline Date","Last Progression","Last Checked"]:
+            club_players_export[col]=pd.to_datetime(club_players_export[col],utc=True,errors="coerce").dt.strftime("%Y-%m-%d %H:%M UTC").fillna("")
+
+        ex1,ex2,_=st.columns([1.3,1.5,4])
+        with ex1:
+            st.download_button(
+                "↓ Export Club Summary CSV",
+                data=clubs.to_csv(index=False).encode("utf-8-sig"),
+                file_name=f"mfl_club_summary_{short_wallet(wallet).replace('…','_')}.csv",
+                mime="text/csv",
+                use_container_width=True,
+                key="club_summary_export_csv"
+            )
+        with ex2:
+            st.download_button(
+                "↓ Export All Club Players CSV",
+                data=club_players_export.to_csv(index=False).encode("utf-8-sig"),
+                file_name=f"mfl_club_development_{short_wallet(wallet).replace('…','_')}.csv",
+                mime="text/csv",
+                use_container_width=True,
+                key="club_players_export_csv"
+            )
 
         st.markdown('<div class="section-head2"><h3>Top developing clubs</h3><span class="small-note2">SEASON 17 NETWORK LEADERS</span></div>',unsafe_allow_html=True)
         top=clubs.head(3)

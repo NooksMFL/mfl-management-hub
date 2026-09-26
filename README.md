@@ -1,11 +1,19 @@
-# MFL Management Hub — Public Fix v17.1
+# MFL Management Hub — Public Polish v17.3
 
-Fixes:
-- Club Development KeyError in Top developing clubs (`ATTR ↑` column mismatch).
-- Public Agency first load is reduced to 4 players per batch.
-- Public Agency now shows per-player API errors instead of looking like a hard failure.
-- Agency HTTP calls retry timeouts / connection errors / transient 5xx responses.
-- Agency current refresh reduced to 8 players per batch.
-- Grower fresh-deployment empty state now clearly tells users to run Refresh Competition.
+Home
+- "Track your MFL network" is now inside the Season 17 workspace hero.
+- Removed the unhelpful two-point OVR progression chart.
+- Added Development Breakdown with OVR, attributes, developing players and PAC/SHO/PAS/DRI/DEF/PHY totals.
+- "Top 5 Players" is now "Top 5 Progressors" with real MFL player portraits, OVR gain and attribute gain.
+- Replaced Workspace Status with useful Network Highlights.
 
-Privacy protections from v17 remain unchanged.
+Wallet UX
+- Sidebar warns clearly that first-time wallet analysis can take several minutes.
+- First-time Agency screen repeats the warning and tells the user to keep the page open.
+
+CSV exports
+- Agency Development CSV.
+- Club Summary CSV.
+- All Club Players CSV.
+
+All v17.1 privacy and reliability fixes remain included.
