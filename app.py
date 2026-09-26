@@ -1,7 +1,7 @@
 
 import os
 import base64
-import html
+import html as html_lib
 import math
 import io
 import json
@@ -466,8 +466,8 @@ st.markdown(r"""
 .compare-player-v18{font-size:.84rem;color:#eef5f4;font-weight:900}.compare-meta-v18{font-size:.58rem;color:#647d83;margin-top:3px}.compare-big-v18{font-size:1.55rem;color:#13e0b4;font-weight:930;margin-top:10px}
 .compare-stat-v18{display:flex;justify-content:space-between;font-size:.61rem;color:#70878d;border-top:1px solid #102b33;padding-top:6px;margin-top:6px}.compare-stat-v18 b{color:#dce6e5}
 .analysis-grid-v18{display:grid;grid-template-columns:1fr 1fr;gap:10px}.analysis-card-v18{background:#07161d;border:1px solid #173843;border-radius:11px;padding:14px}
-.analysis-title-v18{font-size:.77rem;color:#e8f0ef;font-weight:850;margin-bottom:10px}
-.bar-row-v18{display:grid;grid-template-columns:90px 1fr 45px;gap:8px;align-items:center;margin:8px 0}.bar-lab-v18{font-size:.59rem;color:#758b90}.bar-track-v18{height:7px;background:#0b252d;border-radius:99px;overflow:hidden}.bar-fill-v18{height:100%;background:linear-gradient(90deg,#13e0b4,#38afff);border-radius:99px}.bar-val-v18{font-size:.60rem;color:#d5e1df;text-align:right}
+.analysis-title-v18{font-size:.90rem;color:#e8f0ef;font-weight:850;margin-bottom:10px}
+.bar-row-v18{display:grid;grid-template-columns:90px 1fr 45px;gap:8px;align-items:center;margin:8px 0}.bar-lab-v18{font-size:.68rem;color:#758b90}.bar-track-v18{height:7px;background:#0b252d;border-radius:99px;overflow:hidden}.bar-fill-v18{height:100%;background:linear-gradient(90deg,#13e0b4,#38afff);border-radius:99px}.bar-val-v18{font-size:.68rem;color:#d5e1df;text-align:right}
 .milestone-grid-v18{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.milestone-v18{background:#07161d;border:1px solid #173843;border-radius:11px;padding:12px}.milestone-icon-v18{font-size:1.2rem}.milestone-title-v18{font-size:.72rem;color:#eef5f4;font-weight:850;margin-top:7px}.milestone-sub-v18{font-size:.57rem;color:#647d83;margin-top:3px}
 .fresh-v18{display:inline-flex;align-items:center;gap:6px;border:1px solid #1c4650;border-radius:999px;padding:5px 8px;font-size:.56rem;color:#91a5a9;background:#081a21}.fresh-v18 i{width:6px;height:6px;border-radius:50%;background:#13e0b4}
 .sync-grid-v18{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.sync-card-v18{background:#07161d;border:1px solid #173843;border-radius:11px;padding:13px}.sync-name-v18{font-size:.76rem;color:#edf5f4;font-weight:850}.sync-status-v18{font-size:.58rem;color:#657e84;margin-top:4px;line-height:1.45}
@@ -478,7 +478,60 @@ st.markdown(r"""
 </style>
 """,unsafe_allow_html=True)
 
-def esc(x): return html.escape(str(x))
+
+st.markdown(r"""
+<style>
+/* ===== v18.2 UI POLISH ===== */
+
+/* Stop the old home feature-card .feature-copy absolute positioning from affecting pages */
+.suite-hero{background:linear-gradient(115deg,#07151c,#0a1f29);border:1px solid #173944;border-radius:14px;padding:24px 25px;margin-bottom:15px;position:relative;overflow:hidden}
+.suite-kicker{font-size:.70rem;color:#13e0b4;letter-spacing:.15em;font-weight:900}
+.suite-title{font-size:2.05rem;color:#f4faf8;font-weight:930;letter-spacing:-.05em;margin-top:9px;line-height:1.05}
+.suite-copy{font-size:.83rem;color:#789096;line-height:1.55;margin-top:10px;max-width:850px;position:static!important}
+.suite-hero:after{content:"";position:absolute;right:-55px;top:-80px;width:270px;height:270px;border-radius:50%;border:40px solid rgba(19,224,180,.025)}
+
+/* Milestones */
+.milestone-list-v182{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.milestone-card-v182{display:grid;grid-template-columns:72px 1fr auto;gap:13px;align-items:center;background:#07161d;border:1px solid #173843;border-radius:12px;padding:11px 13px;min-height:94px}
+.milestone-photo-v182{width:68px;height:68px;border-radius:10px;overflow:hidden;background:#0a2028;border:1px solid #1b414b}
+.milestone-photo-v182 img{width:100%;height:100%;object-fit:contain;object-position:center top}
+.milestone-type-v182{font-size:.58rem;color:#13e0b4;letter-spacing:.09em;text-transform:uppercase;font-weight:900}
+.milestone-name-v182{font-size:.94rem;color:#f0f6f5;font-weight:900;margin-top:4px}
+.milestone-detail-v182{font-size:.68rem;color:#789095;margin-top:4px;line-height:1.4}
+.milestone-badge-v182{font-size:1.05rem;color:#13e0b4;font-weight:950;background:#0b2926;border:1px solid #1b5b4e;border-radius:9px;padding:8px 10px;min-width:52px;text-align:center}
+
+/* Comparison */
+.compare-intro-v182{background:#07161d;border:1px solid #173843;border-radius:11px;padding:13px 15px;margin-bottom:11px}
+.compare-intro-v182 b{color:#eaf2f1;font-size:.80rem}.compare-intro-v182 span{display:block;color:#6f878d;font-size:.68rem;margin-top:4px;line-height:1.45}
+.compare-grid-v182{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.compare-player-card-v182{background:#07161d;border:1px solid #173843;border-radius:12px;overflow:hidden}
+.compare-photo-zone-v182{height:150px;position:relative;overflow:hidden;background:radial-gradient(circle at 70% 25%,rgba(19,224,180,.15),transparent 45%),linear-gradient(145deg,#0a222c,#07151b)}
+.compare-photo-v182{position:absolute;right:8px;top:5px;height:150px;width:150px;object-fit:contain;object-position:center top}
+.compare-rank-copy-v182{position:absolute;left:14px;top:14px;z-index:2;max-width:55%}
+.compare-player-name-v182{font-size:1.02rem;color:#f0f6f5;font-weight:900;line-height:1.05}
+.compare-player-meta-v182{font-size:.62rem;color:#6d858b;margin-top:4px}
+.compare-body-v182{padding:12px 13px 13px}
+.compare-main-v182{display:flex;align-items:end;justify-content:space-between;gap:8px}
+.compare-ovr-v182{font-size:1.85rem;color:#f3f8f7;font-weight:950;letter-spacing:-.05em}
+.compare-gain-v182{font-size:.82rem;color:#13e0b4;font-weight:900}
+.compare-stat-v182{display:flex;justify-content:space-between;gap:8px;border-top:1px solid #102b33;padding-top:7px;margin-top:7px;font-size:.65rem;color:#6e878d}
+.compare-stat-v182 b{color:#dce6e5}
+.compare-attrs-v182{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:9px}
+.compare-attr-v182{background:#0a2028;border:1px solid #173b45;border-radius:7px;padding:6px;text-align:center}
+.compare-attr-v182 span{display:block;font-size:.50rem;color:#58737a}.compare-attr-v182 b{display:block;font-size:.72rem;color:#13e0b4;margin-top:2px}
+.compare-summary-v182{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}
+.compare-summary-card-v182{background:#07161d;border:1px solid #173843;border-radius:10px;padding:12px}
+.compare-summary-lab-v182{font-size:.55rem;color:#5e787e;text-transform:uppercase;letter-spacing:.08em}
+.compare-summary-val-v182{font-size:1.0rem;color:#eef5f4;font-weight:900;margin-top:6px}
+
+/* tabs slightly larger */
+[data-baseweb="tab"] p{font-size:.76rem!important}
+@media(max-width:1100px){.compare-grid-v182{grid-template-columns:1fr 1fr}.milestone-list-v182{grid-template-columns:1fr}}
+@media(max-width:700px){.compare-grid-v182,.compare-summary-v182{grid-template-columns:1fr}}
+</style>
+""",unsafe_allow_html=True)
+
+def esc(x): return html_lib.escape(str(x))
 
 def page_head(kicker,title,sub):
     st.markdown(
@@ -820,7 +873,7 @@ with st.sidebar:
       <div class="season-top"><span>Season 17</span><span>PUBLIC</span></div>
       <div class="connected"><i></i><span>MFL API ready</span></div>
     </div>
-    <div class="build">FEATURE SUITE · v18.2</div>""",unsafe_allow_html=True)
+    <div class="build">UI POLISH · v18.2.2</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 
@@ -1130,11 +1183,23 @@ elif page=="Agency Development":
       LEFT JOIN activity a ON a.wallet=o.wallet AND a.player_id=o.player_id
       WHERE o.wallet=?""",(wallet.lower(),)).fetchall()
 
+    # If Club Development or Sync Centre has already loaded the wallet roster,
+    # reuse it immediately instead of asking the user to load the same wallet again.
+    if not rows and shared.roster_rows(wallet):
+        agency.seed_from_shared(wallet)
+        rows=c.execute("""SELECT o.*,COALESCE(t.tag,'NORMAL') tag,COALESCE(t.note,'') note,
+          m.age,m.position,m.club,a.last_event_at,a.match_events,a.training_events,a.total_events
+          FROM ownership_v65 o
+          LEFT JOIN tags t ON t.wallet=o.wallet AND t.player_id=o.player_id
+          LEFT JOIN player_meta m ON m.wallet=o.wallet AND m.player_id=o.player_id
+          LEFT JOIN activity a ON a.wallet=o.wallet AND a.player_id=o.player_id
+          WHERE o.wallet=?""",(wallet.lower(),)).fetchall()
+
     if not rows:
         st.markdown("""<div class="public-connect">
           <div class="public-connect-kicker">FIRST-TIME AGENCY LOAD</div>
-          <div class="public-connect-title">Build this wallet's agency</div>
-          <div class="public-connect-copy">This wallet has not been cached yet. <strong>The first load can take several minutes</strong> because MFL player history has to be analysed. Keep this page open while it runs. Start with a small batch below, then continue safely from the Agency page.</div>
+          <div class="public-connect-title">Load this wallet once</div>
+          <div class="public-connect-copy">No shared wallet roster exists yet. Load the first small batch here, or load the wallet from Club Development / Sync Centre. Once the shared roster exists, Agency opens immediately without loading the wallet list again.</div>
         </div>""",unsafe_allow_html=True)
         if st.button("Load first 4 players",type="primary",key="public_agency_first_load"):
             bar=st.progress(0,text="Loading agency safely…")
@@ -1173,6 +1238,10 @@ elif page=="Agency Development":
         originals=int((df.source=="NEW MINT / ORIGINAL").sum())
         priority=int((df.tag=="PRIORITY").sum())
         total_ovr=float(df["OVR ↑"].fillna(0).clip(lower=0).sum())
+
+        pending_baselines=int((df["confidence"].fillna("").str.upper()=="BASELINE PENDING").sum())
+        if pending_baselines:
+            st.info(f"{pending_baselines} player(s) are already available from the shared wallet cache. Ownership baselines are still pending for those players — analyse them in small batches below; you do not need to reload the wallet roster.")
 
         st.markdown(
             f'<div class="agency-hero"><div class="ah-kicker">AGENCY · OWNERSHIP DEVELOPMENT</div>'
@@ -1325,15 +1394,25 @@ elif page=="Agency Development":
             )
 
         with st.expander("Refresh player data"):
-            st.caption("Refreshes 8 players at a time to reduce MFL rate-limit pressure on the public app.")
-            if st.button("Refresh next 8 players",key="agency_refresh20"):
+            if pending_baselines:
+                st.caption("Analyses ownership/progression history for 8 cached players at a time. The wallet roster is already loaded.")
+                agency_button_label="Analyse next 8 baselines"
+            else:
+                st.caption("Refreshes 8 players at a time to reduce MFL rate-limit pressure on the public app.")
+                agency_button_label="Refresh next 8 players"
+            if st.button(agency_button_label,key="agency_refresh20"):
                 bar=st.progress(0,text="Refreshing players…")
                 def prog(n,total):
                     bar.progress(n/max(total,1),text=f"{n}/{min(total,8)}")
                 try:
-                    done,total,errs=agency.refresh_current_v21(wallet,prog,8)
-                    bar.empty()
-                    st.success(f"Updated {done} players." if not errs else f"Updated {done}; {len(errs)} issue(s).")
+                    if pending_baselines:
+                        total,done,errs,analysed,planned=agency.sync(wallet,prog,batch_size=8)
+                        bar.empty()
+                        st.success(f"Analysed {done} ownership baseline(s)." if not errs else f"Analysed {done}; {len(errs)} issue(s).")
+                    else:
+                        done,total,errs=agency.refresh_current_v21(wallet,prog,8)
+                        bar.empty()
+                        st.success(f"Updated {done} players." if not errs else f"Updated {done}; {len(errs)} issue(s).")
                 except Exception as e:
                     bar.empty()
                     st.error("MFL could not refresh this batch.")
@@ -1517,7 +1596,7 @@ elif page=="Watchlist":
     if not wallet:
         st.markdown('<div class="public-connect"><div class="public-connect-kicker">WATCHLIST</div><div class="public-connect-title">Connect a wallet first</div><div class="public-connect-copy">Your watchlist is stored against your wallet.</div></div>',unsafe_allow_html=True)
         st.stop()
-    st.markdown('<div class="feature-page-hero"><div class="feature-kicker">PLAYER WATCHLIST</div><div class="feature-title">Keep your key players in one place.</div><div class="feature-copy">Star players from your loaded Agency or Club data, then monitor their current OVR, total development and latest progression.</div></div>',unsafe_allow_html=True)
+    st.markdown('<div class="suite-hero"><div class="suite-kicker">PLAYER WATCHLIST</div><div class="suite-title">Keep your key players in one place.</div><div class="suite-copy">Star players from your loaded Agency or Club data, then monitor their current OVR, total development and latest progression.</div></div>',unsafe_allow_html=True)
     allp=combined_players(wallet)
     watched_ids={int(x["player_id"]) for x in shared.watched(wallet)}
     if allp.empty:
@@ -1549,42 +1628,105 @@ elif page=="Watchlist":
 elif page=="Compare":
     if not wallet:
         st.warning("Connect a wallet first.");st.stop()
-    st.markdown('<div class="feature-page-hero"><div class="feature-kicker">COMPARISON LAB</div><div class="feature-title">Player vs player. Club vs club.</div><div class="feature-copy">Compare development side-by-side without leaving the hub.</div></div>',unsafe_allow_html=True)
+
+    st.markdown('<div class="suite-hero"><div class="suite-kicker">COMPARISON LAB</div><div class="suite-title">Compare development side by side.</div><div class="suite-copy">This is a comparison tool — choose 2 to 4 players or clubs and the hub puts their Season 17 development next to each other so you can see who is progressing fastest.</div></div>',unsafe_allow_html=True)
+
     tabs=st.tabs(["Player comparison","Club comparison"])
+
     with tabs[0]:
+        st.markdown('<div class="compare-intro-v182"><b>Player comparison</b><span>Select 2–4 players. You will see their portrait, current OVR, OVR gain, total attribute gain and the six individual attribute changes.</span></div>',unsafe_allow_html=True)
         allp=combined_players(wallet)
-        if allp.empty:st.info("Load Agency or Club Development first.")
+
+        if allp.empty:
+            st.info("Load Agency or Club Development first.")
         else:
             labels={f'{r["player"]} · {int(r["player_id"])}':int(r["player_id"]) for _,r in allp.sort_values("player").iterrows()}
             keys=list(labels)
             defaults=keys[:min(2,len(keys))]
-            chosen=st.multiselect("Choose 2–4 players",keys,default=defaults,max_selections=4)
+            chosen=st.multiselect("Choose 2–4 players",keys,default=defaults,max_selections=4,key="compare_players")
             sel=allp[allp.player_id.isin([labels[x] for x in chosen])]
+
             cards=""
             for _,r in sel.iterrows():
-                cards+=f'<div class="compare-card-v18"><div class="compare-player-v18">{esc(r.player)}</div><div class="compare-meta-v18">{esc(r.get("club") or "No club")} · {esc(r.get("position") or "—")}</div><div class="compare-big-v18">+{float(r.get("ovr_gain") or 0):g} OVR</div><div class="compare-stat-v18"><span>Current OVR</span><b>{esc(r.get("current_ovr") or "—")}</b></div><div class="compare-stat-v18"><span>Attributes</span><b>+{float(r.get("attr_gain") or 0):g}</b></div><div class="compare-stat-v18"><span>PAC / SHO / PAS</span><b>+{float(r.get("pac") or 0):g} / +{float(r.get("sho") or 0):g} / +{float(r.get("pas") or 0):g}</b></div><div class="compare-stat-v18"><span>DRI / DEF / PHY</span><b>+{float(r.get("dri") or 0):g} / +{float(r.get("defn") or 0):g} / +{float(r.get("phy") or 0):g}</b></div></div>'
-            st.markdown(f'<div class="compare-grid-v18">{cards}</div>',unsafe_allow_html=True)
-            if len(chosen)>=1:
-                query="&".join(f"player{i+1}={labels[x]}" for i,x in enumerate(chosen))
-                st.code(f"?page=Compare&{query}",language=None)
+                pid=int(r.player_id)
+                cards+=(
+                    f'<div class="compare-player-card-v182">'
+                    f'<div class="compare-photo-zone-v182"><img class="compare-photo-v182" src="{portrait_url(pid)}">'
+                    f'<div class="compare-rank-copy-v182"><div class="compare-player-name-v182">{esc(r.player)}</div>'
+                    f'<div class="compare-player-meta-v182">{esc(r.get("club") or "No club")} · {esc(r.get("position") or "—")}</div></div></div>'
+                    f'<div class="compare-body-v182"><div class="compare-main-v182">'
+                    f'<div><div class="compare-ovr-v182">{float(r.get("current_ovr") or 0):g}</div><div class="compare-player-meta-v182">CURRENT OVR</div></div>'
+                    f'<div class="compare-gain-v182">+{float(r.get("ovr_gain") or 0):g} OVR</div></div>'
+                    f'<div class="compare-stat-v182"><span>Total attributes</span><b>+{float(r.get("attr_gain") or 0):g}</b></div>'
+                    f'<div class="compare-stat-v182"><span>Latest progression</span><b>{esc(age_text(r.get("last_progression")))}</b></div>'
+                    f'<div class="compare-attrs-v182">'
+                    f'<div class="compare-attr-v182"><span>PAC</span><b>+{float(r.get("pac") or 0):g}</b></div>'
+                    f'<div class="compare-attr-v182"><span>SHO</span><b>+{float(r.get("sho") or 0):g}</b></div>'
+                    f'<div class="compare-attr-v182"><span>PAS</span><b>+{float(r.get("pas") or 0):g}</b></div>'
+                    f'<div class="compare-attr-v182"><span>DRI</span><b>+{float(r.get("dri") or 0):g}</b></div>'
+                    f'<div class="compare-attr-v182"><span>DEF</span><b>+{float(r.get("defn") or 0):g}</b></div>'
+                    f'<div class="compare-attr-v182"><span>PHY</span><b>+{float(r.get("phy") or 0):g}</b></div>'
+                    f'</div></div></div>'
+                )
+            st.markdown(f'<div class="compare-grid-v182">{cards}</div>',unsafe_allow_html=True)
+
+            if len(sel)>=2:
+                best_ovr=sel.sort_values(["ovr_gain","attr_gain"],ascending=False).iloc[0]
+                best_attr=sel.sort_values(["attr_gain","ovr_gain"],ascending=False).iloc[0]
+                highest=sel.sort_values("current_ovr",ascending=False).iloc[0]
+                st.markdown(
+                    f'<div class="compare-summary-v182">'
+                    f'<div class="compare-summary-card-v182"><div class="compare-summary-lab-v182">Most OVR growth</div><div class="compare-summary-val-v182">{esc(best_ovr.player)} · +{float(best_ovr.ovr_gain or 0):g}</div></div>'
+                    f'<div class="compare-summary-card-v182"><div class="compare-summary-lab-v182">Most attribute growth</div><div class="compare-summary-val-v182">{esc(best_attr.player)} · +{float(best_attr.attr_gain or 0):g}</div></div>'
+                    f'<div class="compare-summary-card-v182"><div class="compare-summary-lab-v182">Highest current OVR</div><div class="compare-summary-val-v182">{esc(highest.player)} · {float(highest.current_ovr or 0):g}</div></div>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
+
     with tabs[1]:
+        st.markdown('<div class="compare-intro-v182"><b>Club comparison</b><span>Select 2–4 owned clubs and compare total OVR gained, total attributes gained and where those gains are coming from.</span></div>',unsafe_allow_html=True)
         cf=club.cached(wallet)
-        if cf.empty:st.info("Sync Club Development first.")
+        if cf.empty:
+            st.info("Sync Club Development first.")
         else:
             cf=cf[cf["error"].isna()] if "error" in cf.columns else cf
-            sums=cf.groupby("club").agg(Players=("player_id","count"),OVR=("ovr_gain","sum"),ATTR=("attr_gain","sum"),PAC=("pac","sum"),SHO=("sho","sum"),PAS=("pas","sum"),DRI=("dri","sum"),DEF=("defn","sum"),PHY=("phy","sum")).reset_index()
+            sums=cf.groupby("club").agg(
+                Players=("player_id","count"),OVR=("ovr_gain","sum"),ATTR=("attr_gain","sum"),
+                PAC=("pac","sum"),SHO=("sho","sum"),PAS=("pas","sum"),DRI=("dri","sum"),DEF=("defn","sum"),PHY=("phy","sum")
+            ).reset_index()
             clubs=sums.club.tolist()
-            chosen=st.multiselect("Choose 2–4 clubs",clubs,default=clubs[:min(2,len(clubs))],max_selections=4)
+            chosen=st.multiselect("Choose 2–4 clubs",clubs,default=clubs[:min(2,len(clubs))],max_selections=4,key="compare_clubs")
+
             cards=""
-            for _,r in sums[sums.club.isin(chosen)].iterrows():
-                cards+=f'<div class="compare-card-v18"><div class="compare-player-v18">{esc(r.club)}</div><div class="compare-meta-v18">{int(r.Players)} players</div><div class="compare-big-v18">+{float(r.OVR):g} OVR</div><div class="compare-stat-v18"><span>Attributes</span><b>+{float(r.ATTR):g}</b></div><div class="compare-stat-v18"><span>PAC / SHO / PAS</span><b>+{r.PAC:g} / +{r.SHO:g} / +{r.PAS:g}</b></div><div class="compare-stat-v18"><span>DRI / DEF / PHY</span><b>+{r.DRI:g} / +{r.DEF:g} / +{r.PHY:g}</b></div></div>'
+            selected=sums[sums.club.isin(chosen)]
+            for _,r in selected.iterrows():
+                cards+=(
+                    f'<div class="compare-card-v18"><div class="compare-player-v18">{esc(r.club)}</div>'
+                    f'<div class="compare-meta-v18">{int(r.Players)} players</div>'
+                    f'<div class="compare-big-v18">+{float(r.OVR):g} OVR</div>'
+                    f'<div class="compare-stat-v18"><span>Total attributes</span><b>+{float(r.ATTR):g}</b></div>'
+                    f'<div class="compare-stat-v18"><span>Avg attributes / player</span><b>{float(r.ATTR)/max(int(r.Players),1):.2f}</b></div>'
+                    f'<div class="compare-stat-v18"><span>PAC / SHO / PAS</span><b>+{r.PAC:g} / +{r.SHO:g} / +{r.PAS:g}</b></div>'
+                    f'<div class="compare-stat-v18"><span>DRI / DEF / PHY</span><b>+{r.DRI:g} / +{r.DEF:g} / +{r.PHY:g}</b></div></div>'
+                )
             st.markdown(f'<div class="compare-grid-v18">{cards}</div>',unsafe_allow_html=True)
-            st.code("?page=Compare&"+";".join(chosen),language=None)
+
+            if len(selected)>=2:
+                best=selected.sort_values(["OVR","ATTR"],ascending=False).iloc[0]
+                efficient=selected.assign(Rate=selected.ATTR/selected.Players.clip(lower=1)).sort_values("Rate",ascending=False).iloc[0]
+                st.markdown(
+                    f'<div class="compare-summary-v182">'
+                    f'<div class="compare-summary-card-v182"><div class="compare-summary-lab-v182">Most OVR gained</div><div class="compare-summary-val-v182">{esc(best.club)} · +{float(best.OVR):g}</div></div>'
+                    f'<div class="compare-summary-card-v182"><div class="compare-summary-lab-v182">Best attributes / player</div><div class="compare-summary-val-v182">{esc(efficient.club)} · {float(efficient.Rate):.2f}</div></div>'
+                    f'<div class="compare-summary-card-v182"><div class="compare-summary-lab-v182">Clubs compared</div><div class="compare-summary-val-v182">{len(selected)}</div></div>'
+                    f'</div>',
+                    unsafe_allow_html=True
+                )
 
 elif page=="Insights":
     if not wallet:
         st.warning("Connect a wallet first.");st.stop()
-    st.markdown('<div class="feature-page-hero"><div class="feature-kicker">DEVELOPMENT INTELLIGENCE</div><div class="feature-title">See the patterns behind the gains.</div><div class="feature-copy">Recent movers, age/position trends, milestones, season snapshot and on-demand market history.</div></div>',unsafe_allow_html=True)
+    st.markdown('<div class="suite-hero"><div class="suite-kicker">DEVELOPMENT INTELLIGENCE</div><div class="suite-title">See the patterns behind the gains.</div><div class="suite-copy">Recent movers, age and position trends, player milestones, your Season 17 snapshot and on-demand market history.</div></div>',unsafe_allow_html=True)
     af=agency_frame(wallet); cf=club.cached(wallet)
     if not cf.empty:
         cf=cf[cf["error"].isna()] if "error" in cf.columns else cf
@@ -1615,8 +1757,10 @@ elif page=="Insights":
     with tabs[1]:
         if af.empty:st.info("Load Agency Development to unlock age and position analysis.")
         else:
-            af["age_band"]=pd.cut(pd.to_numeric(af["age"],errors="coerce"),bins=[0,21,25,29,99],labels=["U21","22–25","26–29","30+"])
-            af["pos_group"]=af["position"].fillna("Unknown").str.split(" / ").str[0]
+            ages=pd.to_numeric(af["age"],errors="coerce")
+            af["age_band"]=pd.cut(ages,bins=[0,21,25,29,99],labels=["U21","22–25","26–29","30+"])
+            af["age_band"]=af["age_band"].astype(object).where(ages.notna(),"Unknown")
+            af["pos_group"]=af["position"].fillna("Unknown").replace("","Unknown").astype(str).str.split(" / ").str[0]
             p=af.groupby("pos_group").agg(Players=("player_id","count"),OVR=("OVR ↑","sum")).reset_index().sort_values("OVR",ascending=False)
             g=af.groupby("age_band",observed=False).agg(Players=("player_id","count"),OVR=("OVR ↑","sum")).reset_index()
             maxp=max(float(p.OVR.max()) if len(p) else 0,1); maxg=max(float(g.OVR.max()) if len(g) else 0,1)
@@ -1624,15 +1768,47 @@ elif page=="Insights":
             gh="".join(f'<div class="bar-row-v18"><div class="bar-lab-v18">{esc(r.age_band)}</div><div class="bar-track-v18"><div class="bar-fill-v18" style="width:{max(2,float(r.OVR)/maxg*100):.1f}%"></div></div><div class="bar-val-v18">+{float(r.OVR):g}</div></div>' for _,r in g.iterrows())
             st.markdown(f'<div class="analysis-grid-v18"><div class="analysis-card-v18"><div class="analysis-title-v18">OVR gain by position</div>{ph}</div><div class="analysis-card-v18"><div class="analysis-title-v18">OVR gain by age band</div>{gh}</div></div>',unsafe_allow_html=True)
     with tabs[2]:
-        cards=[]
+        milestone_items=[]
         if not cf.empty:
-            for _,r in cf.iterrows():
-                if float(r.ovr_gain or 0)>=1:cards.append(("⬆","OVR improver",f"{r.player} has gained +{r.ovr_gain:g} OVR"))
-                if float(r.attr_gain or 0)>=5:cards.append(("✦","5+ attributes",f"{r.player} has gained +{r.attr_gain:g} attributes"))
-                if float(r.current_ovr or 0)>=60 and float(r.start_ovr or 0)<60:cards.append(("60","OVR 60 reached",f"{r.player} reached {r.current_ovr:g} OVR"))
-            cards=cards[:18]
-        html="".join(f'<div class="milestone-v18"><div class="milestone-icon-v18">{i}</div><div class="milestone-title-v18">{esc(t)}</div><div class="milestone-sub-v18">{esc(x)}</div></div>' for i,t,x in cards)
-        st.markdown(f'<div class="milestone-grid-v18">{html or "<div class=empty><b>No milestones yet</b>Development milestones will appear here.</div>"}</div>',unsafe_allow_html=True)
+            for _,r in cf.sort_values(["ovr_gain","attr_gain"],ascending=False).iterrows():
+                pid=int(r.player_id)
+                if float(r.ovr_gain or 0)>=1:
+                    milestone_items.append({
+                        "pid":pid,"player":r.player,"club":r.club,
+                        "type":"OVR improver","detail":f"Has gained +{float(r.ovr_gain):g} OVR this season",
+                        "badge":f"+{float(r.ovr_gain):g}"
+                    })
+                if float(r.attr_gain or 0)>=5:
+                    milestone_items.append({
+                        "pid":pid,"player":r.player,"club":r.club,
+                        "type":"5+ attribute gain","detail":f"Has gained +{float(r.attr_gain):g} total attributes",
+                        "badge":f"+{float(r.attr_gain):g}"
+                    })
+                if float(r.current_ovr or 0)>=60 and float(r.start_ovr or 0)<60:
+                    milestone_items.append({
+                        "pid":pid,"player":r.player,"club":r.club,
+                        "type":"OVR 60 reached","detail":f"Moved from {float(r.start_ovr):g} to {float(r.current_ovr):g} OVR",
+                        "badge":"60"
+                    })
+
+        # Keep it useful rather than flooding the page with repetitive boxes.
+        milestone_items=milestone_items[:16]
+
+        st.markdown('<div class="section-head2"><h3>Season milestones</h3><span class="small-note2">PLAYER ACHIEVEMENTS</span></div>',unsafe_allow_html=True)
+        if not milestone_items:
+            st.markdown('<div class="empty"><b>No milestones yet</b>OVR gains, 5+ attribute gains and OVR thresholds will appear here.</div>',unsafe_allow_html=True)
+        else:
+            cards=""
+            for m in milestone_items:
+                cards+=(
+                    f'<div class="milestone-card-v182">'
+                    f'<div class="milestone-photo-v182"><img src="{portrait_url(m["pid"])}" alt="{esc(m["player"])}"></div>'
+                    f'<div><div class="milestone-type-v182">{esc(m["type"])}</div>'
+                    f'<div class="milestone-name-v182">{esc(m["player"])}</div>'
+                    f'<div class="milestone-detail-v182">{esc(m["club"] or "No club")} · {esc(m["detail"])}</div></div>'
+                    f'<div class="milestone-badge-v182">{esc(m["badge"])}</div></div>'
+                )
+            st.markdown(f'<div class="milestone-list-v182">{cards}</div>',unsafe_allow_html=True)
     with tabs[3]:
         if cf.empty:st.info("Sync Club Development first.")
         else:
@@ -1645,7 +1821,12 @@ elif page=="Insights":
             st.download_button("↓ Export Season 17 snapshot",snap.to_csv(index=False).encode("utf-8-sig"),file_name="mfl_season17_snapshot.csv",mime="text/csv")
     with tabs[4]:
         allp=combined_players(wallet)
-        if allp.empty:st.info("Load some player data first.")
+        if allp.empty and shared.roster_rows(wallet):
+            allp=pd.DataFrame([{
+                "player_id":r["player_id"],"player":r["player_name"],"club":r.get("club"),
+                "current_ovr":r.get("overall"),"ovr_gain":0,"attr_gain":0
+            } for r in shared.roster_rows(wallet)])
+        if allp.empty:st.info("Load the shared wallet roster first.")
         else:
             choices={f'{r["player"]} · {int(r["player_id"])}':int(r["player_id"]) for _,r in allp.sort_values("player").iterrows()}
             choice=st.selectbox("Player",list(choices),key="market_player");pid=choices[choice]
@@ -1680,7 +1861,7 @@ elif page=="Insights":
 elif page=="Sync Centre":
     if not wallet:
         st.warning("Connect a wallet first.");st.stop()
-    st.markdown('<div class="feature-page-hero"><div class="feature-kicker">DATA & SYNC CENTRE</div><div class="feature-title">Refresh once. Reuse everywhere.</div><div class="feature-copy">The shared wallet roster is now reused by Agency and Club Development, so the same wallet list is not fetched from MFL twice.</div></div>',unsafe_allow_html=True)
+    st.markdown('<div class="suite-hero"><div class="suite-kicker">DATA & SYNC CENTRE</div><div class="suite-title">Refresh once. Reuse everywhere.</div><div class="suite-copy">The shared wallet roster is reused by Agency and Club Development, so the same wallet list is not fetched from MFL twice.</div></div>',unsafe_allow_html=True)
     fresh=shared.freshness(wallet)
     af=agency_frame(wallet);cf=club.cached(wallet)
     gc=grower.db();grower.init_db(gc);grows=grower.leaderboard(gc);gc.close()

@@ -1,29 +1,16 @@
-# MFL Management Hub — Feature Suite v18
+# MFL Management Hub — v18.2 UI Polish
 
-A large feature pass built on the public v17.3.2 app.
+Focused cleanup after the v18 feature pass.
 
-New architecture
-- Shared wallet cache (`wallet_shared_cache.db`) reused by Agency and Club Development.
-- One Sync Centre for roster, clubs, Agency, Club Development and Grower or Shower.
-- Data freshness indicators.
+- Fixed feature-page hero text overlap caused by an old `.feature-copy` CSS rule.
+- Development Intelligence header now has proper spacing and larger copy.
+- Milestones redesigned as compact player achievement cards with real MFL portraits.
+- Milestone player names/details are larger and easier to read.
+- Player Comparison redesigned so its purpose is obvious.
+- Player comparison now includes MFL portraits, current OVR, OVR gain, attribute gain,
+  individual stat gains, latest progression and a comparison summary.
+- Club comparison now includes clearer totals and a comparison summary.
+- Removed the confusing raw query-string box from the comparison UI.
+- Position/Age typography increased.
 
-New tools
-- Watchlist / favourites.
-- Player comparison (2–4 players).
-- Club comparison (2–4 clubs).
-- Development Insights.
-- Season 17 / 7-day / 24-hour mover views (period views populate as snapshots accumulate).
-- Recent progression timeline.
-- Position analysis and age-band analysis.
-- Milestones.
-- Season snapshot + CSV.
-- On-demand market history.
-- Downloadable share-card PNG.
-- Optional Discord posting when `DISCORD_WEBHOOK_URL` is configured.
-- Relative share URLs for player/comparison views.
-- Grower or Shower race view.
-- Filtered Agency CSV export.
-- Tag import/export.
-- Watchlist CSV export.
-
-Existing public privacy protections remain in place.
+All v18.1 shared-cache and Agency reuse fixes remain included.

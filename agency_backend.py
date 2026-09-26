@@ -223,12 +223,64 @@ def analyse(pid,wallet,t):
   start={k:None for k in STATS}
  first=parsed[0][0] if parsed else None
  return pid,cur,source,confidence,(acq if confidence=="VERIFIED" else None),effective,start,owned,last,first,len(parsed)
+
+def seed_from_shared(wallet):
+    """Make Agency usable immediately from the shared wallet roster.
+
+    These rows are provisional: start=current and confidence is BASELINE PENDING.
+    The normal Agency analyser later replaces them with verified ownership baselines.
+    """
+    wallet=wallet.strip().lower()
+    shared_rows=shared.roster_rows(wallet)
+    if not shared_rows:
+        return 0
+
+    c=db(); init(c); ensure_v2(c)
+    now=datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+    added=0
+
+    for r in shared_rows:
+        pid=int(r["player_id"])
+        exists=c.execute(
+            "SELECT 1 FROM ownership_v65 WHERE wallet=? AND player_id=?",
+            (wallet,pid)
+        ).fetchone()
+
+        # Always hydrate metadata from the already-loaded shared roster.
+        c.execute("""INSERT INTO player_meta(wallet,player_id,age,position,club)
+                     VALUES(?,?,?,?,?)
+                     ON CONFLICT(wallet,player_id) DO UPDATE SET
+                     age=COALESCE(excluded.age,player_meta.age),
+                     position=COALESCE(excluded.position,player_meta.position),
+                     club=COALESCE(excluded.club,player_meta.club)""",
+                  (wallet,pid,r.get("age"),r.get("position"),r.get("club")))
+
+        if exists:
+            continue
+
+        vals=(
+            wallet,pid,r.get("player_name") or f"Player {pid}",
+            "SHARED WALLET CACHE","BASELINE PENDING",
+            None,None,
+            r.get("overall"),r.get("pace"),r.get("shooting"),r.get("passing"),
+            r.get("dribbling"),r.get("defense"),r.get("physical"),
+            r.get("overall"),r.get("pace"),r.get("shooting"),r.get("passing"),
+            r.get("dribbling"),r.get("defense"),r.get("physical"),
+            0,None,None,0,now
+        )
+        c.execute("""INSERT INTO ownership_v65 VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", vals)
+        added+=1
+
+    c.commit(); c.close()
+    return added
+
 def sync(wallet,progress=None,batch_size=12):
  wallet=wallet.strip().lower();t=token()
  ids=list(dict.fromkeys(pid(x) for x in roster(wallet,t)))
  c=db();init(c)
  cached={r["player_id"]:r for r in c.execute("SELECT * FROM ownership_v65 WHERE wallet=?",(wallet,))}
- uncached=[x for x in ids if x not in cached]
+ pending={pid for pid,row in cached.items() if str(row["confidence"] or "").upper()=="BASELINE PENDING"}
+ uncached=[x for x in ids if x not in cached or x in pending]
  todo=uncached[:batch_size]
  results=[];errors=[]
  for n,x in enumerate(todo,1):
