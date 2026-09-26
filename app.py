@@ -388,7 +388,7 @@ st.markdown(r"""
 
 .wallet-empty{background:#07161d;border:1px solid #173843;border-radius:9px;padding:10px;font-size:.66rem;color:#70888e}
 .wallet-short{font-family:ui-monospace,monospace;background:#07161d;border:1px solid #173843;border-radius:9px;padding:10px;font-size:.67rem;color:#c7d4d5}
-.public-connect{background:linear-gradient(135deg,#07171e,#09232a);border:1px solid #1a414b;border-radius:14px;padding:22px;margin:14px 0}
+.public-connect{background:linear-gradient(135deg,#07171e,#09232a);border:1px solid #1a414b;border-radius:14px;padding:22px;margin:14px auto;max-width:1400px}
 .public-connect-kicker{font-size:.59rem;color:#13e0b4;letter-spacing:.15em;font-weight:900}
 .public-connect-title{font-size:1.48rem;color:#f3f9f8;font-weight:900;letter-spacing:-.04em;margin-top:7px}
 .public-connect-copy{font-size:.75rem;color:#748b91;line-height:1.55;margin-top:7px;max-width:720px}

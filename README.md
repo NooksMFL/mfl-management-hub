@@ -17,3 +17,7 @@ CSV exports
 - All Club Players CSV.
 
 All v17.1 privacy and reliability fixes remain included.
+
+
+Hotfix
+- Wallet connect banner now uses the same max width/alignment as the Season 17 workspace hero on Home.
