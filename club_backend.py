@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import pandas as pd
+import wallet_cache_backend as shared
 
 BASE="https://api.playmfl.com"
 DB=Path("club_development_cache.db")
@@ -150,6 +151,10 @@ def _save_owned(wallet,found):
 
 def owned_clubs(wallet,t=None,refresh=False):
     wallet=wallet.strip().lower()
+    if not refresh:
+        shared_saved=shared.clubs_rows(wallet)
+        if shared_saved:
+            return shared_saved
     c=db()
     saved=c.execute("SELECT club_id,club_name FROM owned_clubs WHERE wallet=? ORDER BY club_name",(wallet,)).fetchall()
     c.close()
@@ -188,6 +193,7 @@ def owned_clubs(wallet,t=None,refresh=False):
                     if k not in seen:
                         seen.add(k);uniq.append(x)
                 _save_owned(wallet,uniq)
+                shared.save_clubs(wallet,uniq)
                 return uniq
         except Exception as e:
             last_error=e
@@ -200,15 +206,15 @@ def owned_clubs(wallet,t=None,refresh=False):
     return []
 
 def roster(wallet,t):
-    raw=get("/players",t,{"ownerWalletAddress":wallet,"limit":1200},timeout=(4,8))
+    raw=shared.roster_payload(wallet,t,force=False)
     rows=[]
-    for item in arr(raw):
+    for item in raw:
         p=unwrap(item); m=p.get("metadata") if isinstance(p.get("metadata"),dict) else {}
         pid=p.get("id") or p.get("playerId") or m.get("id")
         try:pid=int(pid)
         except:continue
-        name=p.get("name") or m.get("name") or (str(p.get("firstName") or m.get("firstName") or "")+" "+str(p.get("lastName") or m.get("lastName") or "")).strip()
-        rows.append({"player_id":pid,"player":name or f"Player {pid}","club":club_name(p)})
+        name=p.get("name") or m.get("name") or f"Player {pid}"
+        rows.append({"player_id":pid,"player":name,"club":club_name(p)})
     return rows
 
 def todt(v):

@@ -1,23 +1,29 @@
-# MFL Management Hub — Public Polish v17.3
+# MFL Management Hub — Feature Suite v18
 
-Home
-- "Track your MFL network" is now inside the Season 17 workspace hero.
-- Removed the unhelpful two-point OVR progression chart.
-- Added Development Breakdown with OVR, attributes, developing players and PAC/SHO/PAS/DRI/DEF/PHY totals.
-- "Top 5 Players" is now "Top 5 Progressors" with real MFL player portraits, OVR gain and attribute gain.
-- Replaced Workspace Status with useful Network Highlights.
+A large feature pass built on the public v17.3.2 app.
 
-Wallet UX
-- Sidebar warns clearly that first-time wallet analysis can take several minutes.
-- First-time Agency screen repeats the warning and tells the user to keep the page open.
+New architecture
+- Shared wallet cache (`wallet_shared_cache.db`) reused by Agency and Club Development.
+- One Sync Centre for roster, clubs, Agency, Club Development and Grower or Shower.
+- Data freshness indicators.
 
-CSV exports
-- Agency Development CSV.
-- Club Summary CSV.
-- All Club Players CSV.
+New tools
+- Watchlist / favourites.
+- Player comparison (2–4 players).
+- Club comparison (2–4 clubs).
+- Development Insights.
+- Season 17 / 7-day / 24-hour mover views (period views populate as snapshots accumulate).
+- Recent progression timeline.
+- Position analysis and age-band analysis.
+- Milestones.
+- Season snapshot + CSV.
+- On-demand market history.
+- Downloadable share-card PNG.
+- Optional Discord posting when `DISCORD_WEBHOOK_URL` is configured.
+- Relative share URLs for player/comparison views.
+- Grower or Shower race view.
+- Filtered Agency CSV export.
+- Tag import/export.
+- Watchlist CSV export.
 
-All v17.1 privacy and reliability fixes remain included.
-
-
-Hotfix
-- Wallet connect banner now uses the same max width/alignment as the Season 17 workspace hero on Home.
+Existing public privacy protections remain in place.

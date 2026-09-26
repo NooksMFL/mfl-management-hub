@@ -1,6 +1,7 @@
 import shutil
 from pathlib import Path
 import os, sqlite3, requests, time
+import wallet_cache_backend as shared
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 
@@ -90,7 +91,7 @@ def pid(p):
    if x.get(k) is not None:return int(x[k])
  raise ValueError("No player id")
 def roster(wallet,t):
- return arr(get("/players",t,{"ownerWalletAddress":wallet,"limit":1200}))
+ return shared.roster_payload(wallet,t,force=False)
 def unwrap(p):
  if isinstance(p,dict):
   for k in ("data","player"):
@@ -321,7 +322,7 @@ def refresh_current(wallet, progress=None, batch_size=20):
  c.close();return done,len(ids),errors
 
 def roster_payload(wallet,t):
- return arr(get("/players",t,{"ownerWalletAddress":wallet,"limit":1200}))
+ return shared.roster_payload(wallet,t,force=False)
 
 def roster_meta_map(wallet,t):
  out={}
