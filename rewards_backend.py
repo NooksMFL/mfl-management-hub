@@ -218,6 +218,85 @@ def standing(detail, wanted):
     return None
 
 
+def calculated_league_standing(detail, wanted):
+    table = {}
+
+    def stats(cid):
+        cid = to_int(cid)
+        if cid is None:
+            return None
+        if cid not in table:
+            table[cid] = {
+                "club_id": cid,
+                "wins": 0,
+                "draws": 0,
+                "losses": 0,
+                "goals": 0,
+                "goals_against": 0,
+                "points": 0,
+            }
+        return table[cid]
+
+    for stage in stages(detail):
+        groups = stage.get("groups") or []
+        owners = [stage] + [g for g in groups if isinstance(g, dict)]
+        for owner in owners:
+            for rnd in owner.get("rounds") or []:
+                if not isinstance(rnd, dict):
+                    continue
+                for match in rnd.get("matches") or []:
+                    if not isinstance(match, dict):
+                        continue
+                    status = str(match.get("status") or "").upper()
+                    if status not in ("ENDED", "FINISHED", "FT", "FORFEITED"):
+                        continue
+                    hid = match_club_id(match, "home")
+                    aid = match_club_id(match, "away")
+                    hs = to_int(match.get("homeScore"))
+                    aws = to_int(match.get("awayScore"))
+                    if hid is None or aid is None or hs is None or aws is None:
+                        continue
+
+                    home = stats(hid)
+                    away = stats(aid)
+                    if home is None or away is None:
+                        continue
+
+                    home["goals"] += hs
+                    home["goals_against"] += aws
+                    away["goals"] += aws
+                    away["goals_against"] += hs
+
+                    if hs > aws:
+                        home["wins"] += 1
+                        away["losses"] += 1
+                        home["points"] += 3
+                    elif aws > hs:
+                        away["wins"] += 1
+                        home["losses"] += 1
+                        away["points"] += 3
+                    else:
+                        home["draws"] += 1
+                        away["draws"] += 1
+                        home["points"] += 1
+                        away["points"] += 1
+
+    ordered = sorted(
+        table.values(),
+        key=lambda r: (
+            -r["points"],
+            -(r["goals"] - r["goals_against"]),
+            -r["goals"],
+            -r["wins"],
+            r["club_id"],
+        ),
+    )
+    for index, row in enumerate(ordered, start=1):
+        if row["club_id"] == wanted:
+            return index
+    return None
+
+
 def league_reward(detail, position):
     if position is None:
         return 0.0
@@ -335,6 +414,8 @@ def project_club(cid, name="", club_payload=None):
         ctype = str(comp.get("type") or "").upper()
         amount, note = 0.0, ""
         if ctype == "LEAGUE":
+            if pos is None:
+                pos = calculated_league_standing(comp, cid)
             amount = league_reward(comp, pos)
             note = f"Rank {pos}" if pos else "Rank unavailable"
         elif ctype == "CUP":
