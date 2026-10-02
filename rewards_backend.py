@@ -528,7 +528,8 @@ def flow_competitions_for_clubs(club_ids):
                 comps = row.get("competitionIds") if isinstance(row.get("competitionIds"), list) else []
                 if cid is not None:
                     _FLOW_CLUB_COMPETITIONS[cid] = sorted({
-                        int(x) for x in comps if to_int(x) is not None
+                        int(x) for x in comps
+                        if to_int(x) is not None and int(x) > 1000
                     })
         for cid in missing:
             _FLOW_CLUB_COMPETITIONS.setdefault(cid, [])
@@ -583,9 +584,10 @@ def discover_competition_ids_for_club(cid):
         direct = competition_ids(club_detail(cid))
     except Exception:
         direct = []
+    direct = [int(x) for x in direct if to_int(x) is not None and int(x) > 1000]
     if direct:
         return direct
-    return list(_FLOW_CLUB_COMPETITIONS.get(int(cid), []))
+    return [int(x) for x in _FLOW_CLUB_COMPETITIONS.get(int(cid), []) if int(x) > 1000]
 
 
 def project_club(cid, name="", club_payload=None):
@@ -594,7 +596,7 @@ def project_club(cid, name="", club_payload=None):
     if isinstance(club_payload, dict):
         ids.extend(competition_ids(club_payload))
     ids.extend(competition_ids(raw))
-    ids = sorted(set(ids))
+    ids = sorted({int(x) for x in ids if to_int(x) is not None and int(x) > 1000})
     if not ids:
         ids = discover_competition_ids_for_club(cid)
     gross, comps = 0.0, []
