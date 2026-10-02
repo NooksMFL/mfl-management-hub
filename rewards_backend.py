@@ -313,7 +313,7 @@ def project_club(cid, name=""):
 
 
 def wallet_relationships(wallet):
-    rows = as_list(api_get("/clubs", {"walletAddress": wallet, "withStaffContracts": "true"}))
+    rows = as_list(api_get("/clubs", {"walletAddress": wallet}))
     owned, staff = [], []
     for row in rows:
         if not isinstance(row, dict):
