@@ -78,6 +78,24 @@ def to_float(value):
         return None
 
 
+def deep_first(obj, key_names):
+    wanted = {str(k).lower() for k in key_names}
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            if str(key).lower() in wanted and value not in (None, "", [], {}):
+                if not isinstance(value, (dict, list)):
+                    return value
+            found = deep_first(value, key_names)
+            if found not in (None, ""):
+                return found
+    elif isinstance(obj, list):
+        for value in obj:
+            found = deep_first(value, key_names)
+            if found not in (None, ""):
+                return found
+    return None
+
+
 def share(raw):
     value = to_float(raw)
     if value is None:
@@ -259,37 +277,55 @@ def competition_ids(club):
     found = []
     if not isinstance(club, dict):
         return found
-    for key in ("currentCompetitionIds", "competitionIds", "currentCompetitions"):
+
+    def add(value):
+        cid = to_int(value)
+        if cid is None and isinstance(value, dict):
+            cid = to_int(first(value, "competitionId", "competitionID", "id"))
+        if cid is not None and cid > 0:
+            found.append(cid)
+
+    for key in ("currentCompetitionIds", "competitionIds", "currentCompetitions",
+                "competitions", "competitionMemberships", "competitionsMemberships"):
         value = club.get(key)
         if isinstance(value, list):
             for item in value:
-                cid = club_id(item)
-                if cid is None and isinstance(item, dict):
-                    cid = to_int(first(item, "competitionId", "id"))
-                if cid is not None:
-                    found.append(cid)
-    def walk(obj):
+                add(item)
+        elif isinstance(value, dict):
+            add(value)
+
+    def walk(obj, parent_key=""):
         if isinstance(obj, dict):
             for key, value in obj.items():
-                if "competition" in key.lower() and key.lower().endswith("ids") and isinstance(value, list):
-                    for item in value:
-                        cid = to_int(item) or (to_int(first(item, "id", "competitionId")) if isinstance(item, dict) else None)
-                        if cid is not None:
-                            found.append(cid)
-                elif isinstance(value, (dict, list)):
-                    walk(value)
+                lk = str(key).lower()
+                context = f"{parent_key}.{lk}" if parent_key else lk
+                if "competition" in context:
+                    if lk in ("competitionid", "competition_id", "id") and not isinstance(value, (dict, list)):
+                        add(value)
+                    elif isinstance(value, list):
+                        for item in value:
+                            if isinstance(item, (dict, int, str)):
+                                add(item)
+                if isinstance(value, (dict, list)):
+                    walk(value, context)
         elif isinstance(obj, list):
             for value in obj:
                 if isinstance(value, (dict, list)):
-                    walk(value)
+                    walk(value, parent_key)
+
     walk(club)
     return sorted(set(found))
 
 
-def project_club(cid, name=""):
+def project_club(cid, name="", club_payload=None):
     raw = club_detail(cid)
+    ids = []
+    if isinstance(club_payload, dict):
+        ids.extend(competition_ids(club_payload))
+    ids.extend(competition_ids(raw))
+    ids = sorted(set(ids))
     gross, comps = 0.0, []
-    for comp_id in competition_ids(raw):
+    for comp_id in ids:
         comp = competition_detail(comp_id)
         if not isinstance(comp, dict):
             continue
@@ -323,7 +359,14 @@ def wallet_relationships(wallet):
         name = first(club, "name", "clubName")
         if cid is None or not name:
             continue
-        item = {"id": cid, "name": str(name), "share": share(first(row, "revenueShare", "share", "rewardShare"))}
+        revenue_raw = deep_first(row, ("revenueShare", "rewardShare", "revenue_share"))
+        item = {
+            "id": cid,
+            "name": str(name),
+            "share": share(revenue_raw),
+            "club_payload": club,
+            "relationship_payload": row,
+        }
         (owned if str(row.get("title") or "").upper() == "MFL_OWNER" else staff).append(item)
     return owned, staff
 
@@ -353,12 +396,12 @@ def calculate(wallet):
     players = wallet_players(wallet)
     owned_ids = {x["id"] for x in owned}
 
-    club_rows = [project_club(c["id"], c["name"]) for c in owned]
+    club_rows = [project_club(c["id"], c["name"], c.get("club_payload")) for c in owned]
     club_gross = sum(x["gross"] for x in club_rows)
 
     staff_rows, staff_total = [], 0.0
     for rel in staff:
-        proj = project_club(rel["id"], rel["name"])
+        proj = project_club(rel["id"], rel["name"], rel.get("club_payload"))
         cut = proj["gross"] * rel["share"]
         staff_total += cut
         staff_rows.append({**rel, "gross": proj["gross"], "cut": cut, "competitions": proj["competitions"]})
