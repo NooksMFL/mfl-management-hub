@@ -1,5 +1,7 @@
 import os
 import re
+import json
+import base64
 import requests
 import wallet_cache_backend as shared
 
@@ -413,13 +415,177 @@ def competition_ids(club):
 
 
 
+
+FLOW_SCRIPT_URL = "https://rest-mainnet.onflow.org/v1/scripts?block_height=sealed"
+MFL_CLUB_ADDRESS = "0x8ebcbfd516b1da27"
+_FLOW_CLUB_COMPETITIONS = {}
+
+FLOW_CLUB_COMPETITIONS_SCRIPT = f"""
+import MFLClub from {MFL_CLUB_ADDRESS}
+
+access(all) struct ClubCompetitions {{
+    access(all) let clubId: UInt64
+    access(all) let competitionIds: [UInt64]
+
+    init(clubId: UInt64, competitionIds: [UInt64]) {{
+        self.clubId = clubId
+        self.competitionIds = competitionIds
+    }}
+}}
+
+access(all) fun main(clubIds: [UInt64]): [ClubCompetitions] {{
+    let result: [ClubCompetitions] = []
+
+    for clubId in clubIds {{
+        let ids: [UInt64] = []
+
+        if let clubData = MFLClub.getClubData(id: clubId) {{
+            for squadId in clubData.getSquadIDs() {{
+                if let squadData = MFLClub.getSquadData(id: squadId) {{
+                    let memberships = squadData.getCompetitionsMemberships()
+                    for competitionId in memberships.keys {{
+                        ids.append(competitionId)
+                    }}
+                }}
+            }}
+        }}
+
+        result.append(ClubCompetitions(clubId: clubId, competitionIds: ids))
+    }}
+
+    return result
+}}
+"""
+
+
+def _flow_arg(argument):
+    return base64.b64encode(
+        json.dumps(argument, separators=(",", ":")).encode("utf-8")
+    ).decode("utf-8")
+
+
+def _cadence_decode(value):
+    if not isinstance(value, dict):
+        return value
+    typ = value.get("type")
+    raw = value.get("value")
+    if typ == "Optional":
+        return None if raw is None else _cadence_decode(raw)
+    if typ in ("UInt", "UInt8", "UInt16", "UInt32", "UInt64", "UInt128", "UInt256",
+               "Int", "Int8", "Int16", "Int32", "Int64", "Int128", "Int256"):
+        return int(raw)
+    if typ in ("UFix64", "Fix64"):
+        return float(raw)
+    if typ in ("String", "Address", "Character"):
+        return str(raw)
+    if typ == "Bool":
+        return bool(raw)
+    if typ in ("Array", "VariableSizedArray", "ConstantSizedArray"):
+        return [_cadence_decode(x) for x in (raw or [])]
+    if typ in ("Struct", "Resource", "Event"):
+        fields = (raw or {}).get("fields") or []
+        return {field.get("name"): _cadence_decode(field.get("value")) for field in fields}
+    if typ == "Dictionary":
+        out = {}
+        for item in raw or []:
+            out[_cadence_decode(item.get("key"))] = _cadence_decode(item.get("value"))
+        return out
+    return raw
+
+
+def flow_competitions_for_clubs(club_ids):
+    ids = sorted({int(x) for x in club_ids if to_int(x) is not None})
+    missing = [cid for cid in ids if cid not in _FLOW_CLUB_COMPETITIONS]
+    if missing:
+        body = {
+            "script": base64.b64encode(FLOW_CLUB_COMPETITIONS_SCRIPT.encode("utf-8")).decode("utf-8"),
+            "arguments": [
+                _flow_arg({
+                    "type": "Array",
+                    "value": [{"type": "UInt64", "value": str(cid)} for cid in missing],
+                })
+            ],
+        }
+        r = requests.post(
+            FLOW_SCRIPT_URL,
+            json=body,
+            headers={
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+                "User-Agent": "mfl-management-hub-rewards/1.0",
+            },
+            timeout=25,
+        )
+        r.raise_for_status()
+        encoded = r.json()
+        cadence_json = json.loads(base64.b64decode(encoded).decode("utf-8"))
+        decoded = _cadence_decode(cadence_json)
+        if isinstance(decoded, list):
+            for row in decoded:
+                if not isinstance(row, dict):
+                    continue
+                cid = to_int(row.get("clubId"))
+                comps = row.get("competitionIds") if isinstance(row.get("competitionIds"), list) else []
+                if cid is not None:
+                    _FLOW_CLUB_COMPETITIONS[cid] = sorted({
+                        int(x) for x in comps if to_int(x) is not None
+                    })
+        for cid in missing:
+            _FLOW_CLUB_COMPETITIONS.setdefault(cid, [])
+    return {cid: list(_FLOW_CLUB_COMPETITIONS.get(cid, [])) for cid in ids}
+
+
+_STAFF_SHARE_CACHE = {}
+
+def resolve_staff_share(relation):
+    rid = to_int(relation.get("relationship_payload", {}).get("id"))
+    cid = to_int(relation.get("id"))
+    cache_key = (rid, cid)
+    if cache_key in _STAFF_SHARE_CACHE:
+        return _STAFF_SHARE_CACHE[cache_key]
+
+    candidates = []
+    if rid:
+        candidates.extend([
+            f"/staff/{rid}",
+            f"/staff/{rid}/contract",
+            f"/staff/{rid}/contracts",
+            f"/contracts/{rid}",
+            f"/staff/contracts/{rid}",
+            f"/managerContracts/{rid}",
+        ])
+    if cid:
+        candidates.extend([
+            f"/clubs/{cid}/staff",
+            f"/clubs/{cid}/contracts",
+            f"/clubs/{cid}/managerContracts",
+        ])
+
+    for path in candidates:
+        probe = api_probe(path)
+        if probe.get("status") != 200:
+            continue
+        raw = deep_first(
+            probe.get("payload"),
+            ("revenueShare", "rewardShare", "revenue_share")
+        )
+        resolved = share(raw)
+        if resolved > 0:
+            _STAFF_SHARE_CACHE[cache_key] = resolved
+            return resolved
+
+    _STAFF_SHARE_CACHE[cache_key] = 0.0
+    return 0.0
+
+
 def discover_competition_ids_for_club(cid):
-    # Fast path only. Do not scan the entire MFL competition catalogue here:
-    # that caused long-running requests for wallets with many loaned players.
     try:
-        return competition_ids(club_detail(cid))
+        direct = competition_ids(club_detail(cid))
     except Exception:
-        return []
+        direct = []
+    if direct:
+        return direct
+    return list(_FLOW_CLUB_COMPETITIONS.get(int(cid), []))
 
 
 def project_club(cid, name="", club_payload=None):
@@ -560,12 +726,27 @@ def calculate(wallet):
 
     staff_rows, staff_total = [], 0.0
     for rel in staff:
+        if rel.get("share", 0) <= 0:
+            rel["share"] = resolve_staff_share(rel)
         proj = project_club(rel["id"], rel["name"], rel.get("relationship_payload"))
         cut = proj["gross"] * rel["share"]
         staff_total += cut
         staff_rows.append({**rel, "gross": proj["gross"], "cut": cut, "competitions": proj["competitions"]})
 
     cache, loan_rows, loan_total = {}, [], 0.0
+    external_club_ids = sorted({
+        int(p["club_id"]) for p in players
+        if p.get("club_id") is not None
+        and p.get("club_id") not in owned_ids
+        and p.get("share", 0) > 0
+    })
+    if external_club_ids:
+        try:
+            flow_competitions_for_clubs(external_club_ids)
+        except Exception:
+            # Keep the rest of the wallet calculation usable if Flow is temporarily unavailable.
+            pass
+
     for p in players:
         cid = p["club_id"]
         if cid is None or cid in owned_ids or p["share"] <= 0:
