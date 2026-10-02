@@ -390,6 +390,24 @@ def wallet_players(wallet):
     return out
 
 
+
+
+def diagnostic_wallet_payload(wallet):
+    rows = as_list(api_get("/clubs", {"walletAddress": wallet}))
+    owned = None
+    staff = None
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        title = str(row.get("title") or "").upper()
+        if title == "MFL_OWNER" and owned is None:
+            owned = row
+        elif title != "MFL_OWNER" and staff is None:
+            staff = row
+        if owned is not None and staff is not None:
+            break
+    return {"owned_sample": owned, "staff_sample": staff}
+
 def calculate(wallet):
     wallet = (wallet or "").strip().lower()
     owned, staff = wallet_relationships(wallet)
