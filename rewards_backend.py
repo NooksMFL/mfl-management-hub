@@ -1,6 +1,7 @@
 import os
 import re
 import requests
+import wallet_cache_backend as shared
 
 BASE = "https://api.playmfl.com"
 HEADERS = {
@@ -31,11 +32,11 @@ def _token():
 
 
 def api_get(path, params=None):
-    h = dict(HEADERS)
-    h["Authorization"] = "Bearer " + _token()
-    r = requests.get(BASE + path, headers=h, params=params, timeout=30)
-    r.raise_for_status()
-    return r.json()
+    # Reuse the Management Hub's proven MFL authentication/request layer.
+    # This keeps Rewards on the same browser headers, retries and token flow
+    # as Agency/Club Development instead of maintaining a second auth path.
+    token = shared.token()
+    return shared._get(path, token, params=params, timeout=30)
 
 
 def as_list(payload):
