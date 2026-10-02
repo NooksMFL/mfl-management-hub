@@ -414,12 +414,12 @@ def calculate(wallet):
     players = wallet_players(wallet)
     owned_ids = {x["id"] for x in owned}
 
-    club_rows = [project_club(c["id"], c["name"], c.get("club_payload")) for c in owned]
+    club_rows = [project_club(c["id"], c["name"], c.get("relationship_payload")) for c in owned]
     club_gross = sum(x["gross"] for x in club_rows)
 
     staff_rows, staff_total = [], 0.0
     for rel in staff:
-        proj = project_club(rel["id"], rel["name"], rel.get("club_payload"))
+        proj = project_club(rel["id"], rel["name"], rel.get("relationship_payload"))
         cut = proj["gross"] * rel["share"]
         staff_total += cut
         staff_rows.append({**rel, "gross": proj["gross"], "cut": cut, "competitions": proj["competitions"]})
