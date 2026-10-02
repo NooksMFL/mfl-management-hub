@@ -1651,6 +1651,16 @@ elif page=="Rewards Calculator":
             "This beta deliberately does not invent the remaining player/coach deductions; we will use the comparison to finish the exact NET calculation."
         )
 
+        with st.expander("Rewards API diagnostic (temporary)"):
+            try:
+                diag=rewards.diagnostic_wallet_payload(reward_wallet)
+                st.markdown("**Owned club sample**")
+                st.json(diag.get("owned_sample"))
+                st.markdown("**Staff relationship sample**")
+                st.json(diag.get("staff_sample"))
+            except Exception as e:
+                st.code(str(e))
+
         st.markdown('<div class="section-head2"><h3>Owned clubs</h3><span class="small-note2">LEAGUE + CUP PROJECTION</span></div>',unsafe_allow_html=True)
         if not rr["owned"]:
             st.warning("No MFL_OWNER clubs were found for this wallet.")
