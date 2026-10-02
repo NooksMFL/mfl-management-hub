@@ -39,6 +39,22 @@ def api_get(path, params=None):
     return shared._get(path, token, params=params, timeout=30)
 
 
+def api_probe(path, params=None):
+    token = shared.token()
+    h = dict(shared.H)
+    h["Authorization"] = "Bearer " + token
+    try:
+        r = requests.get(BASE + path, headers=h, params=params, timeout=20)
+        payload = None
+        try:
+            payload = r.json()
+        except Exception:
+            payload = r.text[:1200]
+        return {"path": path, "status": r.status_code, "payload": payload}
+    except Exception as exc:
+        return {"path": path, "status": None, "payload": str(exc)}
+
+
 def as_list(payload):
     if isinstance(payload, list):
         return payload
@@ -396,6 +412,44 @@ def competition_ids(club):
     return sorted(set(found))
 
 
+
+_CURRENT_COMPETITIONS_CACHE = None
+
+def current_competition_index():
+    global _CURRENT_COMPETITIONS_CACHE
+    if _CURRENT_COMPETITIONS_CACHE is not None:
+        return _CURRENT_COMPETITIONS_CACHE
+    rows = as_list(api_get("/competitions", {"upcoming": "true"}))
+    _CURRENT_COMPETITIONS_CACHE = [r for r in rows if isinstance(r, dict)]
+    return _CURRENT_COMPETITIONS_CACHE
+
+
+def discover_competition_ids_for_club(cid):
+    found = []
+    # Try club detail first.
+    try:
+        found.extend(competition_ids(club_detail(cid)))
+    except Exception:
+        pass
+    if found:
+        return sorted(set(found))
+
+    # Fallback: scan current competition details for participation.
+    # This is only used for external loan clubs where /clubs/{id} does not
+    # expose competition membership.
+    for summary in current_competition_index():
+        comp_id = to_int(first(summary, "id", "competitionId"))
+        if comp_id is None:
+            continue
+        try:
+            comp = competition_detail(comp_id)
+        except Exception:
+            continue
+        if cid in members(comp) or standing(comp, cid) is not None or calculated_league_standing(comp, cid) is not None:
+            found.append(comp_id)
+    return sorted(set(found))
+
+
 def project_club(cid, name="", club_payload=None):
     raw = club_detail(cid)
     ids = []
@@ -403,6 +457,8 @@ def project_club(cid, name="", club_payload=None):
         ids.extend(competition_ids(club_payload))
     ids.extend(competition_ids(raw))
     ids = sorted(set(ids))
+    if not ids:
+        ids = discover_competition_ids_for_club(cid)
     gross, comps = 0.0, []
     for comp_id in ids:
         comp = competition_detail(comp_id)
@@ -467,6 +523,7 @@ def wallet_players(wallet):
             "club_id": to_int(first(club, "id", "clubId")),
             "club_name": str(first(club, "name", "clubName") or ""),
             "share": share(contract.get("revenueShare")),
+            "raw": row,
         })
     return out
 
@@ -487,7 +544,38 @@ def diagnostic_wallet_payload(wallet):
             staff = row
         if owned is not None and staff is not None:
             break
-    return {"owned_sample": owned, "staff_sample": staff}
+
+    players = wallet_players(wallet)
+    loan_sample = next((p for p in players if p.get("club_id") and p.get("share", 0) > 0), None)
+
+    probes = []
+    if staff:
+        sid = to_int(staff.get("id"))
+        cid = to_int(first(staff.get("club") or {}, "id", "clubId"))
+        candidates = []
+        if sid:
+            candidates += [
+                f"/staff/{sid}",
+                f"/staff/{sid}/contracts",
+                f"/contracts/{sid}",
+                f"/staff/contracts/{sid}",
+                f"/managerContracts/{sid}",
+            ]
+        if cid:
+            candidates += [
+                f"/clubs/{cid}/staff",
+                f"/clubs/{cid}/contracts",
+                f"/clubs/{cid}/managerContracts",
+            ]
+        for path in candidates:
+            probes.append(api_probe(path))
+
+    return {
+        "owned_sample": owned,
+        "staff_sample": staff,
+        "loan_player_sample": loan_sample.get("raw") if loan_sample else None,
+        "staff_contract_probes": probes,
+    }
 
 def calculate(wallet):
     wallet = (wallet or "").strip().lower()
