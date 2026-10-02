@@ -1653,11 +1653,11 @@ elif page=="Rewards Calculator":
 
         with st.expander("Rewards API diagnostic (temporary)"):
             try:
-                diag=rewards.diagnostic_wallet_payload(reward_wallet)
-                st.markdown("**Owned club sample**")
-                st.json(diag.get("owned_sample"))
-                st.markdown("**Staff relationship sample**")
-                st.json(diag.get("staff_sample"))
+                diag=rewards.diagnostic_reward_sources(reward_wallet)
+                st.markdown("**Managed club / staff source**")
+                st.json(diag.get("staff"))
+                st.markdown("**Loan club source**")
+                st.json(diag.get("loan"))
             except Exception as e:
                 st.code(str(e))
 
