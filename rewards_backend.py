@@ -413,41 +413,13 @@ def competition_ids(club):
 
 
 
-_CURRENT_COMPETITIONS_CACHE = None
-
-def current_competition_index():
-    global _CURRENT_COMPETITIONS_CACHE
-    if _CURRENT_COMPETITIONS_CACHE is not None:
-        return _CURRENT_COMPETITIONS_CACHE
-    rows = as_list(api_get("/competitions", {"upcoming": "true"}))
-    _CURRENT_COMPETITIONS_CACHE = [r for r in rows if isinstance(r, dict)]
-    return _CURRENT_COMPETITIONS_CACHE
-
-
 def discover_competition_ids_for_club(cid):
-    found = []
-    # Try club detail first.
+    # Fast path only. Do not scan the entire MFL competition catalogue here:
+    # that caused long-running requests for wallets with many loaned players.
     try:
-        found.extend(competition_ids(club_detail(cid)))
+        return competition_ids(club_detail(cid))
     except Exception:
-        pass
-    if found:
-        return sorted(set(found))
-
-    # Fallback: scan current competition details for participation.
-    # This is only used for external loan clubs where /clubs/{id} does not
-    # expose competition membership.
-    for summary in current_competition_index():
-        comp_id = to_int(first(summary, "id", "competitionId"))
-        if comp_id is None:
-            continue
-        try:
-            comp = competition_detail(comp_id)
-        except Exception:
-            continue
-        if cid in members(comp) or standing(comp, cid) is not None or calculated_league_standing(comp, cid) is not None:
-            found.append(comp_id)
-    return sorted(set(found))
+        return []
 
 
 def project_club(cid, name="", club_payload=None):
