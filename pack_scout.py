@@ -160,6 +160,13 @@ def fetch_rarity_pool(rarity):
         return "Poor"
 
     df["pull_label"] = df["percentile"].map(label)
+
+    # Estimated per-player chance assuming every currently packable player
+    # in the selected rarity is equally likely. This is NOT an official MFL
+    # pack probability unless MFL confirms the draw is uniformly random.
+    pool_size = len(df)
+    df["estimated_pull_chance_pct"] = round(100.0 / pool_size, 6) if pool_size else 0.0
+    df["estimated_one_in"] = pool_size
     return df
 
 def portrait_url(player_id):
