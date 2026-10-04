@@ -1953,8 +1953,8 @@ elif page=="Pack Scout":
         f'<div class="pack-shell" style="--pack-accent:{accent}">'
         f'<div class="pack-hero"><div class="pack-kicker">MFL PACK INTELLIGENCE · {esc(rarity.upper())}</div>'
         f'<div class="pack-title">Pack Scout</div>'
-        f'<div class="pack-copy">Rank the live MFL-owned 16–28 pool by more than OVR alone. We have evidence that true pack-reserve players may be age-frozen, but full frozen-age verification is not applied on page load because checking every player history would make the app stall.</div>'
-        f'<div class="pack-live"><i></i> Live MFL-owned candidate pool · {lo}–{hi} OVR · age 16–28</div></div></div>',
+        f'<div class="pack-copy">Pack Scout now verifies frozen-age evidence in small cached batches instead of hitting every player history at once. Players proven to have received NEW_AGE while MFL-owned are removed; players that survive a rollover without ageing are marked verified frozen.</div>'
+        f'<div class="pack-live"><i></i> Cached frozen-age verification · {lo}–{hi} OVR · age 16–28</div></div></div>',
         unsafe_allow_html=True
     )
 
@@ -1962,11 +1962,11 @@ elif page=="Pack Scout":
     def _load_pack_pool(r):
         return packs.fetch_rarity_pool(r)
 
-    controls=st.columns([1.1,1.1,4])
+    controls=st.columns([1.25,1.6,3.35])
     with controls[0]:
-        refresh_pack=st.button("↻ Refresh pool",type="primary",use_container_width=True,key="refresh_pack_pool")
+        refresh_pack=st.button("↻ Refresh + verify",type="primary",use_container_width=True,key="refresh_pack_pool")
     with controls[1]:
-        st.caption("Auto cache: 10 min")
+        st.caption("Checks up to 24 more histories per refresh · results cached")
     if refresh_pack:
         _load_pack_pool.clear()
 
@@ -2003,13 +2003,16 @@ elif page=="Pack Scout":
 
     youngest=int(pool["age"].dropna().min()) if pool["age"].notna().any() else "—"
     median_score=float(pool["pull_score"].median())
+    verified_frozen=int((pool["verification_status"]=="VERIFIED_FROZEN").sum()) if "verification_status" in pool else 0
+    too_new=int((pool["verification_status"]=="TOO_NEW").sum()) if "verification_status" in pool else 0
+    pending_verify=int(pool["verification_status"].isin(["PENDING","UNKNOWN"]).sum()) if "verification_status" in pool else len(pool)
 
     st.markdown(
         f'<div class="pack-shell" style="--pack-accent:{accent}"><div class="pack-grid">'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Candidate pool</div><div class="pack-kpi-val">{len(pool):,}</div><div class="pack-kpi-sub">MFL-owned · age 16–28 · live rarity filter</div></div>'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Top Scout Score</div><div class="pack-kpi-val">{float(best.pull_score):.1f}</div><div class="pack-kpi-sub">{esc(best.player)}</div></div>'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Highest OVR</div><div class="pack-kpi-val">{int(pool.overall.max())}</div><div class="pack-kpi-sub">Top of the rarity band</div></div>'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Chance per player</div><div class="pack-kpi-val">{float(best.estimated_pull_chance_pct):.4f}%</div><div class="pack-kpi-sub">≈ 1 in {int(best.estimated_one_in):,} if equally weighted</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Candidate pool</div><div class="pack-kpi-val">{len(pool):,}</div><div class="pack-kpi-sub">Aged-in-MFL players already removed</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Verified frozen</div><div class="pack-kpi-val">{verified_frozen:,}</div><div class="pack-kpi-sub">Passed a rollover without NEW_AGE</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Still checking</div><div class="pack-kpi-val">{pending_verify:,}</div><div class="pack-kpi-sub">{too_new:,} more are too new to test yet</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Chance per player</div><div class="pack-kpi-val">{float(best.estimated_pull_chance_pct):.4f}%</div><div class="pack-kpi-sub">≈ 1 in {int(best.estimated_one_in):,} · provisional</div></div>'
         f'</div></div>', unsafe_allow_html=True
     )
 
@@ -2102,9 +2105,9 @@ elif page=="Pack Scout":
             view=view[view.pull_label.isin(pull_filter)]
 
         st.caption(f"{len(view):,} of {len(pool):,} players shown")
-        show=view[["rank","player","overall","age","positions","nationality","pull_score","pull_label","estimated_pull_chance_pct","estimated_one_in"]].rename(columns={
+        show=view[["rank","player","overall","age","positions","nationality","verification_status","pull_score","pull_label","estimated_pull_chance_pct","estimated_one_in"]].rename(columns={
             "rank":"Rank","player":"Player","overall":"OVR","age":"Age","positions":"Position",
-            "nationality":"Nationality","pull_score":"Scout Score","pull_label":"Pull",
+            "nationality":"Nationality","verification_status":"Pack check","pull_score":"Scout Score","pull_label":"Pull",
             "estimated_pull_chance_pct":"Est. chance %","estimated_one_in":"Est. 1 in"
         })
         st.dataframe(
