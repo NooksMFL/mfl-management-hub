@@ -957,6 +957,10 @@ if page=="Home":
           <div class="workspace-top-v15"><div class="workspace-icon-v15 violet"><svg viewBox="0 0 24 24" fill="none" stroke="#ad76ff" stroke-width="1.8"><path d="M4 19h16M6 19V9l6-4 6 4v10"/><path d="M9 19v-5h6v5"/></svg></div><div class="workspace-arrow-v15">→</div></div>
           <div class="workspace-title-v15">Club Development</div><div class="workspace-sub-v15">Compare development across every owned club and drill into the players.</div><div class="workspace-accent-v15"></div>
         </a>
+        <a class="workspace-card-v15" href="?page=Pack%20Scout" target="_self">
+          <div class="workspace-top-v15"><div class="workspace-icon-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#13e0b4" stroke-width="1.8"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/><path d="m8.5 5 8 4.5"/></svg></div><div class="workspace-arrow-v15">→</div></div>
+          <div class="workspace-title-v15">Pack Scout</div><div class="workspace-sub-v15">Rank the live MFL-owned pack pool by OVR and age-adjusted pull value.</div><div class="workspace-accent-v15"></div>
+        </a>
       </div>
     """,unsafe_allow_html=True)
 
@@ -1061,6 +1065,7 @@ if page=="Home":
             <a class="quick-v15" href="?page=Grower%20or%20Shower" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#13e0b4" stroke-width="1.8"><path d="M6 4h12v3c0 3.8-2.4 6.7-6 7.8C8.4 13.7 6 10.8 6 7V4Z"/></svg></div><div class="quick-title-v15">Grower or Shower</div></div><div class="quick-arr-v15">→</div></a>
             <a class="quick-v15" href="?page=Agency%20Development" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#38afff" stroke-width="1.8"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/></svg></div><div class="quick-title-v15">Agency Development</div></div><div class="quick-arr-v15">→</div></a>
             <a class="quick-v15" href="?page=Club%20Development" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#ad76ff" stroke-width="1.8"><path d="M4 19h16M6 19V9l6-4 6 4v10"/></svg></div><div class="quick-title-v15">Club Development</div></div><div class="quick-arr-v15">→</div></a>
+            <a class="quick-v15" href="?page=Pack%20Scout" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#13e0b4" stroke-width="1.8"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4 7.5 8 4.5 8-4.5"/></svg></div><div class="quick-title-v15">Pack Scout</div></div><div class="quick-arr-v15">→</div></a>
             <a class="quick-v15" href="?page=Club%20Development" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#13e0b4" stroke-width="1.8"><path d="M20 7v5h-5"/><path d="M18.5 15A7 7 0 1 1 19 8l1 4"/></svg></div><div class="quick-title-v15">Sync latest data</div></div><div class="quick-arr-v15">→</div></a>
           </div>
         </div>
