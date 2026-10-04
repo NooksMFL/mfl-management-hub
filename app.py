@@ -1956,7 +1956,7 @@ elif page=="Pack Scout":
         f'<div class="pack-shell" style="--pack-accent:{accent}">'
         f'<div class="pack-hero"><div class="pack-kicker">MFL PACK INTELLIGENCE · {esc(rarity.upper())}</div>'
         f'<div class="pack-title">Pack Scout</div>'
-        f'<div class="pack-copy">Explore the MFL-owned player pool and see which players look most like genuine pack-reserve inventory. Pack Scout checks age history over time: players that aged while held by MFL are ruled out, while players that stayed frozen across a rollover receive stronger verification.</div>'
+        f'<div class="pack-copy">Explore MFL-owned players in the known pack age range of 16–28 and compare them by OVR, age and Scout Score. Age-history checks are shown as research context only; they no longer remove players from the pool because that behaviour is not proven to equal pack eligibility.</div>'
         f'<div class="pack-live"><i></i> Live research model · {lo}–{hi} OVR · pack ages 16–28</div></div></div>',
         unsafe_allow_html=True
     )
@@ -1986,12 +1986,11 @@ elif page=="Pack Scout":
         st.info(f"No MFL-owned {rarity} players were returned.")
         st.stop()
 
-    # Prefer verified-frozen players for headline rankings. Until enough are
-    # verified, fall back to the wider candidate pool rather than pretending
-    # pending candidates are confirmed pack stock.
+    # Rankings use the complete MFL-owned, age-valid pool. History status is
+    # displayed as research context only and does not decide pack eligibility.
     verified_pool=pool[pool["verification_status"]=="VERIFIED_FROZEN"].copy() if "verification_status" in pool else pool.iloc[0:0].copy()
-    rank_pool=verified_pool if len(verified_pool)>=3 else pool
-    rankings_verified=len(verified_pool)>=3
+    rank_pool=pool
+    rankings_verified=False
 
     best=rank_pool.iloc[0]
     worst=rank_pool.iloc[-1]
@@ -2020,26 +2019,26 @@ elif page=="Pack Scout":
     raw_candidates=int(best.get("raw_candidate_count",len(pool)))
     coverage=float(best.get("verification_coverage",0.0))
     coverage_pct=coverage*100
-    rank_scope="VERIFIED FROZEN" if rankings_verified else "CANDIDATE POOL"
+    rank_scope="MFL-OWNED AGE-VALID POOL"
 
     st.markdown(
         f'<div class="pack-shell" style="--pack-accent:{accent}"><div class="pack-grid">'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Possible candidates</div><div class="pack-kpi-val">{len(pool):,}</div><div class="pack-kpi-sub">Still in consideration after proven aged stock is removed</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">MFL-owned pool</div><div class="pack-kpi-val">{len(pool):,}</div><div class="pack-kpi-sub">Age 16–28 · selected rarity</div></div>'
         f'<div class="pack-kpi"><div class="pack-kpi-lab">Frozen candidates</div><div class="pack-kpi-val">{verified_frozen:,}</div><div class="pack-kpi-sub">Held by MFL across a rollover without ageing</div></div>'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Ruled out</div><div class="pack-kpi-val">{excluded_aged:,}</div><div class="pack-kpi-sub">Aged while held by MFL</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Aged while MFL-owned</div><div class="pack-kpi-val">{excluded_aged:,}</div><div class="pack-kpi-sub">Research flag only · not excluded</div></div>'
         f'<div class="pack-kpi"><div class="pack-kpi-lab">Research coverage</div><div class="pack-kpi-val">{coverage_pct:.1f}%</div><div class="pack-kpi-sub">{pending_verify:,} awaiting checks · {too_new:,} too new to test</div></div>'
         f'</div></div>', unsafe_allow_html=True
     )
     st.caption(
-        f"Pack Scout is a research model, not an official MFL pack list. "
-        f"Current evidence ranges from {verified_frozen:,} frozen candidates to {len(pool):,} possible candidates. "
-        f"Headline rankings currently use the {rank_scope.lower()}."
+        f"Pack Scout is a research tool, not an official MFL pack list. "
+        f"All MFL-owned players aged 16–28 in the selected rarity remain visible. "
+        f"Age-history status is shown separately and does not determine eligibility."
     )
     st.markdown(
         '<div class="pack-status-strip">'
-        '<span class="pack-status-pill"><b>Verified Frozen</b> survived a rollover without ageing</span>'
-        '<span class="pack-status-pill"><b>Pending</b> history still being checked</span>'
-        '<span class="pack-status-pill"><b>Too New</b> joined MFL after the latest rollover</span>'
+        '<span class="pack-status-pill"><b>No age change seen</b> research signal only</span>'
+        '<span class="pack-status-pill"><b>Aged while MFL-owned</b> still included</span>'
+        '<span class="pack-status-pill"><b>Pending / Too New</b> not yet conclusive</span>'
         '</div>',
         unsafe_allow_html=True
     )
