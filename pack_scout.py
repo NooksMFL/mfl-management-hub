@@ -12,10 +12,11 @@ AGE_WEIGHT = 0.5
 
 # Observed on player 164286: the most recent global NEW_AGE rollover.
 # A player already owned by MFL before this timestamp had an opportunity to age.
-LATEST_KNOWN_AGE_ROLLOVER_MS = 1789383117448
+FALLBACK_AGE_ROLLOVER_MS = 1789383117448
+ROLLOVER_SENTINEL_PLAYER_ID = 164286
 CACHE_DB = os.getenv("PACK_SCOUT_DB", "pack_scout_cache.db")
-AUTO_VERIFY_LIMIT = 80
-VERIFY_WORKERS = 10
+AUTO_VERIFY_LIMIT = 24
+VERIFY_WORKERS = 6
 
 # Current MFL rarity bands. Ultimate is progression-only and therefore not a mint/pack tier.
 RARITIES = {
@@ -59,7 +60,11 @@ def _to_row(p):
     return {
         "player_id": pid,
         "player": name,
-        "owned_since": p.get("ownedSince"),
+        "owned_since": (
+            p.get("ownedSince")
+            or p.get("ownershipDate")
+            or ((p.get("ownedBy") or {}).get("since") if isinstance(p.get("ownedBy"), dict) else None)
+        ),
         "overall": overall,
         "age": age,
         "positions": " / ".join(str(x) for x in positions),
@@ -257,7 +262,24 @@ def _history_events(player_id, token):
     payload = agency.get(f"/players/{int(player_id)}/experiences/history", token)
     return agency.arr(payload)
 
-def _classify_from_history(row, token):
+def _latest_rollover(token):
+    """Derive the current global age-rollover marker from a known ageing player."""
+    try:
+        events = _history_events(ROLLOVER_SENTINEL_PLAYER_ID, token)
+        dates = []
+        for e in events:
+            if str(e.get("reasonType") or "").upper() == "NEW_AGE":
+                try:
+                    dates.append(int(e.get("date")))
+                except Exception:
+                    pass
+        if dates:
+            return max(dates)
+    except Exception:
+        pass
+    return FALLBACK_AGE_ROLLOVER_MS
+
+def _classify_from_history(row, token, rollover_ms):
     """
     VERIFIED_FROZEN: MFL owned the player before the latest known rollover and
     no NEW_AGE happened after acquisition.
@@ -271,7 +293,7 @@ def _classify_from_history(row, token):
     except Exception:
         return "UNKNOWN", None
 
-    if owned_ms > LATEST_KNOWN_AGE_ROLLOVER_MS:
+    if owned_ms > rollover_ms:
         return "TOO_NEW", None
 
     events = _history_events(pid, token)
@@ -343,6 +365,7 @@ def _apply_history_verification(df, token, verify_limit=AUTO_VERIFY_LIMIT):
     if df.empty:
         return df
 
+    rollover_ms = _latest_rollover(token)
     ids = [int(x) for x in df["player_id"].tolist()]
     cached = _read_cached_statuses(ids)
 
@@ -358,7 +381,7 @@ def _apply_history_verification(df, token, verify_limit=AUTO_VERIFY_LIMIT):
             statuses[pid] = "UNKNOWN"
             continue
 
-        if owned_ms > LATEST_KNOWN_AGE_ROLLOVER_MS:
+        if owned_ms > rollover_ms:
             statuses[pid] = "TOO_NEW"
             continue
 
@@ -366,7 +389,7 @@ def _apply_history_verification(df, token, verify_limit=AUTO_VERIFY_LIMIT):
         if (
             hit
             and hit.get("owned_since") == owned_ms
-            and int(hit.get("checked_rollover") or 0) == LATEST_KNOWN_AGE_ROLLOVER_MS
+            and int(hit.get("checked_rollover") or 0) == rollover_ms
         ):
             statuses[pid] = hit["status"]
         else:
@@ -379,7 +402,7 @@ def _apply_history_verification(df, token, verify_limit=AUTO_VERIFY_LIMIT):
     writes = []
     if pending:
         with ThreadPoolExecutor(max_workers=VERIFY_WORKERS) as ex:
-            futures = {ex.submit(_classify_from_history, row, token): row for row in pending}
+            futures = {ex.submit(_classify_from_history, row, token, rollover_ms): row for row in pending}
             for fut in as_completed(futures):
                 row = futures[fut]
                 pid = int(row["player_id"])
@@ -391,7 +414,7 @@ def _apply_history_verification(df, token, verify_limit=AUTO_VERIFY_LIMIT):
                     owned_ms = int(row.get("owned_since") or 0)
                 statuses[pid] = status
                 if status in ("AGED", "VERIFIED_FROZEN", "TOO_NEW"):
-                    writes.append((pid, owned_ms, status, latest, LATEST_KNOWN_AGE_ROLLOVER_MS))
+                    writes.append((pid, owned_ms, status, latest, rollover_ms))
     _write_cache(writes)
 
     out = df.copy()
@@ -402,6 +425,7 @@ def _apply_history_verification(df, token, verify_limit=AUTO_VERIFY_LIMIT):
     # Proven ageing while MFL-owned is a hard exclusion.
     out = out[out["verification_status"] != "AGED"].copy()
     out["packable_candidate"] = True
+    out["verification_rollover"] = rollover_ms
     out["packable_reason"] = out["verification_status"].map({
         "VERIFIED_FROZEN": "Verified frozen across latest rollover",
         "TOO_NEW": "Acquired after latest rollover; not yet testable",
