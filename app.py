@@ -1985,10 +1985,22 @@ elif page=="Pack Scout":
 
     best=pool.iloc[0]
     worst=pool.iloc[-1]
-    current_best=pool.sort_values(["overall","age","pull_score"],ascending=[False,True,False]).iloc[0]
-    prospect_pool=pool[pool["age"].fillna(99)<=20]
-    best_prospect=(prospect_pool.sort_values(["pull_score","overall","age"],ascending=[False,False,True]).iloc[0]
-                   if not prospect_pool.empty else best)
+
+    # Headline cards should showcase different players.
+    # Best Prospect excludes the overall best/worst so the row never repeats the same face.
+    excluded_ids={int(best.player_id),int(worst.player_id)}
+    prospect_pool=pool[
+        (pool["age"].fillna(99)<=20)
+        & (~pool["player_id"].astype(int).isin(excluded_ids))
+    ]
+    if not prospect_pool.empty:
+        best_prospect=prospect_pool.sort_values(
+            ["pull_score","overall","age"],ascending=[False,False,True]
+        ).iloc[0]
+    else:
+        alternatives=pool[~pool["player_id"].astype(int).isin(excluded_ids)]
+        best_prospect=(alternatives.iloc[0] if not alternatives.empty else best)
+
     youngest=int(pool["age"].dropna().min()) if pool["age"].notna().any() else "—"
     median_score=float(pool["pull_score"].median())
 
@@ -2019,11 +2031,11 @@ elif page=="Pack Scout":
             f'{" · "+esc(attrs) if attrs else ""}</div></div></div>'
         )
 
-    st.markdown('<div class="section-head2"><h3>Three ways to hit big</h3><span class="small-note2">LIVE POOL LEADERS</span></div>',unsafe_allow_html=True)
+    st.markdown('<div class="section-head2"><h3>Pack highlights</h3><span class="small-note2">THREE DIFFERENT OUTCOMES</span></div>',unsafe_allow_html=True)
     feature_html=(
-        _feature_card(best,"Best overall pull","Best balance of current OVR and age",True)+
-        _feature_card(best_prospect,"Best prospect","Strongest age-adjusted option aged 20 or under")+
-        _feature_card(current_best,"Best current player","Highest OVR available; age breaks ties")
+        _feature_card(best,"Best pull","Best balance of current OVR and age",True)+
+        _feature_card(worst,"Worst pull","Lowest age-adjusted value in the current packable pool")+
+        _feature_card(best_prospect,"Best young prospect","Best age-adjusted player aged 20 or under, excluding the overall best")
     )
     st.markdown(f'<div class="pack-shell" style="--pack-accent:{accent}"><div class="pack-feature-grid">{feature_html}</div></div>',unsafe_allow_html=True)
 
