@@ -1997,7 +1997,7 @@ elif page=="Pack Scout":
         f'<div class="pack-kpi"><div class="pack-kpi-lab">Pool size</div><div class="pack-kpi-val">{len(pool):,}</div><div class="pack-kpi-sub">MFL-owned {esc(rarity.lower())} players</div></div>'
         f'<div class="pack-kpi"><div class="pack-kpi-lab">Top Scout Score</div><div class="pack-kpi-val">{float(best.pull_score):.1f}</div><div class="pack-kpi-sub">{esc(best.player)}</div></div>'
         f'<div class="pack-kpi"><div class="pack-kpi-lab">Highest OVR</div><div class="pack-kpi-val">{int(pool.overall.max())}</div><div class="pack-kpi-sub">Top of the rarity band</div></div>'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Youngest available</div><div class="pack-kpi-val">{youngest}</div><div class="pack-kpi-sub">Packable range 16–28</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Chance per player</div><div class="pack-kpi-val">{float(best.estimated_pull_chance_pct):.4f}%</div><div class="pack-kpi-sub">≈ 1 in {int(best.estimated_one_in):,} if equally weighted</div></div>'
         f'</div></div>', unsafe_allow_html=True
     )
 
@@ -2041,7 +2041,8 @@ elif page=="Pack Scout":
             f'<div class="pack-meta">{int(row.overall)} OVR · Age {esc(age_txt)} · {esc(row.positions or "—")} · {esc(row.nationality or "—")}</div>'
             f'<div class="pack-meta">{esc(attrs) if attrs else ""}</div>'
             f'<span class="pack-badge {cls}">{esc(row.pull_label)} · top {100-pct+1}% of live pool · +{bonus:.1f} age premium</span></div>'
-            f'<div class="pack-score"><strong>{float(row.pull_score):.1f}</strong><span>SCOUT SCORE</span></div></div>'
+            f'<div class="pack-score"><strong>{float(row.pull_score):.1f}</strong><span>SCOUT SCORE</span>'
+            f'<div class="pack-meta" style="margin-top:6px">{float(row.estimated_pull_chance_pct):.4f}% · 1 in {int(row.estimated_one_in):,}</div></div></div>'
         )
 
     with top_tab:
@@ -2089,9 +2090,10 @@ elif page=="Pack Scout":
             view=view[view.pull_label.isin(pull_filter)]
 
         st.caption(f"{len(view):,} of {len(pool):,} players shown")
-        show=view[["rank","player","overall","age","positions","nationality","pull_score","pull_label"]].rename(columns={
+        show=view[["rank","player","overall","age","positions","nationality","pull_score","pull_label","estimated_pull_chance_pct","estimated_one_in"]].rename(columns={
             "rank":"Rank","player":"Player","overall":"OVR","age":"Age","positions":"Position",
-            "nationality":"Nationality","pull_score":"Scout Score","pull_label":"Pull"
+            "nationality":"Nationality","pull_score":"Scout Score","pull_label":"Pull",
+            "estimated_pull_chance_pct":"Est. chance %","estimated_one_in":"Est. 1 in"
         })
         st.dataframe(
             show,use_container_width=True,hide_index=True,
@@ -2099,6 +2101,8 @@ elif page=="Pack Scout":
                 "Scout Score":st.column_config.NumberColumn(format="%.1f"),
                 "OVR":st.column_config.NumberColumn(format="%d"),
                 "Age":st.column_config.NumberColumn(format="%d"),
+                "Est. chance %":st.column_config.NumberColumn(format="%.4f%%"),
+                "Est. 1 in":st.column_config.NumberColumn(format="%d"),
             }
         )
 
@@ -2108,7 +2112,8 @@ elif page=="Pack Scout":
             f'<b>Scout Score is a Pack Scout heuristic, not an official MFL metric.</b><br>'
             f'It starts with the player\'s OVR and adds <b>0.5 points for every year younger than 28</b>. '
             f'That makes youth meaningful without allowing age to overwhelm actual player quality. '
-            f'Pull labels are relative to the live {esc(rarity)} pool: Jackpot is approximately the top 2%, Excellent the next 8%, Good the next 25%, Average the middle 40%, and Poor the bottom 25%.'
+            f'Pull labels are relative to the live {esc(rarity)} pool: Jackpot is approximately the top 2%, Excellent the next 8%, Good the next 25%, Average the middle 40%, and Poor the bottom 25%.<br><br>'
+            f'<b>Estimated pull chance</b> is calculated as 1 divided by the number of currently packable players in this rarity. It assumes every player is equally likely; it is not an official MFL probability unless MFL confirms there is no weighting.'
             f'</div></div>',unsafe_allow_html=True
         )
         st.code("Scout Score = OVR + ((28 - Age) × 0.5)",language=None)
