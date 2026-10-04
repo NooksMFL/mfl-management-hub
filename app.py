@@ -2109,6 +2109,8 @@ elif page=="Pack Scout":
     def _feature_card(row,kicker,reason,hero=False):
         age_txt=int(row.age) if pd.notna(row.age) else "—"
         bonus=max(0,(packs.AGE_MAX-int(row.age))*packs.AGE_WEIGHT) if pd.notna(row.age) else 0
+        attrs=" · ".join(f"{lab} {val}" for lab,val in packs.top_attributes(row))
+        detail=packs.pull_reason(row)
         return (
             f'<div class="pack-feature {"hero" if hero else ""}"><div class="pack-photo-zone">'
             f'<img class="pack-photo" src="{packs.portrait_url(row.player_id)}" alt="{esc(row.player)}">'
@@ -2118,7 +2120,8 @@ elif page=="Pack Scout":
             f'<div class="pack-mini"><span>OVR</span><b>{int(row.overall)}</b></div>'
             f'<div class="pack-mini"><span>Age</span><b>{esc(age_txt)}</b></div>'
             f'<div class="pack-mini"><span>Scout</span><b class="accent">{float(row.pull_score):.1f}</b></div>'
-            f'</div><div class="pack-reason">{esc(reason)} · age premium +{bonus:.1f}</div></div></div>'
+            f'</div><div class="pack-reason">{esc(reason)}<br>{esc(detail)}'
+            f'{" · "+esc(attrs) if attrs else ""}</div></div></div>'
         )
 
     st.markdown('<div class="section-head2"><h3>Three ways to hit big</h3><span class="small-note2">LIVE POOL LEADERS</span></div>',unsafe_allow_html=True)
@@ -2129,17 +2132,20 @@ elif page=="Pack Scout":
     )
     st.markdown(f'<div class="pack-shell" style="--pack-accent:{accent}"><div class="pack-feature-grid">{feature_html}</div></div>',unsafe_allow_html=True)
 
-    top_tab,bottom_tab,all_tab,method_tab=st.tabs(["Best pulls","Worst pulls","Full pool","Scoring"])
+    top_tab,prospect_tab,bottom_tab,all_tab,method_tab=st.tabs(["Best pulls","Young gems","Worst pulls","Full pool","Scoring"])
 
     def _pack_list_card(row,rank_text):
         age_txt=int(row.age) if pd.notna(row.age) else "—"
         bonus=max(0,(packs.AGE_MAX-int(row.age))*packs.AGE_WEIGHT) if pd.notna(row.age) else 0
         cls=str(row.pull_label).lower()
+        pct=max(1,min(100,int(round(float(row.percentile)*100))))
+        attrs=" · ".join(f"{lab} {val}" for lab,val in packs.top_attributes(row))
         return (
             f'<div class="pack-list-card"><div class="pack-list-photo"><img src="{packs.portrait_url(row.player_id)}" alt="{esc(row.player)}"></div>'
             f'<div><div class="pack-rank">{esc(rank_text)}</div><div class="pack-name">{esc(row.player)}</div>'
             f'<div class="pack-meta">{int(row.overall)} OVR · Age {esc(age_txt)} · {esc(row.positions or "—")} · {esc(row.nationality or "—")}</div>'
-            f'<span class="pack-badge {cls}">{esc(row.pull_label)} · +{bonus:.1f} age premium</span></div>'
+            f'<div class="pack-meta">{esc(attrs) if attrs else ""}</div>'
+            f'<span class="pack-badge {cls}">{esc(row.pull_label)} · top {100-pct+1}% of live pool · +{bonus:.1f} age premium</span></div>'
             f'<div class="pack-score"><strong>{float(row.pull_score):.1f}</strong><span>SCOUT SCORE</span></div></div>'
         )
 
@@ -2150,6 +2156,15 @@ elif page=="Pack Scout":
         st.markdown('<div class="section-head2"><h3>Best possible pulls right now</h3><span class="small-note2">AGE-ADJUSTED RANKING</span></div>',unsafe_allow_html=True)
         cards="".join(_pack_list_card(r,f"#{int(r['rank'])} · {str(r.pull_label).upper()}") for _,r in pool.head(n).iterrows())
         st.markdown(f'<div class="pack-shell" style="--pack-accent:{accent}">{cards}</div>',unsafe_allow_html=True)
+
+    with prospect_tab:
+        st.markdown('<div class="section-head2"><h3>Young gems</h3><span class="small-note2">AGE 20 OR UNDER</span></div>',unsafe_allow_html=True)
+        gems=pool[pool["age"].fillna(99)<=20].sort_values(["pull_score","overall","age"],ascending=[False,False,True]).head(25)
+        if gems.empty:
+            st.info("No players aged 20 or under are currently in this live pool.")
+        else:
+            cards="".join(_pack_list_card(r,f"#{i} YOUNG GEM") for i,(_,r) in enumerate(gems.iterrows(),1))
+            st.markdown(f'<div class="pack-shell" style="--pack-accent:{accent}">{cards}</div>',unsafe_allow_html=True)
 
     with bottom_tab:
         a,b=st.columns([1,3])
@@ -2209,7 +2224,7 @@ elif page=="Pack Scout":
             {"Example":"28-year-old strong player","OVR":71,"Age":28,"Age premium":0.0,"Scout Score":packs.pull_score(71,28)},
         ])
         st.dataframe(ex,use_container_width=True,hide_index=True)
-        st.caption(f"Current {rarity} median Scout Score: {median_score:.1f}. A 16-year-old 67 OVR scores 73.0, while a 28-year-old 71 OVR scores 71.0.")
+        st.caption(f"Current {rarity} median Scout Score: {median_score:.1f}. A 16-year-old 67 OVR scores 73.0, while a 28-year-old 71 OVR scores 71.0. Rankings describe player quality/value within the live MFL-owned pool; they do not claim pack draw odds.")
 
 
 elif page=="Sync Centre":
