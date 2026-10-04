@@ -2043,7 +2043,6 @@ elif page=="Pack Scout":
         '</div>',
         unsafe_allow_html=True
     )
-    )
 
     def _feature_card(row,kicker,reason,hero=False):
         age_txt=int(row.age) if pd.notna(row.age) else "—"
