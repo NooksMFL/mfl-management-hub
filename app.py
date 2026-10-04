@@ -1953,8 +1953,8 @@ elif page=="Pack Scout":
         f'<div class="pack-shell" style="--pack-accent:{accent}">'
         f'<div class="pack-hero"><div class="pack-kicker">MFL PACK INTELLIGENCE · {esc(rarity.upper())}</div>'
         f'<div class="pack-title">Pack Scout</div>'
-        f'<div class="pack-copy">Rank likely pack-reserved MFL inventory by more than OVR alone. Pack Scout now excludes players that have aged while MFL-owned, then applies an age-adjusted Scout Score across the 16–28 packable range.</div>'
-        f'<div class="pack-live"><i></i> Inferred pack-reserve pool · {lo}–{hi} OVR · frozen-age filter</div></div></div>',
+        f'<div class="pack-copy">Rank the live MFL-owned 16–28 pool by more than OVR alone. We have evidence that true pack-reserve players may be age-frozen, but full frozen-age verification is not applied on page load because checking every player history would make the app stall.</div>'
+        f'<div class="pack-live"><i></i> Live MFL-owned candidate pool · {lo}–{hi} OVR · age 16–28</div></div></div>',
         unsafe_allow_html=True
     )
 
@@ -2006,7 +2006,7 @@ elif page=="Pack Scout":
 
     st.markdown(
         f'<div class="pack-shell" style="--pack-accent:{accent}"><div class="pack-grid">'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Candidate pool</div><div class="pack-kpi-val">{len(pool):,}</div><div class="pack-kpi-sub">MFL-owned, age 16–28, no NEW_AGE since acquisition</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Candidate pool</div><div class="pack-kpi-val">{len(pool):,}</div><div class="pack-kpi-sub">MFL-owned · age 16–28 · live rarity filter</div></div>'
         f'<div class="pack-kpi"><div class="pack-kpi-lab">Top Scout Score</div><div class="pack-kpi-val">{float(best.pull_score):.1f}</div><div class="pack-kpi-sub">{esc(best.player)}</div></div>'
         f'<div class="pack-kpi"><div class="pack-kpi-lab">Highest OVR</div><div class="pack-kpi-val">{int(pool.overall.max())}</div><div class="pack-kpi-sub">Top of the rarity band</div></div>'
         f'<div class="pack-kpi"><div class="pack-kpi-lab">Chance per player</div><div class="pack-kpi-val">{float(best.estimated_pull_chance_pct):.4f}%</div><div class="pack-kpi-sub">≈ 1 in {int(best.estimated_one_in):,} if equally weighted</div></div>'
@@ -2125,7 +2125,7 @@ elif page=="Pack Scout":
             f'It starts with the player\'s OVR and adds <b>0.5 points for every year younger than 28</b>. '
             f'That makes youth meaningful without allowing age to overwhelm actual player quality. '
             f'Pull labels are relative to the live {esc(rarity)} pool: Jackpot is approximately the top 2%, Excellent the next 8%, Good the next 25%, Average the middle 40%, and Poor the bottom 25%.<br><br>'
-            f'<b>Estimated pull chance</b> is calculated as 1 divided by this inferred candidate pool. It assumes every candidate is equally likely and that the frozen-age rule correctly identifies pack inventory. It is therefore an estimate, not an official MFL probability.'
+            f'<b>Estimated pull chance</b> is calculated as 1 divided by the current candidate pool. It assumes every candidate is equally likely and therefore remains provisional until we can bulk-verify the frozen-age pack inventory.'
             f'</div></div>',unsafe_allow_html=True
         )
         st.code("Scout Score = OVR + ((28 - Age) × 0.5)",language=None)
