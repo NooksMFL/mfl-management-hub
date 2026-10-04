@@ -2213,7 +2213,7 @@ elif page=="Pack Scout":
             f'<b>Scout Score is a Pack Scout heuristic, not an official MFL metric.</b><br>'
             f'It starts with the player\'s OVR and adds <b>0.5 points for every year younger than 28</b>. '
             f'That makes youth meaningful without allowing age to overwhelm actual player quality. '
-            f'Pull labels are relative to the live {esc(rarity)} pool, so Jackpot means roughly the top 5% of what is currently available.'
+            f'Pull labels are relative to the live {esc(rarity)} pool: Jackpot is approximately the top 2%, Excellent the next 8%, Good the next 25%, Average the middle 40%, and Poor the bottom 25%.'
             f'</div></div>',unsafe_allow_html=True
         )
         st.code("Scout Score = OVR + ((28 - Age) × 0.5)",language=None)
