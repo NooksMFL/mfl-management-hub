@@ -184,12 +184,9 @@ def fetch_rarity_pool(rarity):
 
     df["pull_label"] = df["percentile"].map(label)
 
-    # Estimated per-player chance assuming every currently packable player
-    # in the selected rarity is equally likely. This is NOT an official MFL
-    # pack probability unless MFL confirms the draw is uniformly random.
-    pool_size = len(df)
-    df["estimated_pull_chance_pct"] = round(100.0 / pool_size, 6) if pool_size else 0.0
-    df["estimated_one_in"] = pool_size
+    # Do not manufacture a single pull probability while the pool is still
+    # being verified. The bounded estimates added above are safer and make the
+    # uncertainty visible.
     return df
 
 def portrait_url(player_id):
@@ -422,8 +419,40 @@ def _apply_history_verification(df, token, verify_limit=AUTO_VERIFY_LIMIT):
         lambda x: statuses.get(int(x), "PENDING")
     )
 
+    # Capture verification accounting BEFORE removing proven aged stock.
+    raw_count = len(out)
+    aged_count = int((out["verification_status"] == "AGED").sum())
+    frozen_count = int((out["verification_status"] == "VERIFIED_FROZEN").sum())
+    too_new_count = int((out["verification_status"] == "TOO_NEW").sum())
+    pending_count = int(out["verification_status"].isin(["PENDING", "UNKNOWN"]).sum())
+    checked_count = aged_count + frozen_count
+    coverage = (checked_count / raw_count) if raw_count else 0.0
+
     # Proven ageing while MFL-owned is a hard exclusion.
     out = out[out["verification_status"] != "AGED"].copy()
+    candidate_count = len(out)
+
+    out["raw_candidate_count"] = raw_count
+    out["excluded_aged_count"] = aged_count
+    out["verified_frozen_count"] = frozen_count
+    out["too_new_count"] = too_new_count
+    out["pending_verification_count"] = pending_count
+    out["verification_coverage"] = coverage
+    out["candidate_count_after_exclusions"] = candidate_count
+
+    # Probability bounds are intentionally conservative. If every remaining
+    # candidate were packable, an equal-weight player would be 1/candidate_count.
+    # If only the currently VERIFIED_FROZEN players were packable, it would be
+    # 1/frozen_count. These are research bounds, not official MFL odds.
+    out["chance_floor_pct"] = (
+        round(100.0 / candidate_count, 6) if candidate_count else None
+    )
+    out["chance_ceiling_pct"] = (
+        round(100.0 / frozen_count, 6) if frozen_count else None
+    )
+    out["chance_floor_one_in"] = candidate_count if candidate_count else None
+    out["chance_ceiling_one_in"] = frozen_count if frozen_count else None
+
     out["packable_candidate"] = True
     out["verification_rollover"] = rollover_ms
     out["packable_reason"] = out["verification_status"].map({
