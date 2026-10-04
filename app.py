@@ -1968,32 +1968,75 @@ elif page=="Insights":
 
 # ---------------- PACK SCOUT ----------------
 elif page=="Pack Scout":
+    rarity_colours={
+        "Common":"#a8b0b4",
+        "Limited":"#7fd36b",
+        "Uncommon":"#39a8ff",
+        "Rare":"#b16cff",
+        "Legendary":"#ffb02e",
+    }
+
     st.markdown("""
     <style>
-    .pack-hero{position:relative;overflow:hidden;border:1px solid #173944;border-radius:14px;
-      background:linear-gradient(115deg,#07151c 0%,#07151c 48%,#10271f 100%);
-      padding:22px 24px;margin-bottom:14px}
-    .pack-kicker{font-size:.68rem;letter-spacing:.16em;color:#13e0b4;font-weight:900}
-    .pack-title{font-size:2.1rem;color:#f7fbfa;font-weight:930;letter-spacing:-.055em;margin-top:7px}
-    .pack-copy{font-size:.86rem;color:#789096;line-height:1.55;margin-top:7px;max-width:820px}
+    .pack-shell{--pack-accent:#13e0b4}
+    .pack-hero{position:relative;overflow:hidden;border:1px solid #173944;border-radius:16px;
+      background:
+        radial-gradient(520px 220px at 83% 10%,color-mix(in srgb,var(--pack-accent) 22%,transparent),transparent 68%),
+        linear-gradient(115deg,#061319 0%,#07151c 52%,#0a2025 100%);
+      padding:25px 27px 24px;margin-bottom:14px;min-height:178px}
+    .pack-hero:after{content:"";position:absolute;right:-85px;top:-105px;width:340px;height:340px;border-radius:50%;
+      border:54px solid color-mix(in srgb,var(--pack-accent) 5%,transparent)}
+    .pack-kicker{font-size:.65rem;letter-spacing:.18em;color:var(--pack-accent);font-weight:900}
+    .pack-title{font-size:2.35rem;color:#f8fbfb;font-weight:950;letter-spacing:-.06em;margin-top:8px;line-height:1}
+    .pack-copy{font-size:.84rem;color:#82969b;line-height:1.55;margin-top:10px;max-width:780px}
+    .pack-live{display:inline-flex;align-items:center;gap:7px;margin-top:16px;padding:6px 9px;border-radius:999px;
+      border:1px solid #21444d;background:#081a21;color:#9eb0b4;font-size:.61rem;font-weight:750}
+    .pack-live i{width:7px;height:7px;border-radius:50%;background:var(--pack-accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--pack-accent) 10%,transparent)}
     .pack-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:13px 0 18px}
-    .pack-kpi{background:#07161d;border:1px solid #173843;border-radius:11px;padding:14px}
-    .pack-kpi-lab{font-size:.61rem;color:#607b82;text-transform:uppercase;letter-spacing:.08em;font-weight:850}
-    .pack-kpi-val{font-size:1.7rem;color:#f3f9f8;font-weight:930;letter-spacing:-.05em;margin-top:8px}
-    .pack-card{background:#07161d;border:1px solid #173843;border-radius:12px;padding:14px;margin-bottom:9px}
-    .pack-rank{font-size:.58rem;color:#13e0b4;letter-spacing:.11em;font-weight:900}
-    .pack-name{font-size:1.08rem;color:#eef6f4;font-weight:900;margin-top:5px}
-    .pack-meta{font-size:.68rem;color:#70878d;margin-top:4px}
-    .pack-score{font-size:1.45rem;color:#13e0b4;font-weight:930}
-    .pack-pill{display:inline-block;font-size:.62rem;padding:4px 7px;border-radius:999px;background:#0d2826;
-      border:1px solid #1a5c50;color:#b8fff0;margin-top:8px}
-    @media(max-width:900px){.pack-grid{grid-template-columns:1fr 1fr}}
+    .pack-kpi{position:relative;overflow:hidden;background:linear-gradient(145deg,#08171e,#061219);border:1px solid #173843;border-radius:12px;padding:14px}
+    .pack-kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--pack-accent)}
+    .pack-kpi-lab{font-size:.58rem;color:#607b82;text-transform:uppercase;letter-spacing:.09em;font-weight:850}
+    .pack-kpi-val{font-size:1.72rem;color:#f3f9f8;font-weight:950;letter-spacing:-.05em;margin-top:7px}
+    .pack-kpi-sub{font-size:.61rem;color:#597178;margin-top:4px}
+    .pack-feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin:13px 0 19px}
+    .pack-feature{position:relative;overflow:hidden;min-height:238px;background:linear-gradient(145deg,#08171e,#061219);
+      border:1px solid #173944;border-radius:14px}
+    .pack-feature.hero{border-color:color-mix(in srgb,var(--pack-accent) 58%,#173944)}
+    .pack-photo-zone{position:relative;height:132px;overflow:hidden;background:
+      radial-gradient(circle at 72% 35%,color-mix(in srgb,var(--pack-accent) 22%,transparent),transparent 44%),#091820}
+    .pack-photo-zone:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,12,16,.88),rgba(4,12,16,.18) 70%)}
+    .pack-photo{position:absolute;right:5px;top:4px;width:138px;height:138px;object-fit:contain;object-position:center top;
+      filter:drop-shadow(0 10px 16px rgba(0,0,0,.48))}
+    .pack-card-copy{position:absolute;left:14px;top:13px;z-index:2;max-width:58%}
+    .pack-card-kicker{font-size:.57rem;color:var(--pack-accent);letter-spacing:.12em;font-weight:900;text-transform:uppercase}
+    .pack-card-name{font-size:1.15rem;color:#f5faf9;font-weight:930;line-height:1.02;letter-spacing:-.04em;margin-top:7px}
+    .pack-card-pos{font-size:.62rem;color:#789097;margin-top:5px}
+    .pack-card-body{padding:12px 14px 14px}
+    .pack-card-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+    .pack-mini{background:#0a2028;border:1px solid #173b45;border-radius:8px;padding:8px}
+    .pack-mini span{display:block;font-size:.53rem;color:#58737a;text-transform:uppercase;letter-spacing:.07em}
+    .pack-mini b{display:block;font-size:.92rem;color:#edf5f4;margin-top:3px}
+    .pack-mini b.accent{color:var(--pack-accent)}
+    .pack-reason{font-size:.63rem;color:#74898f;line-height:1.4;margin-top:9px}
+    .pack-list-card{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center;background:#07161d;
+      border:1px solid #173843;border-radius:11px;padding:10px 12px;margin-bottom:8px}
+    .pack-list-photo{width:68px;height:72px;border-radius:9px;overflow:hidden;background:#0a2028;border:1px solid #193e49}
+    .pack-list-photo img{width:100%;height:100%;object-fit:contain;object-position:center top}
+    .pack-rank{font-size:.55rem;color:var(--pack-accent);letter-spacing:.10em;font-weight:900}
+    .pack-name{font-size:.92rem;color:#eef6f4;font-weight:880;margin-top:3px}
+    .pack-meta{font-size:.61rem;color:#6b8389;margin-top:3px}
+    .pack-score{text-align:right}.pack-score strong{display:block;font-size:1.35rem;color:var(--pack-accent);font-weight:950}
+    .pack-score span{font-size:.52rem;color:#587178;letter-spacing:.08em}
+    .pack-badge{display:inline-block;font-size:.56rem;padding:4px 6px;border-radius:999px;background:#0b2429;border:1px solid #1c444d;color:#9fb3b6;margin-top:6px}
+    .pack-badge.jackpot{color:#ffe29a;border-color:#6f5a1f;background:#211b09}
+    .pack-badge.excellent{color:#baffee;border-color:#1d6657;background:#0c2822}
+    .pack-badge.good{color:#c7ddff;border-color:#2a4d72;background:#0b1d2b}
+    .pack-badge.average{color:#d2d8da}.pack-badge.poor{color:#a8afb1}
+    .pack-note{background:#07161d;border:1px solid #173843;border-radius:11px;padding:13px 14px;color:#788f95;font-size:.70rem;line-height:1.5}
+    .pack-note b{color:#e8f0ef}
+    @media(max-width:1000px){.pack-grid{grid-template-columns:1fr 1fr}.pack-feature-grid{grid-template-columns:1fr}.pack-list-card{grid-template-columns:62px 1fr auto}}
+    @media(max-width:650px){.pack-grid{grid-template-columns:1fr 1fr}.pack-list-card{grid-template-columns:54px 1fr}.pack-score{grid-column:2;text-align:left}.pack-feature-grid{grid-template-columns:1fr}}
     </style>
-    <div class="pack-hero">
-      <div class="pack-kicker">LIVE MFL WALLET · PACK INTELLIGENCE</div>
-      <div class="pack-title">Pack Scout</div>
-      <div class="pack-copy">See the strongest and weakest players currently sitting with MFL for each pack rarity. Scout Score balances OVR with age, so a young lower-rated player can outrank an older player with a slightly higher OVR.</div>
-    </div>
     """, unsafe_allow_html=True)
 
     rarity = st.segmented_control(
@@ -2002,20 +2045,28 @@ elif page=="Pack Scout":
         default="Uncommon",
         selection_mode="single",
         key="pack_scout_rarity"
-    )
-    if not rarity:
-        rarity="Uncommon"
-
+    ) or "Uncommon"
+    accent=rarity_colours[rarity]
     lo,hi=packs.RARITIES[rarity]
-    st.caption(f"{rarity}: {lo}–{hi} OVR · Packable ages: {packs.AGE_MIN}–{packs.AGE_MAX} · Age bonus: +0.5 Scout Score per year younger than 28")
+
+    st.markdown(
+        f'<div class="pack-shell" style="--pack-accent:{accent}">'
+        f'<div class="pack-hero"><div class="pack-kicker">MFL PACK INTELLIGENCE · {esc(rarity.upper())}</div>'
+        f'<div class="pack-title">Pack Scout</div>'
+        f'<div class="pack-copy">Rank the live MFL-owned pool by more than OVR alone. Scout Score adds an age premium across the 16–28 packable range, so genuine young prospects rise without completely overpowering current quality.</div>'
+        f'<div class="pack-live"><i></i> Live MFL-owned pool · {lo}–{hi} OVR</div></div></div>',
+        unsafe_allow_html=True
+    )
 
     @st.cache_data(ttl=600,show_spinner=False)
     def _load_pack_pool(r):
         return packs.fetch_rarity_pool(r)
 
-    c1,c2=st.columns([1.1,4])
-    with c1:
+    controls=st.columns([1.1,1.1,4])
+    with controls[0]:
         refresh_pack=st.button("↻ Refresh pool",type="primary",use_container_width=True,key="refresh_pack_pool")
+    with controls[1]:
+        st.caption("Auto cache: 10 min")
     if refresh_pack:
         _load_pack_pool.clear()
 
@@ -2034,47 +2085,78 @@ elif page=="Pack Scout":
 
     best=pool.iloc[0]
     worst=pool.iloc[-1]
+    current_best=pool.sort_values(["overall","age","pull_score"],ascending=[False,True,False]).iloc[0]
+    prospect_pool=pool[pool["age"].fillna(99)<=20]
+    best_prospect=(prospect_pool.sort_values(["pull_score","overall","age"],ascending=[False,False,True]).iloc[0]
+                   if not prospect_pool.empty else best)
     youngest=int(pool["age"].dropna().min()) if pool["age"].notna().any() else "—"
+    median_score=float(pool["pull_score"].median())
+
     st.markdown(
-        f'<div class="pack-grid">'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Players available</div><div class="pack-kpi-val">{len(pool):,}</div></div>'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Best Scout Score</div><div class="pack-kpi-val">{float(best.pull_score):.1f}</div></div>'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Highest OVR</div><div class="pack-kpi-val">{int(pool.overall.max())}</div></div>'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Youngest available</div><div class="pack-kpi-val">{youngest}</div></div>'
-        f'</div>', unsafe_allow_html=True
+        f'<div class="pack-shell" style="--pack-accent:{accent}"><div class="pack-grid">'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Pool size</div><div class="pack-kpi-val">{len(pool):,}</div><div class="pack-kpi-sub">MFL-owned {esc(rarity.lower())} players</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Top Scout Score</div><div class="pack-kpi-val">{float(best.pull_score):.1f}</div><div class="pack-kpi-sub">{esc(best.player)}</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Highest OVR</div><div class="pack-kpi-val">{int(pool.overall.max())}</div><div class="pack-kpi-sub">Top of the rarity band</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Youngest available</div><div class="pack-kpi-val">{youngest}</div><div class="pack-kpi-sub">Packable range 16–28</div></div>'
+        f'</div></div>', unsafe_allow_html=True
     )
 
-    top_tab,bottom_tab,all_tab,method_tab=st.tabs(["Best possible pulls","Worst possible pulls","Full pool","How scoring works"])
-
-    def _pack_card(row, rank_text):
+    def _feature_card(row,kicker,reason,hero=False):
         age_txt=int(row.age) if pd.notna(row.age) else "—"
-        pos=row.positions or "—"
-        nat=row.nationality or "—"
+        bonus=max(0,(packs.AGE_MAX-int(row.age))*packs.AGE_WEIGHT) if pd.notna(row.age) else 0
         return (
-            f'<div class="pack-card"><div style="display:flex;justify-content:space-between;gap:14px;align-items:center">'
-            f'<div><div class="pack-rank">{esc(rank_text)} · {esc(row.pull_label.upper())}</div>'
-            f'<div class="pack-name">{esc(row.player)}</div>'
-            f'<div class="pack-meta">{int(row.overall)} OVR · Age {esc(age_txt)} · {esc(pos)} · {esc(nat)}</div>'
-            f'<div class="pack-pill">{esc(row.pull_label)} pull</div></div>'
-            f'<div style="text-align:right"><div class="pack-score">{float(row.pull_score):.1f}</div>'
-            f'<div class="pack-meta">SCOUT SCORE</div></div></div></div>'
+            f'<div class="pack-feature {"hero" if hero else ""}"><div class="pack-photo-zone">'
+            f'<img class="pack-photo" src="{packs.portrait_url(row.player_id)}" alt="{esc(row.player)}">'
+            f'<div class="pack-card-copy"><div class="pack-card-kicker">{esc(kicker)}</div>'
+            f'<div class="pack-card-name">{esc(row.player)}</div><div class="pack-card-pos">{esc(row.positions or "—")}</div></div></div>'
+            f'<div class="pack-card-body"><div class="pack-card-stats">'
+            f'<div class="pack-mini"><span>OVR</span><b>{int(row.overall)}</b></div>'
+            f'<div class="pack-mini"><span>Age</span><b>{esc(age_txt)}</b></div>'
+            f'<div class="pack-mini"><span>Scout</span><b class="accent">{float(row.pull_score):.1f}</b></div>'
+            f'</div><div class="pack-reason">{esc(reason)} · age premium +{bonus:.1f}</div></div></div>'
+        )
+
+    st.markdown('<div class="section-head2"><h3>Three ways to hit big</h3><span class="small-note2">LIVE POOL LEADERS</span></div>',unsafe_allow_html=True)
+    feature_html=(
+        _feature_card(best,"Best overall pull","Best balance of current OVR and age",True)+
+        _feature_card(best_prospect,"Best prospect","Strongest age-adjusted option aged 20 or under")+
+        _feature_card(current_best,"Best current player","Highest OVR available; age breaks ties")
+    )
+    st.markdown(f'<div class="pack-shell" style="--pack-accent:{accent}"><div class="pack-feature-grid">{feature_html}</div></div>',unsafe_allow_html=True)
+
+    top_tab,bottom_tab,all_tab,method_tab=st.tabs(["Best pulls","Worst pulls","Full pool","Scoring"])
+
+    def _pack_list_card(row,rank_text):
+        age_txt=int(row.age) if pd.notna(row.age) else "—"
+        bonus=max(0,(packs.AGE_MAX-int(row.age))*packs.AGE_WEIGHT) if pd.notna(row.age) else 0
+        cls=str(row.pull_label).lower()
+        return (
+            f'<div class="pack-list-card"><div class="pack-list-photo"><img src="{packs.portrait_url(row.player_id)}" alt="{esc(row.player)}"></div>'
+            f'<div><div class="pack-rank">{esc(rank_text)}</div><div class="pack-name">{esc(row.player)}</div>'
+            f'<div class="pack-meta">{int(row.overall)} OVR · Age {esc(age_txt)} · {esc(row.positions or "—")} · {esc(row.nationality or "—")}</div>'
+            f'<span class="pack-badge {cls}">{esc(row.pull_label)} · +{bonus:.1f} age premium</span></div>'
+            f'<div class="pack-score"><strong>{float(row.pull_score):.1f}</strong><span>SCOUT SCORE</span></div></div>'
         )
 
     with top_tab:
-        st.markdown('<div class="section-head2"><h3>Best possible pulls right now</h3><span class="small-note2">OVR + AGE VALUE</span></div>',unsafe_allow_html=True)
-        n=st.slider("Show top",5,50,15,5,key="pack_top_n")
-        for _,r in pool.head(n).iterrows():
-            st.markdown(_pack_card(r,f"#{int(r['rank'])}"),unsafe_allow_html=True)
+        a,b=st.columns([1,3])
+        with a:
+            n=st.select_slider("Show",options=[5,10,15,20,30,50],value=15,key="pack_top_n")
+        st.markdown('<div class="section-head2"><h3>Best possible pulls right now</h3><span class="small-note2">AGE-ADJUSTED RANKING</span></div>',unsafe_allow_html=True)
+        cards="".join(_pack_list_card(r,f"#{int(r['rank'])} · {str(r.pull_label).upper()}") for _,r in pool.head(n).iterrows())
+        st.markdown(f'<div class="pack-shell" style="--pack-accent:{accent}">{cards}</div>',unsafe_allow_html=True)
 
     with bottom_tab:
+        a,b=st.columns([1,3])
+        with a:
+            n2=st.select_slider("Show",options=[5,10,15,20,30,50],value=15,key="pack_bottom_n")
         st.markdown('<div class="section-head2"><h3>Worst possible pulls right now</h3><span class="small-note2">LOWEST SCOUT SCORE</span></div>',unsafe_allow_html=True)
-        n2=st.slider("Show bottom",5,50,15,5,key="pack_bottom_n")
         bottom=pool.tail(n2).sort_values(["pull_score","overall","age"],ascending=[True,True,False])
-        for _,r in bottom.iterrows():
-            st.markdown(_pack_card(r,f"#{int(r['rank'])}"),unsafe_allow_html=True)
+        cards="".join(_pack_list_card(r,f"#{int(r['rank'])} · {str(r.pull_label).upper()}") for _,r in bottom.iterrows())
+        st.markdown(f'<div class="pack-shell" style="--pack-accent:{accent}">{cards}</div>',unsafe_allow_html=True)
 
     with all_tab:
-        f1,f2,f3=st.columns(3)
+        f1,f2,f3,f4=st.columns(4)
         with f1:
             ages=st.slider("Age",packs.AGE_MIN,packs.AGE_MAX,(packs.AGE_MIN,packs.AGE_MAX),key="pack_age")
         with f2:
@@ -2082,26 +2164,48 @@ elif page=="Pack Scout":
         with f3:
             positions=sorted({p.strip() for x in pool.positions.fillna("") for p in str(x).split("/") if p.strip()})
             pos_filter=st.multiselect("Position",positions,key="pack_positions")
+        with f4:
+            pull_filter=st.multiselect("Pull rating",["Jackpot","Excellent","Good","Average","Poor"],key="pack_labels")
+
         view=pool[(pool.age.fillna(packs.AGE_MAX).between(*ages)) & (pool.overall.between(*ovrs))].copy()
         if pos_filter:
             view=view[view.positions.fillna("").apply(lambda x:any(p in [q.strip() for q in str(x).split("/")] for p in pos_filter))]
+        if pull_filter:
+            view=view[view.pull_label.isin(pull_filter)]
+
+        st.caption(f"{len(view):,} of {len(pool):,} players shown")
         show=view[["rank","player","overall","age","positions","nationality","pull_score","pull_label"]].rename(columns={
             "rank":"Rank","player":"Player","overall":"OVR","age":"Age","positions":"Position",
             "nationality":"Nationality","pull_score":"Scout Score","pull_label":"Pull"
         })
-        st.dataframe(show,use_container_width=True,hide_index=True)
+        st.dataframe(
+            show,use_container_width=True,hide_index=True,
+            column_config={
+                "Scout Score":st.column_config.NumberColumn(format="%.1f"),
+                "OVR":st.column_config.NumberColumn(format="%d"),
+                "Age":st.column_config.NumberColumn(format="%d"),
+            }
+        )
 
     with method_tab:
-        st.markdown("### Scout Score")
-        st.write("Scout Score is a Pack Scout heuristic, not an official MFL rating.")
+        st.markdown(
+            f'<div class="pack-shell" style="--pack-accent:{accent}"><div class="pack-note">'
+            f'<b>Scout Score is a Pack Scout heuristic, not an official MFL metric.</b><br>'
+            f'It starts with the player\'s OVR and adds <b>0.5 points for every year younger than 28</b>. '
+            f'That makes youth meaningful without allowing age to overwhelm actual player quality. '
+            f'Pull labels are relative to the live {esc(rarity)} pool, so Jackpot means roughly the top 5% of what is currently available.'
+            f'</div></div>',unsafe_allow_html=True
+        )
         st.code("Scout Score = OVR + ((28 - Age) × 0.5)",language=None)
         ex=pd.DataFrame([
-            {"Example":"Young prospect","OVR":67,"Age":16,"Scout Score":packs.pull_score(67,16)},
-            {"Example":"Prime-age player","OVR":71,"Age":21,"Scout Score":packs.pull_score(71,21)},
-            {"Example":"Older high OVR","OVR":71,"Age":28,"Scout Score":packs.pull_score(71,28)},
+            {"Example":"16-year-old prospect","OVR":67,"Age":16,"Age premium":6.0,"Scout Score":packs.pull_score(67,16)},
+            {"Example":"18-year-old high upside","OVR":69,"Age":18,"Age premium":5.0,"Scout Score":packs.pull_score(69,18)},
+            {"Example":"21-year-old strong player","OVR":71,"Age":21,"Age premium":3.5,"Scout Score":packs.pull_score(71,21)},
+            {"Example":"28-year-old strong player","OVR":71,"Age":28,"Age premium":0.0,"Scout Score":packs.pull_score(71,28)},
         ])
         st.dataframe(ex,use_container_width=True,hide_index=True)
-        st.caption("This deliberately gives meaningful value to youth without letting age completely overpower player quality. Labels are relative to the current live pool for that rarity.")
+        st.caption(f"Current {rarity} median Scout Score: {median_score:.1f}. A 16-year-old 67 OVR scores 73.0, while a 28-year-old 71 OVR scores 71.0.")
+
 
 elif page=="Sync Centre":
     if not wallet:
