@@ -120,7 +120,14 @@ def fetch_rarity_pool(rarity):
         return df
 
     df = df.drop_duplicates("player_id").copy()
+    df["age_bonus"] = [
+        round(max(0, (AGE_MAX - max(AGE_MIN, min(AGE_MAX, int(a))))) * AGE_WEIGHT, 2)
+        if pd.notna(a) else 0.0
+        for a in df["age"]
+    ]
     df["pull_score"] = [pull_score(o, a) for o, a in zip(df["overall"], df["age"])]
+    df["ovr_band_pct"] = ((df["overall"] - lo) / max(hi - lo, 1)).clip(0, 1)
+    df["prospect"] = df["age"].fillna(99).le(20)
     df = df.sort_values(["pull_score", "overall", "age"], ascending=[False, False, True]).reset_index(drop=True)
     n = len(df)
     df["rank"] = range(1, n + 1)
@@ -130,13 +137,14 @@ def fetch_rarity_pool(rarity):
         df["percentile"] = 1.0
 
     def label(p):
-        if p >= 0.95:
+        # Make the top labels genuinely special within the live rarity pool.
+        if p >= 0.98:
             return "Jackpot"
-        if p >= 0.80:
+        if p >= 0.90:
             return "Excellent"
-        if p >= 0.55:
+        if p >= 0.65:
             return "Good"
-        if p >= 0.20:
+        if p >= 0.25:
             return "Average"
         return "Poor"
 
@@ -145,3 +153,49 @@ def fetch_rarity_pool(rarity):
 
 def portrait_url(player_id):
     return f"https://d13e14gtps4iwl.cloudfront.net/players/v2/{int(player_id)}/photo.webp"
+
+
+def pull_reason(row):
+    """Short human-readable explanation for a player's Pack Scout rank."""
+    try:
+        age = int(row["age"])
+    except Exception:
+        age = None
+    try:
+        overall = int(row["overall"])
+    except Exception:
+        overall = None
+    bonus = float(row.get("age_bonus", 0) or 0)
+
+    if age is None or overall is None:
+        return "Ranked from the available player data"
+
+    if age <= 18 and bonus >= 5:
+        return f"Elite age value: only {age}, adding +{bonus:.1f} to the Scout Score"
+    if age <= 20 and bonus >= 4:
+        return f"High-upside prospect: age {age} adds +{bonus:.1f} to the Scout Score"
+    if age <= 23:
+        return f"Good age profile: age {age} adds +{bonus:.1f} while keeping current OVR important"
+    if age >= 27:
+        return f"Current quality matters most here: age {age} gives only +{bonus:.1f} age premium"
+    return f"Balanced profile: {overall} OVR with a +{bonus:.1f} age premium"
+
+def top_attributes(row, limit=3):
+    labels = [
+        ("PAC", row.get("pace")),
+        ("SHO", row.get("shooting")),
+        ("PAS", row.get("passing")),
+        ("DRI", row.get("dribbling")),
+        ("DEF", row.get("defense")),
+        ("PHY", row.get("physical")),
+    ]
+    if "GK" in str(row.get("positions") or ""):
+        labels.append(("GK", row.get("goalkeeping")))
+    vals=[]
+    for lab,val in labels:
+        try:
+            vals.append((lab, int(val)))
+        except Exception:
+            continue
+    vals.sort(key=lambda x:x[1], reverse=True)
+    return vals[:limit]
