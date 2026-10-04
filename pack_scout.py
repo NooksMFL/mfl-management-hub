@@ -85,6 +85,8 @@ def fetch_rarity_pool(rarity):
             "ownerWalletAddress": MFL_WALLET,
             "overallMin": lo,
             "overallMax": hi,
+            "ageMin": AGE_MIN,
+            "ageMax": AGE_MAX,
         }
         if before is not None:
             params["beforePlayerId"] = before
@@ -105,7 +107,12 @@ def fetch_rarity_pool(rarity):
                 continue
             seen.add(pid)
             row = _to_row(p)
-            if row["overall"] is not None and lo <= row["overall"] <= hi:
+            if (
+                row["overall"] is not None
+                and lo <= row["overall"] <= hi
+                and row["age"] is not None
+                and AGE_MIN <= row["age"] <= AGE_MAX
+            ):
                 rows.append(row)
                 new_count += 1
 
@@ -120,6 +127,10 @@ def fetch_rarity_pool(rarity):
         return df
 
     df = df.drop_duplicates("player_id").copy()
+    # Defensive local filter: Pack Scout must NEVER include non-packable ages.
+    df = df[df["age"].between(AGE_MIN, AGE_MAX, inclusive="both")].copy()
+    if df.empty:
+        return df
     df["age_bonus"] = [
         round(max(0, (AGE_MAX - max(AGE_MIN, min(AGE_MAX, int(a))))) * AGE_WEIGHT, 2)
         if pd.notna(a) else 0.0
