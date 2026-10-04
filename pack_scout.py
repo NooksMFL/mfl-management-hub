@@ -48,6 +48,7 @@ def _to_row(p):
     return {
         "player_id": pid,
         "player": name,
+        "owned_since": p.get("ownedSince"),
         "overall": overall,
         "age": age,
         "positions": " / ".join(str(x) for x in positions),
@@ -129,6 +130,20 @@ def fetch_rarity_pool(rarity):
     df = df.drop_duplicates("player_id").copy()
     # Defensive local filter: Pack Scout must NEVER include non-packable ages.
     df = df[df["age"].between(AGE_MIN, AGE_MAX, inclusive="both")].copy()
+    if df.empty:
+        return df
+
+    # Inferred pack-reserve filter: exclude players that have received a NEW_AGE
+    # event after MFL acquired them. This is deliberately conservative.
+    candidate_flags=[]
+    candidate_reasons=[]
+    for _, r in df.iterrows():
+        ok, reason = is_packable_candidate(r, token)
+        candidate_flags.append(bool(ok))
+        candidate_reasons.append(reason)
+    df["packable_candidate"] = candidate_flags
+    df["packable_reason"] = candidate_reasons
+    df = df[df["packable_candidate"]].copy()
     if df.empty:
         return df
     df["age_bonus"] = [
@@ -217,3 +232,45 @@ def top_attributes(row, limit=3):
             continue
     vals.sort(key=lambda x:x[1], reverse=True)
     return vals[:limit]
+
+
+def _history_events(player_id, token):
+    """Return player history events used to infer whether MFL-held inventory is age-frozen."""
+    try:
+        payload = agency.get(f"/players/{int(player_id)}/history", token)
+        return agency.arr(payload)
+    except Exception:
+        return []
+
+def is_packable_candidate(row, token):
+    """
+    Inferred Pack Scout rule:
+    - player is currently MFL-owned (handled by wallet query)
+    - age is 16-28 (handled before this function)
+    - no NEW_AGE event has occurred since MFL acquired the player
+
+    This is an inference based on known examples, not an official MFL flag.
+    """
+    owned_since = row.get("owned_since")
+    events = _history_events(row.get("player_id"), token)
+
+    if owned_since is None:
+        # Without an ownership timestamp we cannot safely prove the player was frozen.
+        return False, "No ownership date"
+
+    try:
+        owned_ms = int(owned_since)
+    except Exception:
+        return False, "Invalid ownership date"
+
+    for e in events:
+        if str(e.get("reasonType") or "").upper() != "NEW_AGE":
+            continue
+        try:
+            event_ms = int(e.get("date"))
+        except Exception:
+            continue
+        if event_ms >= owned_ms:
+            return False, "Aged while MFL-owned"
+
+    return True, "No NEW_AGE since MFL acquisition"
