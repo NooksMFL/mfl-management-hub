@@ -15,7 +15,6 @@ import agency_backend as agency
 import grower_backend as grower
 import club_backend as club
 import wallet_cache_backend as shared
-import rewards_backend as rewards
 import pack_scout as packs
 
 st.set_page_config(
@@ -831,7 +830,7 @@ def valid_wallet(v):
 if "wallet" not in st.session_state: st.session_state.wallet=""
 
 # ---------------- SIDEBAR ----------------
-nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Rewards Calculator","Pack Scout","Watchlist","Compare","Insights","Sync Centre"]
+nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Pack Scout","Watchlist","Compare","Insights","Sync Centre"]
 query_page=st.query_params.get("page","Home")
 if query_page not in nav_pages:
     query_page="Home"
@@ -1598,110 +1597,6 @@ elif page=="Club Development":
             use_container_width=True,hide_index=True,height=520
         )
 
-
-
-elif page=="Rewards Calculator":
-    st.markdown(
-        '<div class="suite-hero"><div class="suite-kicker">SEASON 17 · MFL REWARDS</div>'
-        '<div class="suite-title">Rewards Calculator</div>'
-        '<div class="suite-copy">Project season-end MFL from owned clubs, staff revenue shares and your players contracted elsewhere. Use your connected wallet or paste another Flow/Dapper wallet to check a friend.</div></div>',
-        unsafe_allow_html=True
-    )
-
-    reward_wallet=st.text_input(
-        "Flow / Dapper wallet",
-        value=wallet or "",
-        placeholder="0x…",
-        key="rewards_wallet_input"
-    ).strip().lower()
-
-    c1,c2=st.columns([1,4])
-    with c1:
-        run_rewards=st.button("Calculate rewards",type="primary",use_container_width=True,key="rewards_calculate")
-    with c2:
-        st.caption("This is the beta calculator. Incoming club/staff/player rewards are calculated from live MFL data; exact external player/coach deductions are the next validation step.")
-
-    if run_rewards:
-        if not valid_wallet(reward_wallet):
-            st.error("Enter a valid Flow/Dapper wallet address.")
-        else:
-            try:
-                with st.spinner("Loading clubs, contracts and live competitions…"):
-                    rr=rewards.calculate(reward_wallet)
-                st.session_state["reward_result"]=rr
-                st.session_state["reward_result_wallet"]=reward_wallet
-            except Exception as e:
-                st.error("MFL could not calculate this wallet yet.")
-                with st.expander("Technical detail"):
-                    st.code(str(e))
-
-    rr=st.session_state.get("reward_result")
-    rr_wallet=st.session_state.get("reward_result_wallet")
-    if rr and rr_wallet==reward_wallet:
-        st.markdown(
-            f'<div class="agency-kpis">'
-            f'<div class="ag-kpi"><div class="ag-kpi-label">Known projected earnings</div><div class="ag-kpi-value green">{rr["known_total"]:,.2f}</div></div>'
-            f'<div class="ag-kpi"><div class="ag-kpi-label">Owned club gross</div><div class="ag-kpi-value">{rr["club_gross"]:,.2f}</div></div>'
-            f'<div class="ag-kpi"><div class="ag-kpi-label">Staff earnings</div><div class="ag-kpi-value blue">{rr["staff_total"]:,.2f}</div></div>'
-            f'<div class="ag-kpi"><div class="ag-kpi-label">Players out</div><div class="ag-kpi-value violet">{rr["loan_total"]:,.2f}</div></div>'
-            f'</div>',
-            unsafe_allow_html=True
-        )
-        st.caption(
-            f'{rr["owned_count"]} owned clubs · {rr["staff_count"]} staff relationships · '
-            f'{rr["loan_count"]} owned players earning revenue share elsewhere'
-        )
-
-        st.info(
-            "For your Nooks wallet, Agent Hub currently gives the validation target 38,411.40 MFL net. "
-            "This beta deliberately does not invent the remaining player/coach deductions; we will use the comparison to finish the exact NET calculation."
-        )
-
-        with st.expander("Rewards API diagnostic (temporary)"):
-            try:
-                diag=rewards.diagnostic_reward_sources(reward_wallet)
-                st.markdown("**Managed club / staff source**")
-                st.json(diag.get("staff"))
-                st.markdown("**Loan club source**")
-                st.json(diag.get("loan"))
-            except Exception as e:
-                st.code(str(e))
-
-        st.markdown('<div class="section-head2"><h3>Owned clubs</h3><span class="small-note2">LEAGUE + CUP PROJECTION</span></div>',unsafe_allow_html=True)
-        if not rr["owned"]:
-            st.warning("No MFL_OWNER clubs were found for this wallet.")
-        else:
-            for club_row in sorted(rr["owned"],key=lambda x:x["gross"],reverse=True):
-                with st.expander(f'{club_row["name"]} · {club_row["gross"]:,.2f} MFL'):
-                    if club_row["competitions"]:
-                        st.dataframe(pd.DataFrame(club_row["competitions"]),use_container_width=True,hide_index=True)
-                    else:
-                        st.caption("No current reward-bearing competition was resolved for this club.")
-
-        st.markdown('<div class="section-head2"><h3>Staff earnings</h3><span class="small-note2">YOUR REVENUE SHARE</span></div>',unsafe_allow_html=True)
-        if rr["staff"]:
-            staff_df=pd.DataFrame([{
-                "Club":x["name"],
-                "Share":f'{x["share"]*100:.2f}%',
-                "Club gross":round(x["gross"],2),
-                "Your cut":round(x["cut"],2)
-            } for x in sorted(rr["staff"],key=lambda x:x["cut"],reverse=True)])
-            st.dataframe(staff_df,use_container_width=True,hide_index=True)
-        else:
-            st.caption("No staff revenue-share positions found.")
-
-        st.markdown('<div class="section-head2"><h3>Players contracted elsewhere</h3><span class="small-note2">INCOMING PLAYER SHARE</span></div>',unsafe_allow_html=True)
-        if rr["loans_out"]:
-            loan_df=pd.DataFrame([{
-                "Player":x["name"] or x["id"],
-                "Club":x["club_name"],
-                "Share":f'{x["share"]*100:.2f}%',
-                "Club gross":round(x["gross"],2),
-                "Your cut":round(x["cut"],2)
-            } for x in sorted(rr["loans_out"],key=lambda x:x["cut"],reverse=True)])
-            st.dataframe(loan_df,use_container_width=True,hide_index=True)
-        else:
-            st.caption("No owned players with revenue-share contracts outside your owned clubs were resolved.")
 
 
 elif page=="Watchlist":
