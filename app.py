@@ -16,6 +16,7 @@ import grower_backend as grower
 import club_backend as club
 import wallet_cache_backend as shared
 import rewards_backend as rewards
+import pack_scout as packs
 
 st.set_page_config(
     page_title="MFL Management Hub",
@@ -830,7 +831,7 @@ def valid_wallet(v):
 if "wallet" not in st.session_state: st.session_state.wallet=""
 
 # ---------------- SIDEBAR ----------------
-nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Rewards Calculator","Watchlist","Compare","Insights","Sync Centre"]
+nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Rewards Calculator","Pack Scout","Watchlist","Compare","Insights","Sync Centre"]
 query_page=st.query_params.get("page","Home")
 if query_page not in nav_pages:
     query_page="Home"
@@ -1963,6 +1964,144 @@ elif page=="Insights":
                     resp=requests.post(webhook,data=data,files=files,headers={"User-Agent":"MFL-Management-Hub/1.0"},timeout=20)
                     resp.raise_for_status();st.success("Posted to Discord.")
                 except Exception as e:st.error(f"Discord post failed: {e}")
+
+
+# ---------------- PACK SCOUT ----------------
+elif page=="Pack Scout":
+    st.markdown("""
+    <style>
+    .pack-hero{position:relative;overflow:hidden;border:1px solid #173944;border-radius:14px;
+      background:linear-gradient(115deg,#07151c 0%,#07151c 48%,#10271f 100%);
+      padding:22px 24px;margin-bottom:14px}
+    .pack-kicker{font-size:.68rem;letter-spacing:.16em;color:#13e0b4;font-weight:900}
+    .pack-title{font-size:2.1rem;color:#f7fbfa;font-weight:930;letter-spacing:-.055em;margin-top:7px}
+    .pack-copy{font-size:.86rem;color:#789096;line-height:1.55;margin-top:7px;max-width:820px}
+    .pack-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:13px 0 18px}
+    .pack-kpi{background:#07161d;border:1px solid #173843;border-radius:11px;padding:14px}
+    .pack-kpi-lab{font-size:.61rem;color:#607b82;text-transform:uppercase;letter-spacing:.08em;font-weight:850}
+    .pack-kpi-val{font-size:1.7rem;color:#f3f9f8;font-weight:930;letter-spacing:-.05em;margin-top:8px}
+    .pack-card{background:#07161d;border:1px solid #173843;border-radius:12px;padding:14px;margin-bottom:9px}
+    .pack-rank{font-size:.58rem;color:#13e0b4;letter-spacing:.11em;font-weight:900}
+    .pack-name{font-size:1.08rem;color:#eef6f4;font-weight:900;margin-top:5px}
+    .pack-meta{font-size:.68rem;color:#70878d;margin-top:4px}
+    .pack-score{font-size:1.45rem;color:#13e0b4;font-weight:930}
+    .pack-pill{display:inline-block;font-size:.62rem;padding:4px 7px;border-radius:999px;background:#0d2826;
+      border:1px solid #1a5c50;color:#b8fff0;margin-top:8px}
+    @media(max-width:900px){.pack-grid{grid-template-columns:1fr 1fr}}
+    </style>
+    <div class="pack-hero">
+      <div class="pack-kicker">LIVE MFL WALLET · PACK INTELLIGENCE</div>
+      <div class="pack-title">Pack Scout</div>
+      <div class="pack-copy">See the strongest and weakest players currently sitting with MFL for each pack rarity. Scout Score balances OVR with age, so a young lower-rated player can outrank an older player with a slightly higher OVR.</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    rarity = st.segmented_control(
+        "Rarity",
+        list(packs.RARITIES.keys()),
+        default="Uncommon",
+        selection_mode="single",
+        key="pack_scout_rarity"
+    )
+    if not rarity:
+        rarity="Uncommon"
+
+    lo,hi=packs.RARITIES[rarity]
+    st.caption(f"{rarity}: {lo}–{hi} OVR · Packable ages: {packs.AGE_MIN}–{packs.AGE_MAX} · Age bonus: +0.5 Scout Score per year younger than 28")
+
+    @st.cache_data(ttl=600,show_spinner=False)
+    def _load_pack_pool(r):
+        return packs.fetch_rarity_pool(r)
+
+    c1,c2=st.columns([1.1,4])
+    with c1:
+        refresh_pack=st.button("↻ Refresh pool",type="primary",use_container_width=True,key="refresh_pack_pool")
+    if refresh_pack:
+        _load_pack_pool.clear()
+
+    try:
+        with st.spinner(f"Loading live {rarity} pool from MFL…"):
+            pool=_load_pack_pool(rarity)
+    except Exception as e:
+        st.error("Could not load the live MFL pack pool.")
+        with st.expander("Technical detail"):
+            st.code(str(e))
+        st.stop()
+
+    if pool.empty:
+        st.info(f"No MFL-owned {rarity} players were returned.")
+        st.stop()
+
+    best=pool.iloc[0]
+    worst=pool.iloc[-1]
+    youngest=int(pool["age"].dropna().min()) if pool["age"].notna().any() else "—"
+    st.markdown(
+        f'<div class="pack-grid">'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Players available</div><div class="pack-kpi-val">{len(pool):,}</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Best Scout Score</div><div class="pack-kpi-val">{float(best.pull_score):.1f}</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Highest OVR</div><div class="pack-kpi-val">{int(pool.overall.max())}</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Youngest available</div><div class="pack-kpi-val">{youngest}</div></div>'
+        f'</div>', unsafe_allow_html=True
+    )
+
+    top_tab,bottom_tab,all_tab,method_tab=st.tabs(["Best possible pulls","Worst possible pulls","Full pool","How scoring works"])
+
+    def _pack_card(row, rank_text):
+        age_txt=int(row.age) if pd.notna(row.age) else "—"
+        pos=row.positions or "—"
+        nat=row.nationality or "—"
+        return (
+            f'<div class="pack-card"><div style="display:flex;justify-content:space-between;gap:14px;align-items:center">'
+            f'<div><div class="pack-rank">{esc(rank_text)} · {esc(row.pull_label.upper())}</div>'
+            f'<div class="pack-name">{esc(row.player)}</div>'
+            f'<div class="pack-meta">{int(row.overall)} OVR · Age {esc(age_txt)} · {esc(pos)} · {esc(nat)}</div>'
+            f'<div class="pack-pill">{esc(row.pull_label)} pull</div></div>'
+            f'<div style="text-align:right"><div class="pack-score">{float(row.pull_score):.1f}</div>'
+            f'<div class="pack-meta">SCOUT SCORE</div></div></div></div>'
+        )
+
+    with top_tab:
+        st.markdown('<div class="section-head2"><h3>Best possible pulls right now</h3><span class="small-note2">OVR + AGE VALUE</span></div>',unsafe_allow_html=True)
+        n=st.slider("Show top",5,50,15,5,key="pack_top_n")
+        for _,r in pool.head(n).iterrows():
+            st.markdown(_pack_card(r,f"#{int(r['rank'])}"),unsafe_allow_html=True)
+
+    with bottom_tab:
+        st.markdown('<div class="section-head2"><h3>Worst possible pulls right now</h3><span class="small-note2">LOWEST SCOUT SCORE</span></div>',unsafe_allow_html=True)
+        n2=st.slider("Show bottom",5,50,15,5,key="pack_bottom_n")
+        bottom=pool.tail(n2).sort_values(["pull_score","overall","age"],ascending=[True,True,False])
+        for _,r in bottom.iterrows():
+            st.markdown(_pack_card(r,f"#{int(r['rank'])}"),unsafe_allow_html=True)
+
+    with all_tab:
+        f1,f2,f3=st.columns(3)
+        with f1:
+            ages=st.slider("Age",packs.AGE_MIN,packs.AGE_MAX,(packs.AGE_MIN,packs.AGE_MAX),key="pack_age")
+        with f2:
+            ovrs=st.slider("OVR",lo,hi,(lo,hi),key="pack_ovr")
+        with f3:
+            positions=sorted({p.strip() for x in pool.positions.fillna("") for p in str(x).split("/") if p.strip()})
+            pos_filter=st.multiselect("Position",positions,key="pack_positions")
+        view=pool[(pool.age.fillna(packs.AGE_MAX).between(*ages)) & (pool.overall.between(*ovrs))].copy()
+        if pos_filter:
+            view=view[view.positions.fillna("").apply(lambda x:any(p in [q.strip() for q in str(x).split("/")] for p in pos_filter))]
+        show=view[["rank","player","overall","age","positions","nationality","pull_score","pull_label"]].rename(columns={
+            "rank":"Rank","player":"Player","overall":"OVR","age":"Age","positions":"Position",
+            "nationality":"Nationality","pull_score":"Scout Score","pull_label":"Pull"
+        })
+        st.dataframe(show,use_container_width=True,hide_index=True)
+
+    with method_tab:
+        st.markdown("### Scout Score")
+        st.write("Scout Score is a Pack Scout heuristic, not an official MFL rating.")
+        st.code("Scout Score = OVR + ((28 - Age) × 0.5)",language=None)
+        ex=pd.DataFrame([
+            {"Example":"Young prospect","OVR":67,"Age":16,"Scout Score":packs.pull_score(67,16)},
+            {"Example":"Prime-age player","OVR":71,"Age":21,"Scout Score":packs.pull_score(71,21)},
+            {"Example":"Older high OVR","OVR":71,"Age":28,"Scout Score":packs.pull_score(71,28)},
+        ])
+        st.dataframe(ex,use_container_width=True,hide_index=True)
+        st.caption("This deliberately gives meaningful value to youth without letting age completely overpower player quality. Labels are relative to the current live pool for that rarity.")
 
 elif page=="Sync Centre":
     if not wallet:
