@@ -1,3 +1,7 @@
+import os
+import sqlite3
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 import pandas as pd
 import agency_backend as agency
 
@@ -5,6 +9,13 @@ MFL_WALLET = "0xff8d2bbed8164db0"
 AGE_MIN = 16
 AGE_MAX = 28
 AGE_WEIGHT = 0.5
+
+# Observed on player 164286: the most recent global NEW_AGE rollover.
+# A player already owned by MFL before this timestamp had an opportunity to age.
+LATEST_KNOWN_AGE_ROLLOVER_MS = 1789383117448
+CACHE_DB = os.getenv("PACK_SCOUT_DB", "pack_scout_cache.db")
+AUTO_VERIFY_LIMIT = 80
+VERIFY_WORKERS = 10
 
 # Current MFL rarity bands. Ultimate is progression-only and therefore not a mint/pack tier.
 RARITIES = {
@@ -133,11 +144,11 @@ def fetch_rarity_pool(rarity):
     if df.empty:
         return df
 
-    # Do NOT fetch history for every player here. That creates one API request per
-    # player (often thousands) and can make the Streamlit page appear to hang.
-    # Keep the live pool fast; frozen-age verification is handled separately.
-    df["packable_candidate"] = True
-    df["packable_reason"] = "Live MFL-owned candidate; age-history not bulk-verified"
+    # Verify incrementally and cache results. This avoids the old N+1 request
+    # problem while permanently excluding players proven to have aged in MFL custody.
+    df = _apply_history_verification(df, token, verify_limit=AUTO_VERIFY_LIMIT)
+    if df.empty:
+        return df
     df["age_bonus"] = [
         round(max(0, (AGE_MAX - max(AGE_MIN, min(AGE_MAX, int(a))))) * AGE_WEIGHT, 2)
         if pd.notna(a) else 0.0
@@ -226,35 +237,45 @@ def top_attributes(row, limit=3):
     return vals[:limit]
 
 
+
+def _cache_conn():
+    con = sqlite3.connect(CACHE_DB, timeout=20)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS pack_history_cache(
+            player_id INTEGER PRIMARY KEY,
+            owned_since INTEGER,
+            status TEXT NOT NULL,
+            latest_new_age INTEGER,
+            checked_rollover INTEGER NOT NULL
+        )
+    """)
+    con.commit()
+    return con
+
 def _history_events(player_id, token):
-    """Return player history events used to infer whether MFL-held inventory is age-frozen."""
-    try:
-        payload = agency.get(f"/players/{int(player_id)}/history", token)
-        return agency.arr(payload)
-    except Exception:
-        return []
+    """Fetch the actual player experience/history feed used by MFL player history."""
+    payload = agency.get(f"/players/{int(player_id)}/experiences/history", token)
+    return agency.arr(payload)
 
-def is_packable_candidate(row, token):
+def _classify_from_history(row, token):
     """
-    Inferred Pack Scout rule:
-    - player is currently MFL-owned (handled by wallet query)
-    - age is 16-28 (handled before this function)
-    - no NEW_AGE event has occurred since MFL acquired the player
-
-    This is an inference based on known examples, not an official MFL flag.
+    VERIFIED_FROZEN: MFL owned the player before the latest known rollover and
+    no NEW_AGE happened after acquisition.
+    AGED: at least one NEW_AGE happened while MFL owned the player.
+    TOO_NEW: MFL acquired the player after the latest known rollover, so there
+    has not yet been a rollover with which to test freezing.
     """
-    owned_since = row.get("owned_since")
-    events = _history_events(row.get("player_id"), token)
-
-    if owned_since is None:
-        # Without an ownership timestamp we cannot safely prove the player was frozen.
-        return False, "No ownership date"
-
     try:
-        owned_ms = int(owned_since)
+        pid = int(row["player_id"])
+        owned_ms = int(row["owned_since"])
     except Exception:
-        return False, "Invalid ownership date"
+        return "UNKNOWN", None
 
+    if owned_ms > LATEST_KNOWN_AGE_ROLLOVER_MS:
+        return "TOO_NEW", None
+
+    events = _history_events(pid, token)
+    latest = None
     for e in events:
         if str(e.get("reasonType") or "").upper() != "NEW_AGE":
             continue
@@ -262,7 +283,129 @@ def is_packable_candidate(row, token):
             event_ms = int(e.get("date"))
         except Exception:
             continue
+        if latest is None or event_ms > latest:
+            latest = event_ms
         if event_ms >= owned_ms:
-            return False, "Aged while MFL-owned"
+            return "AGED", latest
 
-    return True, "No NEW_AGE since MFL acquisition"
+    return "VERIFIED_FROZEN", latest
+
+def _read_cached_statuses(player_ids):
+    if not player_ids:
+        return {}
+    con = _cache_conn()
+    try:
+        qmarks = ",".join("?" for _ in player_ids)
+        rows = con.execute(
+            f"SELECT player_id, owned_since, status, latest_new_age, checked_rollover "
+            f"FROM pack_history_cache WHERE player_id IN ({qmarks})",
+            [int(x) for x in player_ids]
+        ).fetchall()
+        return {
+            int(r[0]): {
+                "owned_since": r[1],
+                "status": r[2],
+                "latest_new_age": r[3],
+                "checked_rollover": r[4],
+            }
+            for r in rows
+        }
+    finally:
+        con.close()
+
+def _write_cache(results):
+    if not results:
+        return
+    con = _cache_conn()
+    try:
+        con.executemany("""
+            INSERT INTO pack_history_cache(player_id, owned_since, status, latest_new_age, checked_rollover)
+            VALUES(?,?,?,?,?)
+            ON CONFLICT(player_id) DO UPDATE SET
+                owned_since=excluded.owned_since,
+                status=excluded.status,
+                latest_new_age=excluded.latest_new_age,
+                checked_rollover=excluded.checked_rollover
+        """, results)
+        con.commit()
+    finally:
+        con.close()
+
+def _apply_history_verification(df, token, verify_limit=AUTO_VERIFY_LIMIT):
+    """
+    Incrementally verify the pool without stalling Streamlit.
+
+    Historical results are cached in SQLite. AGED players never need another
+    history request for this ownership spell. VERIFIED_FROZEN players are reused
+    until the known rollover marker changes. Unknown pre-rollover players are
+    checked in a small concurrent batch on each load.
+    """
+    if df.empty:
+        return df
+
+    ids = [int(x) for x in df["player_id"].tolist()]
+    cached = _read_cached_statuses(ids)
+
+    # Cache entries are reusable only if they refer to the same ownership spell
+    # and were checked against the current rollover marker.
+    statuses = {}
+    pending = []
+    for _, row in df.iterrows():
+        pid = int(row["player_id"])
+        try:
+            owned_ms = int(row["owned_since"])
+        except Exception:
+            statuses[pid] = "UNKNOWN"
+            continue
+
+        if owned_ms > LATEST_KNOWN_AGE_ROLLOVER_MS:
+            statuses[pid] = "TOO_NEW"
+            continue
+
+        hit = cached.get(pid)
+        if (
+            hit
+            and hit.get("owned_since") == owned_ms
+            and int(hit.get("checked_rollover") or 0) == LATEST_KNOWN_AGE_ROLLOVER_MS
+        ):
+            statuses[pid] = hit["status"]
+        else:
+            pending.append(row)
+
+    # Oldest ownership first: this quickly removes legacy MFL stock.
+    pending.sort(key=lambda r: int(r.get("owned_since") or 0))
+    pending = pending[:max(0, int(verify_limit or 0))]
+
+    writes = []
+    if pending:
+        with ThreadPoolExecutor(max_workers=VERIFY_WORKERS) as ex:
+            futures = {ex.submit(_classify_from_history, row, token): row for row in pending}
+            for fut in as_completed(futures):
+                row = futures[fut]
+                pid = int(row["player_id"])
+                try:
+                    owned_ms = int(row["owned_since"])
+                    status, latest = fut.result()
+                except Exception:
+                    status, latest = "UNKNOWN", None
+                    owned_ms = int(row.get("owned_since") or 0)
+                statuses[pid] = status
+                if status in ("AGED", "VERIFIED_FROZEN", "TOO_NEW"):
+                    writes.append((pid, owned_ms, status, latest, LATEST_KNOWN_AGE_ROLLOVER_MS))
+    _write_cache(writes)
+
+    out = df.copy()
+    out["verification_status"] = out["player_id"].map(
+        lambda x: statuses.get(int(x), "PENDING")
+    )
+
+    # Proven ageing while MFL-owned is a hard exclusion.
+    out = out[out["verification_status"] != "AGED"].copy()
+    out["packable_candidate"] = True
+    out["packable_reason"] = out["verification_status"].map({
+        "VERIFIED_FROZEN": "Verified frozen across latest rollover",
+        "TOO_NEW": "Acquired after latest rollover; not yet testable",
+        "PENDING": "Awaiting cached history verification",
+        "UNKNOWN": "History/ownership could not yet be verified",
+    }).fillna("Candidate")
+    return out
