@@ -133,19 +133,11 @@ def fetch_rarity_pool(rarity):
     if df.empty:
         return df
 
-    # Inferred pack-reserve filter: exclude players that have received a NEW_AGE
-    # event after MFL acquired them. This is deliberately conservative.
-    candidate_flags=[]
-    candidate_reasons=[]
-    for _, r in df.iterrows():
-        ok, reason = is_packable_candidate(r, token)
-        candidate_flags.append(bool(ok))
-        candidate_reasons.append(reason)
-    df["packable_candidate"] = candidate_flags
-    df["packable_reason"] = candidate_reasons
-    df = df[df["packable_candidate"]].copy()
-    if df.empty:
-        return df
+    # Do NOT fetch history for every player here. That creates one API request per
+    # player (often thousands) and can make the Streamlit page appear to hang.
+    # Keep the live pool fast; frozen-age verification is handled separately.
+    df["packable_candidate"] = True
+    df["packable_reason"] = "Live MFL-owned candidate; age-history not bulk-verified"
     df["age_bonus"] = [
         round(max(0, (AGE_MAX - max(AGE_MIN, min(AGE_MAX, int(a))))) * AGE_WEIGHT, 2)
         if pd.notna(a) else 0.0
