@@ -354,7 +354,7 @@ st.markdown(r"""
 .hk-label{font-size:.56rem;color:#58747a;letter-spacing:.10em;font-weight:850;text-transform:uppercase}.hk-value{font-size:1.58rem;color:#f2f8f7;font-weight:930;letter-spacing:-.05em;margin-top:8px}.hk-value.mint{color:#13e0b4}.hk-value.blue{color:#38afff}.hk-value.violet{color:#ad76ff}.hk-sub{font-size:.60rem;color:#667f85;margin-top:4px}
 
 .home-section-v15{display:flex;align-items:end;justify-content:space-between;margin:22px 0 9px}.home-section-v15 h3{font-size:.95rem;color:#eaf2f1;margin:0}.home-section-v15 span{font-size:.54rem;color:#526d74;letter-spacing:.10em;font-weight:850}
-.workspace-grid-v15{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.workspace-grid-v15{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 a.workspace-card-v15{text-decoration:none!important;color:inherit!important;display:block;position:relative;overflow:hidden;background:linear-gradient(145deg,#07161d,#061219);border:1px solid #173843;border-radius:12px;min-height:170px;padding:18px;transition:.16s ease}
 a.workspace-card-v15:hover{transform:translateY(-2px);border-color:#2a5b66;box-shadow:0 16px 30px rgba(0,0,0,.16)}
 .workspace-top-v15{display:flex;align-items:center;justify-content:space-between}.workspace-icon-v15{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:#0c2926;border:1px solid #155449}
@@ -838,7 +838,7 @@ if query_page not in nav_pages:
 with st.sidebar:
     st.markdown("""<div class="public-brand">
       <div class="public-brand-mfl"><span>MFL</span> HUB</div>
-      <div class="public-brand-sub">MANAGEMENT & DEVELOPMENT</div>
+      <div class="public-brand-sub">SCOUTING · DEVELOPMENT · INSIGHTS</div>
       <div class="public-brand-line"></div>
       <div class="public-brand-season">SEASON 17 · PUBLIC</div>
     </div>""",unsafe_allow_html=True)
@@ -874,7 +874,7 @@ with st.sidebar:
       <div class="season-top"><span>Season 17</span><span>PUBLIC</span></div>
       <div class="connected"><i></i><span>MFL API ready</span></div>
     </div>
-    <div class="build">UI POLISH · v18.2.2</div>""",unsafe_allow_html=True)
+    <div class="build">PUBLIC BETA · v19.0</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 
@@ -915,9 +915,9 @@ if page=="Home":
     <div class="home-shell">
       <div class="home-hero-v15">
         <div>
-          <div class="home-eyebrow-v15">YOUR SEASON 17 WORKSPACE</div>
-          <div class="home-title-v15">Track your MFL network.</div>
-          <div class="home-copy-v15">Competition tracking is public. Connect a wallet to unlock personal agency and club development views.</div>
+          <div class="home-eyebrow-v15">MFL DATA TOOLS · SEASON 17</div>
+          <div class="home-title-v15">Scout smarter. Track development. Understand your MFL network.</div>
+          <div class="home-copy-v15">A public dashboard for MFL players, clubs and agencies. Explore Pack Scout without a wallet, or connect your public wallet to unlock your own development data.</div>
           <div class="home-meta-v15">
             <span class="home-pill-v15"><b>{len(mine) if mine else "—"}</b> owned clubs</span>
             <span class="home-pill-v15"><b>{players or "—"}</b> agency players</span>
@@ -942,7 +942,7 @@ if page=="Home":
         <div class="home-kpi-v15"><div class="hk-label">Attribute gains</div><div class="hk-value violet">+{total_attr:g}</div><div class="hk-sub">Across synced club players</div></div>
       </div>
 
-      <div class="home-section-v15"><h3>Workspaces</h3><span>CLICK TO OPEN</span></div>
+      <div class="home-section-v15"><h3>Explore the tools</h3><span>OPEN A TOOL</span></div>
       <div class="workspace-grid-v15">
         <a class="workspace-card-v15" href="?page=Grower%20or%20Shower" target="_self">
           <div class="workspace-top-v15"><div class="workspace-icon-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#13e0b4" stroke-width="1.8"><path d="M6 4h12v3c0 3.8-2.4 6.7-6 7.8C8.4 13.7 6 10.8 6 7V4Z"/><path d="M9 15h6M10 15v3h4v-3M8 20h8"/></svg></div><div class="workspace-arrow-v15">→</div></div>
@@ -958,7 +958,7 @@ if page=="Home":
         </a>
         <a class="workspace-card-v15" href="?page=Pack%20Scout" target="_self">
           <div class="workspace-top-v15"><div class="workspace-icon-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#13e0b4" stroke-width="1.8"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/><path d="m8.5 5 8 4.5"/></svg></div><div class="workspace-arrow-v15">→</div></div>
-          <div class="workspace-title-v15">Pack Scout</div><div class="workspace-sub-v15">Rank the live MFL-owned pack pool by OVR and age-adjusted pull value.</div><div class="workspace-accent-v15"></div>
+          <div class="workspace-title-v15">Pack Scout</div><div class="workspace-sub-v15">Explore likely pack-reserve players, age-adjusted pull quality and our live verification research.</div><div class="workspace-accent-v15"></div>
         </a>
       </div>
     """,unsafe_allow_html=True)
@@ -1934,6 +1934,9 @@ elif page=="Pack Scout":
     .pack-badge.average{color:#d2d8da}.pack-badge.poor{color:#a8afb1}
     .pack-note{background:#07161d;border:1px solid #173843;border-radius:11px;padding:13px 14px;color:#788f95;font-size:.70rem;line-height:1.5}
     .pack-note b{color:#e8f0ef}
+    .pack-status-strip{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px}
+    .pack-status-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;background:#081a21;border:1px solid #1b3d47;color:#8ca1a6;font-size:.58rem;font-weight:750}
+    .pack-status-pill b{color:#e9f2f1}
     @media(max-width:1000px){.pack-grid{grid-template-columns:1fr 1fr}.pack-feature-grid{grid-template-columns:1fr}.pack-list-card{grid-template-columns:62px 1fr auto}}
     @media(max-width:650px){.pack-grid{grid-template-columns:1fr 1fr}.pack-list-card{grid-template-columns:54px 1fr}.pack-score{grid-column:2;text-align:left}.pack-feature-grid{grid-template-columns:1fr}}
     </style>
@@ -1953,8 +1956,8 @@ elif page=="Pack Scout":
         f'<div class="pack-shell" style="--pack-accent:{accent}">'
         f'<div class="pack-hero"><div class="pack-kicker">MFL PACK INTELLIGENCE · {esc(rarity.upper())}</div>'
         f'<div class="pack-title">Pack Scout</div>'
-        f'<div class="pack-copy">Pack Scout now verifies frozen-age evidence in small cached batches instead of hitting every player history at once. Players proven to have received NEW_AGE while MFL-owned are removed; players that survive a rollover without ageing are marked verified frozen.</div>'
-        f'<div class="pack-live"><i></i> Cached frozen-age verification · {lo}–{hi} OVR · age 16–28</div></div></div>',
+        f'<div class="pack-copy">Explore the MFL-owned player pool and see which players look most like genuine pack-reserve inventory. Pack Scout checks age history over time: players that aged while held by MFL are ruled out, while players that stayed frozen across a rollover receive stronger verification.</div>'
+        f'<div class="pack-live"><i></i> Live research model · {lo}–{hi} OVR · pack ages 16–28</div></div></div>',
         unsafe_allow_html=True
     )
 
@@ -1964,9 +1967,9 @@ elif page=="Pack Scout":
 
     controls=st.columns([1.25,1.6,3.35])
     with controls[0]:
-        refresh_pack=st.button("↻ Refresh + verify",type="primary",use_container_width=True,key="refresh_pack_pool")
+        refresh_pack=st.button("↻ Refresh research",type="primary",use_container_width=True,key="refresh_pack_pool")
     with controls[1]:
-        st.caption("Checks up to 24 more histories per refresh · results cached")
+        st.caption("Updates the pool and checks more player histories · results are cached")
     if refresh_pack:
         _load_pack_pool.clear()
 
@@ -2021,16 +2024,24 @@ elif page=="Pack Scout":
 
     st.markdown(
         f'<div class="pack-shell" style="--pack-accent:{accent}"><div class="pack-grid">'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Candidate ceiling</div><div class="pack-kpi-val">{len(pool):,}</div><div class="pack-kpi-sub">Maximum remaining after proven aged stock is removed</div></div>'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Verified frozen</div><div class="pack-kpi-val">{verified_frozen:,}</div><div class="pack-kpi-sub">Passed a rollover without NEW_AGE</div></div>'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Excluded aged stock</div><div class="pack-kpi-val">{excluded_aged:,}</div><div class="pack-kpi-sub">Proven NEW_AGE while MFL-owned</div></div>'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Verification coverage</div><div class="pack-kpi-val">{coverage_pct:.1f}%</div><div class="pack-kpi-sub">{pending_verify:,} pending · {too_new:,} too new to test</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Possible candidates</div><div class="pack-kpi-val">{len(pool):,}</div><div class="pack-kpi-sub">Still in consideration after proven aged stock is removed</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Frozen candidates</div><div class="pack-kpi-val">{verified_frozen:,}</div><div class="pack-kpi-sub">Held by MFL across a rollover without ageing</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Ruled out</div><div class="pack-kpi-val">{excluded_aged:,}</div><div class="pack-kpi-sub">Aged while held by MFL</div></div>'
+        f'<div class="pack-kpi"><div class="pack-kpi-lab">Research coverage</div><div class="pack-kpi-val">{coverage_pct:.1f}%</div><div class="pack-kpi-sub">{pending_verify:,} awaiting checks · {too_new:,} too new to test</div></div>'
         f'</div></div>', unsafe_allow_html=True
     )
     st.caption(
-        f"Pool size is not being treated as pack odds yet. Current research range: "
-        f"{verified_frozen:,} verified-frozen players to {len(pool):,} remaining candidates. "
-        f"Headline rankings: {rank_scope.lower()}."
+        f"Pack Scout is a research model, not an official MFL pack list. "
+        f"Current evidence ranges from {verified_frozen:,} frozen candidates to {len(pool):,} possible candidates. "
+        f"Headline rankings currently use the {rank_scope.lower()}."
+    )
+    st.markdown(
+        '<div class="pack-status-strip">'
+        '<span class="pack-status-pill"><b>Verified Frozen</b> survived a rollover without ageing</span>'
+        '<span class="pack-status-pill"><b>Pending</b> history still being checked</span>'
+        '<span class="pack-status-pill"><b>Too New</b> joined MFL after the latest rollover</span>'
+        '</div>',
+        unsafe_allow_html=True
     )
     )
 
@@ -2052,11 +2063,11 @@ elif page=="Pack Scout":
             f'{" · "+esc(attrs) if attrs else ""}</div></div></div>'
         )
 
-    st.markdown('<div class="section-head2"><h3>Pack highlights</h3><span class="small-note2">THREE DIFFERENT OUTCOMES</span></div>',unsafe_allow_html=True)
+    st.markdown('<div class="section-head2"><h3>Pack highlights</h3><span class="small-note2">LIVE SCOUTING VIEW</span></div>',unsafe_allow_html=True)
     feature_html=(
-        _feature_card(best,"Best pull","Best balance of current OVR and age",True)+
-        _feature_card(worst,"Worst pull","Lowest age-adjusted value in the current packable pool")+
-        _feature_card(best_prospect,"Best young prospect","Best age-adjusted player aged 20 or under, excluding the overall best")
+        _feature_card(best,"Best-looking pull","Best balance of current OVR and age",True)+
+        _feature_card(worst,"Lowest-value pull","Lowest age-adjusted value in the current research pool")+
+        _feature_card(best_prospect,"Best young prospect","Best age-adjusted option aged 20 or under, excluding the top overall pick")
     )
     st.markdown(f'<div class="pack-shell" style="--pack-accent:{accent}"><div class="pack-feature-grid">{feature_html}</div></div>',unsafe_allow_html=True)
 
@@ -2143,7 +2154,7 @@ elif page=="Pack Scout":
             f'It starts with the player\'s OVR and adds <b>0.5 points for every year younger than 28</b>. '
             f'That makes youth meaningful without allowing age to overwhelm actual player quality. '
             f'Pull labels are relative to the live {esc(rarity)} pool: Jackpot is approximately the top 2%, Excellent the next 8%, Good the next 25%, Average the middle 40%, and Poor the bottom 25%.<br><br>'
-            f'<b>Pull odds are deliberately withheld for now.</b> The large MFL-owned candidate count is not evidence that every one of those players is in active packs. Pack Scout now reports a verified-frozen floor and a remaining-candidate ceiling until enough history has been checked to justify an odds estimate.'
+            f'<b>Why no pull percentage yet?</b> MFL ownership alone does not prove a player is currently available in packs. Until the research has separated enough frozen pack-reserve stock from ordinary MFL-held players, showing a precise percentage would be misleading.'
             f'</div></div>',unsafe_allow_html=True
         )
         st.code("Scout Score = OVR + ((28 - Age) × 0.5)",language=None)
