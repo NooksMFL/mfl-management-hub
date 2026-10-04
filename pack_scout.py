@@ -428,8 +428,8 @@ def _apply_history_verification(df, token, verify_limit=AUTO_VERIFY_LIMIT):
     checked_count = aged_count + frozen_count
     coverage = (checked_count / raw_count) if raw_count else 0.0
 
-    # Proven ageing while MFL-owned is a hard exclusion.
-    out = out[out["verification_status"] != "AGED"].copy()
+    # History is research evidence only. Do not exclude players from Pack Scout
+    # solely because they aged while MFL-owned; that inference is not proven.
     candidate_count = len(out)
 
     out["raw_candidate_count"] = raw_count
@@ -456,9 +456,10 @@ def _apply_history_verification(df, token, verify_limit=AUTO_VERIFY_LIMIT):
     out["packable_candidate"] = True
     out["verification_rollover"] = rollover_ms
     out["packable_reason"] = out["verification_status"].map({
-        "VERIFIED_FROZEN": "Verified frozen across latest rollover",
+        "VERIFIED_FROZEN": "No NEW_AGE seen across latest rollover",
+        "AGED": "Has aged while MFL-owned",
         "TOO_NEW": "Acquired after latest rollover; not yet testable",
-        "PENDING": "Awaiting cached history verification",
+        "PENDING": "History check pending",
         "UNKNOWN": "History/ownership could not yet be verified",
     }).fillna("Candidate")
     return out
