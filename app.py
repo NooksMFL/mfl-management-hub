@@ -15,6 +15,7 @@ import agency_backend as agency
 import grower_backend as grower
 import club_backend as club
 import wallet_cache_backend as shared
+import tier_break_backend as tierbreak
 
 st.set_page_config(
     page_title="MFL Management Hub",
@@ -829,7 +830,7 @@ def valid_wallet(v):
 if "wallet" not in st.session_state: st.session_state.wallet=""
 
 # ---------------- SIDEBAR ----------------
-nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Watchlist","Compare","Insights","Sync Centre"]
+nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Tier Break Scanner","Watchlist","Compare","Insights","Sync Centre"]
 query_page=st.query_params.get("page","Home")
 if query_page not in nav_pages:
     query_page="Home"
@@ -1590,6 +1591,111 @@ elif page=="Club Development":
                              "pac":"PAC ↑","sho":"SHO ↑","pas":"PAS ↑","dri":"DRI ↑","defn":"DEF ↑","phy":"PHY ↑"}),
             use_container_width=True,hide_index=True,height=520
         )
+
+
+
+elif page=="Tier Break Scanner":
+    st.markdown(
+        '<div class="suite-hero"><div class="suite-kicker">SCOUTING · TIER BREAKS</div>'
+        '<div class="suite-title">Tier Break Scanner</div>'
+        '<div class="suite-copy">Find players sitting closest to the next rarity boundary using the MFL position-weighted OVR formula.</div></div>',
+        unsafe_allow_html=True
+    )
+
+    all_positions=["GK","RB","LB","CB","RWB","LWB","CDM","CM","CAM","RM","LM","RW","LW","CF","ST"]
+
+    f1,f2,f3,f4=st.columns([1,1,1.4,1.4])
+    with f1:
+        current_ovr=st.number_input("Current OVR",min_value=45,max_value=94,value=74,step=1,key="tb_current")
+    with f2:
+        target_ovr=st.number_input("Target OVR",min_value=int(current_ovr)+1,max_value=95,value=max(75,int(current_ovr)+1),step=1,key="tb_target")
+    with f3:
+        age_range=st.slider("Age",16,42,(16,28),key="tb_age")
+    with f4:
+        selected_positions=st.multiselect("Positions",all_positions,default=[],key="tb_positions")
+
+    c1,c2=st.columns([1,4])
+    with c1:
+        scan=st.button("Scan tier breaks",type="primary",use_container_width=True,key="tb_scan")
+    with c2:
+        st.caption("The raw OVR is calculated from MFL positional weightings. A displayed 75 starts at raw 74.50 because MFL rounds the weighted score.")
+
+    if scan:
+        try:
+            with st.spinner(f"Scanning {int(current_ovr)} OVR players…"):
+                rows=tierbreak.scan_tier_break(
+                    current_ovr=int(current_ovr),
+                    target_ovr=int(target_ovr),
+                    age_min=int(age_range[0]),
+                    age_max=int(age_range[1]),
+                    positions=selected_positions or None,
+                    max_pages=12,
+                )
+            st.session_state["tier_break_rows"]=rows
+            st.session_state["tier_break_key"]=(int(current_ovr),int(target_ovr),tuple(age_range),tuple(selected_positions))
+        except Exception as e:
+            st.error("Could not load MFL players for the tier-break scan.")
+            with st.expander("Technical detail"):
+                st.code(str(e))
+
+    rows=st.session_state.get("tier_break_rows",[])
+    key=st.session_state.get("tier_break_key")
+    current_key=(int(current_ovr),int(target_ovr),tuple(age_range),tuple(selected_positions))
+
+    if rows and key==current_key:
+        one_gain=sum(1 for r in rows if r.get("one_point_stats"))
+        two_or_less=sum(1 for r in rows if (r.get("min_points") or 999)<=2)
+        closest=min((r.get("gap",999) for r in rows),default=0)
+
+        st.markdown(
+            f'<div class="agency-kpis">'
+            f'<div class="ag-kpi"><div class="ag-kpi-label">Players scanned</div><div class="ag-kpi-value">{len(rows):,}</div></div>'
+            f'<div class="ag-kpi"><div class="ag-kpi-label">1 gain from {int(target_ovr)}</div><div class="ag-kpi-value green">{one_gain:,}</div></div>'
+            f'<div class="ag-kpi"><div class="ag-kpi-label">≤2 gains away</div><div class="ag-kpi-value blue">{two_or_less:,}</div></div>'
+            f'<div class="ag-kpi"><div class="ag-kpi-label">Closest raw gap</div><div class="ag-kpi-value violet">{closest:.3f}</div></div>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
+
+        st.markdown('<div class="section-head2"><h3>Closest tier-break candidates</h3><span class="small-note2">LOWEST DEVELOPMENT REQUIRED FIRST</span></div>',unsafe_allow_html=True)
+
+        display=[]
+        for r in rows:
+            display.append({
+                "Player":r["name"],
+                "Age":r["age"],
+                "Pos":r["position"],
+                "OVR":r["overall"],
+                "Raw OVR":r["raw_ovr"],
+                f"Gap to {int(target_ovr)}":r["gap"],
+                "Min gains":r["min_points"],
+                "Best route":r["best_route"],
+                "1-point break":r["one_point_stats"] or "—",
+                "PAC":r["PAC"],"SHO":r["SHO"],"PAS":r["PAS"],
+                "DRI":r["DRI"],"DEF":r["DEF"],"PHY":r["PHY"],
+                "Club":r["club"],
+                "Owner":r["owner"],
+                "MFL":r["mfl_url"],
+            })
+
+        df=pd.DataFrame(display)
+        st.dataframe(
+            df,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Raw OVR":st.column_config.NumberColumn(format="%.3f"),
+                f"Gap to {int(target_ovr)}":st.column_config.NumberColumn(format="%.3f"),
+                "MFL":st.column_config.LinkColumn("MFL",display_text="Open"),
+            }
+        )
+
+        st.caption(
+            "‘Min gains’ means the fewest +1 attribute increases needed if they land in the most influential stat for that position. "
+            "‘1-point break’ lists every single +1 stat that would immediately push the raw score over the next displayed OVR threshold."
+        )
+    elif not scan:
+        st.info("Set your filters and run the scan. Start with 74 → 75 to find Uncommon players closest to Rare.")
 
 
 elif page=="Watchlist":
