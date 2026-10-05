@@ -1,8 +1,15 @@
 import math
-import urllib.parse
+import os
+import time
 import requests
 
-import wallet_cache_backend as shared
+AUTH_BASE = "https://api.playmfl.com"
+COMMON_HEADERS = {
+    "Accept": "*/*",
+    "Origin": "https://app.playmfl.com",
+    "Referer": "https://app.playmfl.com/",
+    "User-Agent": "Mozilla/5.0",
+}
 
 PLAYERS_URL = "https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players"
 
@@ -35,12 +42,45 @@ STAT_KEYS = {
 }
 
 
+def _access_token():
+    refresh_token = os.getenv("MFL_REFRESH_TOKEN")
+    if not refresh_token:
+        raise RuntimeError("MFL_REFRESH_TOKEN is missing from Streamlit Secrets.")
+
+    last_error = None
+    for attempt in range(4):
+        try:
+            response = requests.post(
+                AUTH_BASE + "/auth/refresh",
+                headers=COMMON_HEADERS,
+                json={"refreshToken": refresh_token},
+                timeout=20,
+            )
+            if response.status_code in (429, 500, 502, 503, 504):
+                last_error = f"HTTP {response.status_code}"
+                time.sleep(min(10, 2 ** attempt))
+                continue
+            response.raise_for_status()
+            payload = response.json()
+            access = payload.get("access")
+            if access is None and isinstance(payload.get("data"), dict):
+                access = payload["data"].get("access")
+            if isinstance(access, dict):
+                access = access.get("token")
+            if not access:
+                raise RuntimeError("MFL did not return an access token.")
+            return access
+        except (requests.Timeout, requests.ConnectionError) as exc:
+            last_error = str(exc)
+            time.sleep(min(10, 2 ** attempt))
+
+    raise RuntimeError(f"MFL authentication failed: {last_error}")
+
+
 def _headers():
-    return {
-        "Authorization": "Bearer " + shared.token(),
-        "Accept": "application/json",
-        "User-Agent": "Mozilla/5.0",
-    }
+    headers = dict(COMMON_HEADERS)
+    headers["Authorization"] = "Bearer " + _access_token()
+    return headers
 
 
 def _js_round(value):
