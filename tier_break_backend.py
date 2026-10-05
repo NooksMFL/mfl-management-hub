@@ -8,7 +8,11 @@ COMMON_HEADERS = {
     "Accept": "*/*",
     "Origin": "https://app.playmfl.com",
     "Referer": "https://app.playmfl.com/",
-    "User-Agent": "Mozilla/5.0",
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/152.0.0.0 Safari/537.36 Edg/152.0.0.0"
+    ),
 }
 
 PLAYERS_URL = "https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players"
@@ -62,6 +66,11 @@ def _access_token():
                 last_error = f"HTTP {response.status_code}"
                 time.sleep(min(10, 2 ** attempt))
                 continue
+            if response.status_code == 403:
+                raise RuntimeError(
+                    "MFL rejected the refresh token (HTTP 403). "
+                    "Replace MFL_REFRESH_TOKEN in this Streamlit app's Secrets with the current token used by your working MFL app."
+                )
             response.raise_for_status()
             payload = response.json()
             access = payload.get("access")
