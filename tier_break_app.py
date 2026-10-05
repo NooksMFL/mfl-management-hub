@@ -3,7 +3,7 @@ import streamlit as st
 
 import tier_break_backend as tierbreak
 
-st.set_page_config(page_title="MFL Transfer Tier Break Scanner", page_icon="⚡", layout="wide")
+st.set_page_config(page_title="MFL Transfer Player Tracker", page_icon="⚡", layout="wide")
 
 st.markdown("""
 <style>
@@ -85,13 +85,13 @@ else:
     m3.metric("Tier break +1 away",f"{tier_one:,}")
     m4.metric("Any +1 OVR close",f"{plus_one:,}")
 
-    st.subheader("Best market opportunities")
+    st.subheader("Transfer market player tracker")
 
     f1,f2,f3=st.columns([1.4,1.4,1.4])
     with f1:
         view=st.selectbox(
             "Show",
-            ["Best opportunities","Tier breaks only","1-stat-gain only","All listings"],
+            ["Best development targets","Tier breaks only","1-stat-gain only","All listings"],
             index=0,
         )
     with f2:
@@ -108,7 +108,7 @@ else:
         filtered=[r for r in filtered if r["tier_break"]]
     elif view=="1-stat-gain only":
         filtered=[r for r in filtered if r["one_point_stats"]]
-    elif view=="Best opportunities":
+    elif view=="Best development targets":
         filtered=[r for r in filtered if r["tier_break"] or r["one_point_stats"] or (r["min_points"] is not None and r["min_points"]<=2)]
 
     if sort_mode=="Closest to +1":
