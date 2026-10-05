@@ -12,6 +12,8 @@ COMMON_HEADERS = {
 }
 
 PLAYERS_URL = "https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players"
+LISTINGS_URL = "https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/listings"
+TIER_BREAK_OVRS = {55, 65, 75, 85, 95}
 
 WEIGHTS = {
     "GK": {"GK": 1.00},
@@ -279,3 +281,204 @@ def scan_tier_break(current_ovr=74, target_ovr=75, age_min=16, age_max=42, posit
         )
     )
     return analysed
+
+
+def analyse_listing(listing):
+    if not isinstance(listing, dict):
+        return None
+
+    player = listing.get("player")
+    if not isinstance(player, dict):
+        return None
+
+    metadata = player.get("metadata") if isinstance(player.get("metadata"), dict) else {}
+    positions = metadata.get("positions") or []
+    primary = positions[0] if positions else None
+    current_ovr = int(metadata.get("overall") or 0)
+    if current_ovr <= 0:
+        return None
+
+    next_ovr = current_ovr + 1
+    raw = raw_ovr(metadata, primary)
+    if raw is None:
+        return None
+
+    threshold = float(next_ovr) - 0.5
+    gap = max(0.0, threshold - raw)
+    min_points, route, options = _minimum_route(metadata, primary, threshold)
+    one_point = _one_point_breaks(metadata, primary, threshold)
+
+    tier_break = next_ovr in TIER_BREAK_OVRS
+
+    if gap <= 0:
+        closeness = "Already over threshold"
+    elif one_point:
+        closeness = "🔥 1 stat gain away"
+    elif min_points == 2:
+        closeness = "🟢 2 gains away"
+    elif min_points == 3:
+        closeness = "🟡 3 gains away"
+    else:
+        closeness = "⚪ Further away"
+
+    if tier_break and one_point:
+        opportunity = "🚨 TIER BREAK +1 AWAY"
+    elif tier_break and min_points is not None and min_points <= 2:
+        opportunity = "🔥 Near tier break"
+    elif one_point:
+        opportunity = "⚡ +1 OVR close"
+    elif min_points is not None and min_points <= 2:
+        opportunity = "🟢 Near +1 OVR"
+    else:
+        opportunity = ""
+
+    contract = player.get("activeContract") if isinstance(player.get("activeContract"), dict) else {}
+    club = contract.get("club") if isinstance(contract.get("club"), dict) else {}
+    owner = player.get("ownedBy") if isinstance(player.get("ownedBy"), dict) else {}
+
+    price = listing.get("price")
+    try:
+        price = float(price) if price is not None else None
+    except (TypeError, ValueError):
+        price = None
+
+    return {
+        "listing_id": listing.get("listingResourceId") or listing.get("id"),
+        "id": player.get("id"),
+        "name": (str(metadata.get("firstName") or "") + " " + str(metadata.get("lastName") or "")).strip(),
+        "age": metadata.get("age"),
+        "position": primary,
+        "positions": ", ".join(positions),
+        "overall": current_ovr,
+        "next_ovr": next_ovr,
+        "raw_ovr": round(raw, 3),
+        "gap": round(gap, 3),
+        "min_points": min_points,
+        "best_route": route,
+        "one_point_stats": ", ".join(one_point),
+        "tier_break": tier_break,
+        "opportunity": opportunity,
+        "closeness": closeness,
+        "price": price,
+        "owner": owner.get("name") or "",
+        "club": club.get("name") or "Free Agent",
+        "PAC": metadata.get("pace"),
+        "SHO": metadata.get("shooting"),
+        "PAS": metadata.get("passing"),
+        "DRI": metadata.get("dribbling"),
+        "DEF": metadata.get("defense"),
+        "PHY": metadata.get("physical"),
+        "GK": metadata.get("goalkeeping"),
+        "mfl_url": f"https://app.playmfl.com/players/{player.get('id')}",
+    }
+
+
+def fetch_transfer_listings(
+    age_min=16,
+    age_max=28,
+    overall_min=45,
+    overall_max=94,
+    price_min=None,
+    price_max=None,
+    positions=None,
+    max_pages=20,
+):
+    params = {
+        "limit": 25,
+        "type": "PLAYER",
+        "status": "AVAILABLE",
+        "view": "full",
+        "sorts": "metadata.overall",
+        "sortsOrders": "DESC",
+        "ageMin": age_min,
+        "ageMax": age_max,
+        "overallMin": overall_min,
+        "overallMax": overall_max,
+    }
+    if price_min is not None:
+        params["priceMin"] = price_min
+    if price_max is not None:
+        params["priceMax"] = price_max
+    if positions:
+        params["positions"] = ",".join(positions)
+
+    headers = _headers()
+    listings = []
+    seen = set()
+    before_id = None
+
+    for _ in range(max_pages):
+        call_params = dict(params)
+        if before_id is not None:
+            call_params["beforeListingId"] = before_id
+
+        response = requests.get(
+            LISTINGS_URL,
+            headers=headers,
+            params=call_params,
+            timeout=30,
+        )
+        response.raise_for_status()
+        rows = response.json()
+        if not isinstance(rows, list) or not rows:
+            break
+
+        new_count = 0
+        for row in rows:
+            listing_id = row.get("listingResourceId") or row.get("id")
+            if listing_id in seen:
+                continue
+            seen.add(listing_id)
+            listings.append(row)
+            new_count += 1
+
+        if len(rows) < 25 or new_count == 0:
+            break
+
+        before_id = rows[-1].get("listingResourceId") or rows[-1].get("id")
+        if before_id is None:
+            break
+
+    return listings
+
+
+def scan_transfer_market(
+    age_min=16,
+    age_max=28,
+    overall_min=45,
+    overall_max=94,
+    price_min=None,
+    price_max=None,
+    positions=None,
+    max_pages=20,
+):
+    listings = fetch_transfer_listings(
+        age_min=age_min,
+        age_max=age_max,
+        overall_min=overall_min,
+        overall_max=overall_max,
+        price_min=price_min,
+        price_max=price_max,
+        positions=positions,
+        max_pages=max_pages,
+    )
+
+    rows = []
+    for listing in listings:
+        row = analyse_listing(listing)
+        if row is not None:
+            rows.append(row)
+
+    rows.sort(
+        key=lambda r: (
+            0 if r["tier_break"] and r["one_point_stats"] else
+            1 if r["tier_break"] else
+            2 if r["one_point_stats"] else
+            3,
+            999 if r["min_points"] is None else r["min_points"],
+            r["gap"],
+            r["price"] if r["price"] is not None else float("inf"),
+            r["age"] if r["age"] is not None else 999,
+        )
+    )
+    return rows
