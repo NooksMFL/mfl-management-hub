@@ -15,8 +15,8 @@ COMMON_HEADERS = {
     ),
 }
 
-PLAYERS_URL = "https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/players"
-LISTINGS_URL = "https://z519wdyajg.execute-api.us-east-1.amazonaws.com/prod/listings"
+PLAYERS_URL = "https://api.playmfl.com/players"
+LISTINGS_URL = "https://api.playmfl.com/listings"
 TIER_BREAK_OVRS = {55, 65, 75, 85, 95}
 
 WEIGHTS = {
