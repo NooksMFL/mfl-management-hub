@@ -15,7 +15,6 @@ import agency_backend as agency
 import grower_backend as grower
 import club_backend as club
 import wallet_cache_backend as shared
-import pack_scout as packs
 
 st.set_page_config(
     page_title="MFL Management Hub",
@@ -354,7 +353,7 @@ st.markdown(r"""
 .hk-label{font-size:.56rem;color:#58747a;letter-spacing:.10em;font-weight:850;text-transform:uppercase}.hk-value{font-size:1.58rem;color:#f2f8f7;font-weight:930;letter-spacing:-.05em;margin-top:8px}.hk-value.mint{color:#13e0b4}.hk-value.blue{color:#38afff}.hk-value.violet{color:#ad76ff}.hk-sub{font-size:.60rem;color:#667f85;margin-top:4px}
 
 .home-section-v15{display:flex;align-items:end;justify-content:space-between;margin:22px 0 9px}.home-section-v15 h3{font-size:.95rem;color:#eaf2f1;margin:0}.home-section-v15 span{font-size:.54rem;color:#526d74;letter-spacing:.10em;font-weight:850}
-.workspace-grid-v15{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.workspace-grid-v15{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 a.workspace-card-v15{text-decoration:none!important;color:inherit!important;display:block;position:relative;overflow:hidden;background:linear-gradient(145deg,#07161d,#061219);border:1px solid #173843;border-radius:12px;min-height:170px;padding:18px;transition:.16s ease}
 a.workspace-card-v15:hover{transform:translateY(-2px);border-color:#2a5b66;box-shadow:0 16px 30px rgba(0,0,0,.16)}
 .workspace-top-v15{display:flex;align-items:center;justify-content:space-between}.workspace-icon-v15{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:#0c2926;border:1px solid #155449}
@@ -830,7 +829,7 @@ def valid_wallet(v):
 if "wallet" not in st.session_state: st.session_state.wallet=""
 
 # ---------------- SIDEBAR ----------------
-nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Pack Scout","Watchlist","Compare","Insights","Sync Centre"]
+nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Watchlist","Compare","Insights","Sync Centre"]
 query_page=st.query_params.get("page","Home")
 if query_page not in nav_pages:
     query_page="Home"
@@ -838,7 +837,7 @@ if query_page not in nav_pages:
 with st.sidebar:
     st.markdown("""<div class="public-brand">
       <div class="public-brand-mfl"><span>MFL</span> HUB</div>
-      <div class="public-brand-sub">SCOUTING · DEVELOPMENT · INSIGHTS</div>
+      <div class="public-brand-sub">MANAGEMENT & DEVELOPMENT</div>
       <div class="public-brand-line"></div>
       <div class="public-brand-season">SEASON 17 · PUBLIC</div>
     </div>""",unsafe_allow_html=True)
@@ -874,7 +873,7 @@ with st.sidebar:
       <div class="season-top"><span>Season 17</span><span>PUBLIC</span></div>
       <div class="connected"><i></i><span>MFL API ready</span></div>
     </div>
-    <div class="build">PUBLIC BETA · v19.0</div>""",unsafe_allow_html=True)
+    <div class="build">UI POLISH · v18.2.2</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 
@@ -915,9 +914,9 @@ if page=="Home":
     <div class="home-shell">
       <div class="home-hero-v15">
         <div>
-          <div class="home-eyebrow-v15">MFL DATA TOOLS · SEASON 17</div>
-          <div class="home-title-v15">Scout smarter. Track development. Understand your MFL network.</div>
-          <div class="home-copy-v15">A public dashboard for MFL players, clubs and agencies. Explore Pack Scout without a wallet, or connect your public wallet to unlock your own development data.</div>
+          <div class="home-eyebrow-v15">YOUR SEASON 17 WORKSPACE</div>
+          <div class="home-title-v15">Track your MFL network.</div>
+          <div class="home-copy-v15">Competition tracking is public. Connect a wallet to unlock personal agency and club development views.</div>
           <div class="home-meta-v15">
             <span class="home-pill-v15"><b>{len(mine) if mine else "—"}</b> owned clubs</span>
             <span class="home-pill-v15"><b>{players or "—"}</b> agency players</span>
@@ -942,7 +941,7 @@ if page=="Home":
         <div class="home-kpi-v15"><div class="hk-label">Attribute gains</div><div class="hk-value violet">+{total_attr:g}</div><div class="hk-sub">Across synced club players</div></div>
       </div>
 
-      <div class="home-section-v15"><h3>Explore the tools</h3><span>OPEN A TOOL</span></div>
+      <div class="home-section-v15"><h3>Workspaces</h3><span>CLICK TO OPEN</span></div>
       <div class="workspace-grid-v15">
         <a class="workspace-card-v15" href="?page=Grower%20or%20Shower" target="_self">
           <div class="workspace-top-v15"><div class="workspace-icon-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#13e0b4" stroke-width="1.8"><path d="M6 4h12v3c0 3.8-2.4 6.7-6 7.8C8.4 13.7 6 10.8 6 7V4Z"/><path d="M9 15h6M10 15v3h4v-3M8 20h8"/></svg></div><div class="workspace-arrow-v15">→</div></div>
@@ -955,10 +954,6 @@ if page=="Home":
         <a class="workspace-card-v15 violet" href="?page=Club%20Development" target="_self">
           <div class="workspace-top-v15"><div class="workspace-icon-v15 violet"><svg viewBox="0 0 24 24" fill="none" stroke="#ad76ff" stroke-width="1.8"><path d="M4 19h16M6 19V9l6-4 6 4v10"/><path d="M9 19v-5h6v5"/></svg></div><div class="workspace-arrow-v15">→</div></div>
           <div class="workspace-title-v15">Club Development</div><div class="workspace-sub-v15">Compare development across every owned club and drill into the players.</div><div class="workspace-accent-v15"></div>
-        </a>
-        <a class="workspace-card-v15" href="?page=Pack%20Scout" target="_self">
-          <div class="workspace-top-v15"><div class="workspace-icon-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#13e0b4" stroke-width="1.8"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/><path d="m8.5 5 8 4.5"/></svg></div><div class="workspace-arrow-v15">→</div></div>
-          <div class="workspace-title-v15">Pack Scout</div><div class="workspace-sub-v15">Explore likely pack-reserve players, age-adjusted pull quality and our live verification research.</div><div class="workspace-accent-v15"></div>
         </a>
       </div>
     """,unsafe_allow_html=True)
@@ -1064,7 +1059,6 @@ if page=="Home":
             <a class="quick-v15" href="?page=Grower%20or%20Shower" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#13e0b4" stroke-width="1.8"><path d="M6 4h12v3c0 3.8-2.4 6.7-6 7.8C8.4 13.7 6 10.8 6 7V4Z"/></svg></div><div class="quick-title-v15">Grower or Shower</div></div><div class="quick-arr-v15">→</div></a>
             <a class="quick-v15" href="?page=Agency%20Development" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#38afff" stroke-width="1.8"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/></svg></div><div class="quick-title-v15">Agency Development</div></div><div class="quick-arr-v15">→</div></a>
             <a class="quick-v15" href="?page=Club%20Development" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#ad76ff" stroke-width="1.8"><path d="M4 19h16M6 19V9l6-4 6 4v10"/></svg></div><div class="quick-title-v15">Club Development</div></div><div class="quick-arr-v15">→</div></a>
-            <a class="quick-v15" href="?page=Pack%20Scout" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#13e0b4" stroke-width="1.8"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5v-9Z"/><path d="m4 7.5 8 4.5 8-4.5"/></svg></div><div class="quick-title-v15">Pack Scout</div></div><div class="quick-arr-v15">→</div></a>
             <a class="quick-v15" href="?page=Club%20Development" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#13e0b4" stroke-width="1.8"><path d="M20 7v5h-5"/><path d="M18.5 15A7 7 0 1 1 19 8l1 4"/></svg></div><div class="quick-title-v15">Sync latest data</div></div><div class="quick-arr-v15">→</div></a>
           </div>
         </div>
@@ -1598,7 +1592,6 @@ elif page=="Club Development":
         )
 
 
-
 elif page=="Watchlist":
     if not wallet:
         st.markdown('<div class="public-connect"><div class="public-connect-kicker">WATCHLIST</div><div class="public-connect-title">Connect a wallet first</div><div class="public-connect-copy">Your watchlist is stored against your wallet.</div></div>',unsafe_allow_html=True)
@@ -1864,309 +1857,6 @@ elif page=="Insights":
                     resp=requests.post(webhook,data=data,files=files,headers={"User-Agent":"MFL-Management-Hub/1.0"},timeout=20)
                     resp.raise_for_status();st.success("Posted to Discord.")
                 except Exception as e:st.error(f"Discord post failed: {e}")
-
-
-# ---------------- PACK SCOUT ----------------
-elif page=="Pack Scout":
-    rarity_colours={
-        "Common":"#a8b0b4",
-        "Limited":"#7fd36b",
-        "Uncommon":"#39a8ff",
-        "Rare":"#b16cff",
-        "Legendary":"#ffb02e",
-    }
-
-    st.markdown("""
-    <style>
-    .pack-shell{--pack-accent:#13e0b4}
-    .pack-hero{position:relative;overflow:hidden;border:1px solid #173944;border-radius:16px;
-      background:
-        radial-gradient(520px 220px at 83% 10%,color-mix(in srgb,var(--pack-accent) 22%,transparent),transparent 68%),
-        linear-gradient(115deg,#061319 0%,#07151c 52%,#0a2025 100%);
-      padding:25px 27px 24px;margin-bottom:14px;min-height:178px}
-    .pack-hero:after{content:"";position:absolute;right:-85px;top:-105px;width:340px;height:340px;border-radius:50%;
-      border:54px solid color-mix(in srgb,var(--pack-accent) 5%,transparent)}
-    .pack-kicker{font-size:.65rem;letter-spacing:.18em;color:var(--pack-accent);font-weight:900}
-    .pack-title{font-size:2.35rem;color:#f8fbfb;font-weight:950;letter-spacing:-.06em;margin-top:8px;line-height:1}
-    .pack-copy{font-size:.84rem;color:#82969b;line-height:1.55;margin-top:10px;max-width:780px}
-    .pack-live{display:inline-flex;align-items:center;gap:7px;margin-top:16px;padding:6px 9px;border-radius:999px;
-      border:1px solid #21444d;background:#081a21;color:#9eb0b4;font-size:.61rem;font-weight:750}
-    .pack-live i{width:7px;height:7px;border-radius:50%;background:var(--pack-accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--pack-accent) 10%,transparent)}
-    .pack-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:13px 0 18px}
-    .pack-kpi{position:relative;overflow:hidden;background:linear-gradient(145deg,#08171e,#061219);border:1px solid #173843;border-radius:12px;padding:14px}
-    .pack-kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--pack-accent)}
-    .pack-kpi-lab{font-size:.58rem;color:#607b82;text-transform:uppercase;letter-spacing:.09em;font-weight:850}
-    .pack-kpi-val{font-size:1.72rem;color:#f3f9f8;font-weight:950;letter-spacing:-.05em;margin-top:7px}
-    .pack-kpi-sub{font-size:.61rem;color:#597178;margin-top:4px}
-    .pack-feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin:13px 0 19px}
-    .pack-feature{position:relative;overflow:hidden;min-height:238px;background:linear-gradient(145deg,#08171e,#061219);
-      border:1px solid #173944;border-radius:14px}
-    .pack-feature.hero{border-color:color-mix(in srgb,var(--pack-accent) 58%,#173944)}
-    .pack-photo-zone{position:relative;height:132px;overflow:hidden;background:
-      radial-gradient(circle at 72% 35%,color-mix(in srgb,var(--pack-accent) 22%,transparent),transparent 44%),#091820}
-    .pack-photo-zone:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(4,12,16,.88),rgba(4,12,16,.18) 70%)}
-    .pack-photo{position:absolute;right:5px;top:4px;width:138px;height:138px;object-fit:contain;object-position:center top;
-      filter:drop-shadow(0 10px 16px rgba(0,0,0,.48))}
-    .pack-card-copy{position:absolute;left:14px;top:13px;z-index:2;max-width:58%}
-    .pack-card-kicker{font-size:.57rem;color:var(--pack-accent);letter-spacing:.12em;font-weight:900;text-transform:uppercase}
-    .pack-card-name{font-size:1.15rem;color:#f5faf9;font-weight:930;line-height:1.02;letter-spacing:-.04em;margin-top:7px}
-    .pack-card-pos{font-size:.62rem;color:#789097;margin-top:5px}
-    .pack-card-body{padding:12px 14px 14px}
-    .pack-card-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-    .pack-mini{background:#0a2028;border:1px solid #173b45;border-radius:8px;padding:8px}
-    .pack-mini span{display:block;font-size:.53rem;color:#58737a;text-transform:uppercase;letter-spacing:.07em}
-    .pack-mini b{display:block;font-size:.92rem;color:#edf5f4;margin-top:3px}
-    .pack-mini b.accent{color:var(--pack-accent)}
-    .pack-reason{font-size:.63rem;color:#74898f;line-height:1.4;margin-top:9px}
-    .pack-list-card{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center;background:#07161d;
-      border:1px solid #173843;border-radius:11px;padding:10px 12px;margin-bottom:8px}
-    .pack-list-photo{width:68px;height:72px;border-radius:9px;overflow:hidden;background:#0a2028;border:1px solid #193e49}
-    .pack-list-photo img{width:100%;height:100%;object-fit:contain;object-position:center top}
-    .pack-rank{font-size:.55rem;color:var(--pack-accent);letter-spacing:.10em;font-weight:900}
-    .pack-name{font-size:.92rem;color:#eef6f4;font-weight:880;margin-top:3px}
-    .pack-meta{font-size:.61rem;color:#6b8389;margin-top:3px}
-    .pack-score{text-align:right}.pack-score strong{display:block;font-size:1.35rem;color:var(--pack-accent);font-weight:950}
-    .pack-score span{font-size:.52rem;color:#587178;letter-spacing:.08em}
-    .pack-badge{display:inline-block;font-size:.56rem;padding:4px 6px;border-radius:999px;background:#0b2429;border:1px solid #1c444d;color:#9fb3b6;margin-top:6px}
-    .pack-badge.jackpot{color:#ffe29a;border-color:#6f5a1f;background:#211b09}
-    .pack-badge.excellent{color:#baffee;border-color:#1d6657;background:#0c2822}
-    .pack-badge.good{color:#c7ddff;border-color:#2a4d72;background:#0b1d2b}
-    .pack-badge.average{color:#d2d8da}.pack-badge.poor{color:#a8afb1}
-    .pack-note{background:#07161d;border:1px solid #173843;border-radius:11px;padding:13px 14px;color:#788f95;font-size:.70rem;line-height:1.5}
-    .pack-note b{color:#e8f0ef}
-    .pack-status-strip{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px}
-    .pack-status-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;background:#081a21;border:1px solid #1b3d47;color:#8ca1a6;font-size:.58rem;font-weight:750}
-    .pack-status-pill b{color:#e9f2f1}
-    @media(max-width:1000px){.pack-grid{grid-template-columns:1fr 1fr}.pack-feature-grid{grid-template-columns:1fr}.pack-list-card{grid-template-columns:62px 1fr auto}}
-    @media(max-width:650px){.pack-grid{grid-template-columns:1fr 1fr}.pack-list-card{grid-template-columns:54px 1fr}.pack-score{grid-column:2;text-align:left}.pack-feature-grid{grid-template-columns:1fr}}
-    </style>
-    """, unsafe_allow_html=True)
-
-    rarity = st.segmented_control(
-        "Rarity",
-        list(packs.RARITIES.keys()),
-        default="Uncommon",
-        selection_mode="single",
-        key="pack_scout_rarity"
-    ) or "Uncommon"
-    accent=rarity_colours[rarity]
-    lo,hi=packs.RARITIES[rarity]
-
-    st.markdown(
-        f'<div class="pack-shell" style="--pack-accent:{accent}">'
-        f'<div class="pack-hero"><div class="pack-kicker">MFL PACK INTELLIGENCE · {esc(rarity.upper())}</div>'
-        f'<div class="pack-title">Pack Scout</div>'
-        f'<div class="pack-copy">Explore MFL-owned players in the known pack age range of 16–28 and compare them by OVR, age and Scout Score. Age-history checks are shown as research context only; they no longer remove players from the pool because that behaviour is not proven to equal pack eligibility.</div>'
-        f'<div class="pack-live"><i></i> Live research model · {lo}–{hi} OVR · pack ages 16–28</div></div></div>',
-        unsafe_allow_html=True
-    )
-
-    @st.cache_data(ttl=600,show_spinner=False)
-    def _load_pack_pool(r):
-        return packs.fetch_rarity_pool(r)
-
-    controls=st.columns([1.25,1.6,3.35])
-    with controls[0]:
-        refresh_pack=st.button("↻ Refresh research",type="primary",use_container_width=True,key="refresh_pack_pool")
-    with controls[1]:
-        st.caption("Updates the pool and checks more player histories · results are cached")
-    if refresh_pack:
-        _load_pack_pool.clear()
-
-    try:
-        with st.spinner(f"Loading live {rarity} pool from MFL…"):
-            pool=_load_pack_pool(rarity)
-    except Exception as e:
-        st.error("Could not load the live MFL pack pool.")
-        with st.expander("Technical detail"):
-            st.code(str(e))
-        st.stop()
-
-    if pool.empty:
-        st.info(f"No MFL-owned {rarity} players were returned.")
-        st.stop()
-
-    # Rankings use the complete MFL-owned, age-valid pool. History status is
-    # displayed as research context only and does not decide pack eligibility.
-    verified_pool=pool[pool["verification_status"]=="VERIFIED_FROZEN"].copy() if "verification_status" in pool else pool.iloc[0:0].copy()
-    rank_pool=pool
-    rankings_verified=False
-
-    best=rank_pool.iloc[0]
-    worst=rank_pool.iloc[-1]
-
-    # Headline cards should showcase different players.
-    # Best Prospect excludes the overall best/worst so the row never repeats the same face.
-    excluded_ids={int(best.player_id),int(worst.player_id)}
-    prospect_pool=rank_pool[
-        (rank_pool["age"].fillna(99)<=20)
-        & (~rank_pool["player_id"].astype(int).isin(excluded_ids))
-    ]
-    if not prospect_pool.empty:
-        best_prospect=prospect_pool.sort_values(
-            ["pull_score","overall","age"],ascending=[False,False,True]
-        ).iloc[0]
-    else:
-        alternatives=rank_pool[~rank_pool["player_id"].astype(int).isin(excluded_ids)]
-        best_prospect=(alternatives.iloc[0] if not alternatives.empty else best)
-
-    youngest=int(pool["age"].dropna().min()) if pool["age"].notna().any() else "—"
-    median_score=float(rank_pool["pull_score"].median())
-    verified_frozen=int(best.get("verified_frozen_count",0))
-    too_new=int(best.get("too_new_count",0))
-    pending_verify=int(best.get("pending_verification_count",0))
-    excluded_aged=int(best.get("excluded_aged_count",0))
-    raw_candidates=int(best.get("raw_candidate_count",len(pool)))
-    coverage=float(best.get("verification_coverage",0.0))
-    coverage_pct=coverage*100
-    rank_scope="MFL-OWNED AGE-VALID POOL"
-
-    st.markdown(
-        f'<div class="pack-shell" style="--pack-accent:{accent}"><div class="pack-grid">'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">MFL-owned pool</div><div class="pack-kpi-val">{len(pool):,}</div><div class="pack-kpi-sub">Age 16–28 · selected rarity</div></div>'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Frozen candidates</div><div class="pack-kpi-val">{verified_frozen:,}</div><div class="pack-kpi-sub">Held by MFL across a rollover without ageing</div></div>'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Aged while MFL-owned</div><div class="pack-kpi-val">{excluded_aged:,}</div><div class="pack-kpi-sub">Research flag only · not excluded</div></div>'
-        f'<div class="pack-kpi"><div class="pack-kpi-lab">Research coverage</div><div class="pack-kpi-val">{coverage_pct:.1f}%</div><div class="pack-kpi-sub">{pending_verify:,} awaiting checks · {too_new:,} too new to test</div></div>'
-        f'</div></div>', unsafe_allow_html=True
-    )
-    st.caption(
-        f"Pack Scout is a research tool, not an official MFL pack list. "
-        f"All MFL-owned players aged 16–28 in the selected rarity remain visible. "
-        f"Age-history status is shown separately and does not determine eligibility."
-    )
-    st.markdown(
-        '<div class="pack-status-strip">'
-        '<span class="pack-status-pill"><b>No age change seen</b> research signal only</span>'
-        '<span class="pack-status-pill"><b>Aged while MFL-owned</b> still included</span>'
-        '<span class="pack-status-pill"><b>Pending / Too New</b> not yet conclusive</span>'
-        '</div>',
-        unsafe_allow_html=True
-    )
-
-    def _feature_card(row,kicker,reason,hero=False):
-        age_txt=int(row.age) if pd.notna(row.age) else "—"
-        bonus=max(0,(packs.AGE_MAX-int(row.age))*packs.AGE_WEIGHT) if pd.notna(row.age) else 0
-        attrs=" · ".join(f"{lab} {val}" for lab,val in packs.top_attributes(row))
-        detail=packs.pull_reason(row)
-        return (
-            f'<div class="pack-feature {"hero" if hero else ""}"><div class="pack-photo-zone">'
-            f'<img class="pack-photo" src="{packs.portrait_url(row.player_id)}" alt="{esc(row.player)}">'
-            f'<div class="pack-card-copy"><div class="pack-card-kicker">{esc(kicker)}</div>'
-            f'<div class="pack-card-name">{esc(row.player)}</div><div class="pack-card-pos">{esc(row.positions or "—")}</div></div></div>'
-            f'<div class="pack-card-body"><div class="pack-card-stats">'
-            f'<div class="pack-mini"><span>OVR</span><b>{int(row.overall)}</b></div>'
-            f'<div class="pack-mini"><span>Age</span><b>{esc(age_txt)}</b></div>'
-            f'<div class="pack-mini"><span>Scout</span><b class="accent">{float(row.pull_score):.1f}</b></div>'
-            f'</div><div class="pack-reason">{esc(reason)}<br>{esc(detail)}'
-            f'{" · "+esc(attrs) if attrs else ""}</div></div></div>'
-        )
-
-    st.markdown('<div class="section-head2"><h3>Pack highlights</h3><span class="small-note2">LIVE SCOUTING VIEW</span></div>',unsafe_allow_html=True)
-    feature_html=(
-        _feature_card(best,"Best-looking pull","Best balance of current OVR and age",True)+
-        _feature_card(worst,"Lowest-value pull","Lowest age-adjusted value in the current research pool")+
-        _feature_card(best_prospect,"Best young prospect","Best age-adjusted option aged 20 or under, excluding the top overall pick")
-    )
-    st.markdown(f'<div class="pack-shell" style="--pack-accent:{accent}"><div class="pack-feature-grid">{feature_html}</div></div>',unsafe_allow_html=True)
-
-    top_tab,prospect_tab,bottom_tab,all_tab,method_tab=st.tabs(["Best pulls","Young gems","Worst pulls","Full pool","Scoring"])
-
-    def _pack_list_card(row,rank_text):
-        age_txt=int(row.age) if pd.notna(row.age) else "—"
-        bonus=max(0,(packs.AGE_MAX-int(row.age))*packs.AGE_WEIGHT) if pd.notna(row.age) else 0
-        cls=str(row.pull_label).lower()
-        pct=max(1,min(100,int(round(float(row.percentile)*100))))
-        attrs=" · ".join(f"{lab} {val}" for lab,val in packs.top_attributes(row))
-        return (
-            f'<div class="pack-list-card"><div class="pack-list-photo"><img src="{packs.portrait_url(row.player_id)}" alt="{esc(row.player)}"></div>'
-            f'<div><div class="pack-rank">{esc(rank_text)}</div><div class="pack-name">{esc(row.player)}</div>'
-            f'<div class="pack-meta">{int(row.overall)} OVR · Age {esc(age_txt)} · {esc(row.positions or "—")} · {esc(row.nationality or "—")}</div>'
-            f'<div class="pack-meta">{esc(attrs) if attrs else ""}</div>'
-            f'<span class="pack-badge {cls}">{esc(row.pull_label)} · top {100-pct+1}% of live pool · +{bonus:.1f} age premium</span></div>'
-            f'<div class="pack-score"><strong>{float(row.pull_score):.1f}</strong><span>SCOUT SCORE</span>'
-            f'<div class="pack-meta" style="margin-top:6px">{esc(str(row.get("verification_status","PENDING")).replace("_"," ").title())}</div></div></div>'
-        )
-
-    with top_tab:
-        a,b=st.columns([1,3])
-        with a:
-            n=st.select_slider("Show",options=[5,10,15,20,30,50],value=15,key="pack_top_n")
-        st.markdown('<div class="section-head2"><h3>Best possible pulls right now</h3><span class="small-note2">AGE-ADJUSTED RANKING</span></div>',unsafe_allow_html=True)
-        cards="".join(_pack_list_card(r,f"#{i} · {str(r.pull_label).upper()}") for i,(_,r) in enumerate(rank_pool.head(n).iterrows(),1))
-        st.markdown(f'<div class="pack-shell" style="--pack-accent:{accent}">{cards}</div>',unsafe_allow_html=True)
-
-    with prospect_tab:
-        st.markdown('<div class="section-head2"><h3>Young gems</h3><span class="small-note2">AGE 20 OR UNDER</span></div>',unsafe_allow_html=True)
-        gems=rank_pool[rank_pool["age"].fillna(99)<=20].sort_values(["pull_score","overall","age"],ascending=[False,False,True]).head(25)
-        if gems.empty:
-            st.info("No players aged 20 or under are currently in this live pool.")
-        else:
-            cards="".join(_pack_list_card(r,f"#{i} YOUNG GEM") for i,(_,r) in enumerate(gems.iterrows(),1))
-            st.markdown(f'<div class="pack-shell" style="--pack-accent:{accent}">{cards}</div>',unsafe_allow_html=True)
-
-    with bottom_tab:
-        a,b=st.columns([1,3])
-        with a:
-            n2=st.select_slider("Show",options=[5,10,15,20,30,50],value=15,key="pack_bottom_n")
-        st.markdown('<div class="section-head2"><h3>Worst possible pulls right now</h3><span class="small-note2">LOWEST SCOUT SCORE</span></div>',unsafe_allow_html=True)
-        bottom=rank_pool.tail(n2).sort_values(["pull_score","overall","age"],ascending=[True,True,False])
-        cards="".join(_pack_list_card(r,f"#{int(r['rank'])} · {str(r.pull_label).upper()}") for _,r in bottom.iterrows())
-        st.markdown(f'<div class="pack-shell" style="--pack-accent:{accent}">{cards}</div>',unsafe_allow_html=True)
-
-    with all_tab:
-        f1,f2,f3,f4=st.columns(4)
-        with f1:
-            ages=st.slider("Age",packs.AGE_MIN,packs.AGE_MAX,(packs.AGE_MIN,packs.AGE_MAX),key="pack_age")
-        with f2:
-            ovrs=st.slider("OVR",lo,hi,(lo,hi),key="pack_ovr")
-        with f3:
-            positions=sorted({p.strip() for x in pool.positions.fillna("") for p in str(x).split("/") if p.strip()})
-            pos_filter=st.multiselect("Position",positions,key="pack_positions")
-        with f4:
-            pull_filter=st.multiselect("Pull rating",["Jackpot","Excellent","Good","Average","Poor"],key="pack_labels")
-
-        view=pool[(pool.age.fillna(packs.AGE_MAX).between(*ages)) & (pool.overall.between(*ovrs))].copy()
-        if pos_filter:
-            view=view[view.positions.fillna("").apply(lambda x:any(p in [q.strip() for q in str(x).split("/")] for p in pos_filter))]
-        if pull_filter:
-            view=view[view.pull_label.isin(pull_filter)]
-
-        st.caption(f"{len(view):,} of {len(pool):,} players shown")
-        show=view[["rank","player","overall","age","positions","nationality","verification_status","pull_score","pull_label"]].rename(columns={
-            "rank":"Rank","player":"Player","overall":"OVR","age":"Age","positions":"Position",
-            "nationality":"Nationality","verification_status":"Pack check","pull_score":"Scout Score","pull_label":"Pull"
-        })
-        st.dataframe(
-            show,use_container_width=True,hide_index=True,
-            column_config={
-                "Scout Score":st.column_config.NumberColumn(format="%.1f"),
-                "OVR":st.column_config.NumberColumn(format="%d"),
-                "Age":st.column_config.NumberColumn(format="%d"),
-            }
-        )
-
-    with method_tab:
-        st.markdown(
-            f'<div class="pack-shell" style="--pack-accent:{accent}"><div class="pack-note">'
-            f'<b>Scout Score is a Pack Scout heuristic, not an official MFL metric.</b><br>'
-            f'It starts with the player\'s OVR and adds <b>0.5 points for every year younger than 28</b>. '
-            f'That makes youth meaningful without allowing age to overwhelm actual player quality. '
-            f'Pull labels are relative to the live {esc(rarity)} pool: Jackpot is approximately the top 2%, Excellent the next 8%, Good the next 25%, Average the middle 40%, and Poor the bottom 25%.<br><br>'
-            f'<b>Why no pull percentage yet?</b> MFL ownership alone does not prove a player is currently available in packs. Until the research has separated enough frozen pack-reserve stock from ordinary MFL-held players, showing a precise percentage would be misleading.'
-            f'</div></div>',unsafe_allow_html=True
-        )
-        st.code("Scout Score = OVR + ((28 - Age) × 0.5)",language=None)
-        st.markdown("#### Known validation examples")
-        st.write("Player 406160 was recently packed and has no NEW_AGE event after MFL acquired him, so he fits the inferred pack-reserve rule. Player 164286 was MFL-owned from 6 June 2025 and continued receiving NEW_AGE events while MFL-owned, so he is excluded.")
-        ex=pd.DataFrame([
-            {"Example":"16-year-old prospect","OVR":67,"Age":16,"Age premium":6.0,"Scout Score":packs.pull_score(67,16)},
-            {"Example":"18-year-old high upside","OVR":69,"Age":18,"Age premium":5.0,"Scout Score":packs.pull_score(69,18)},
-            {"Example":"21-year-old strong player","OVR":71,"Age":21,"Age premium":3.5,"Scout Score":packs.pull_score(71,21)},
-            {"Example":"28-year-old strong player","OVR":71,"Age":28,"Age premium":0.0,"Scout Score":packs.pull_score(71,28)},
-        ])
-        st.dataframe(ex,use_container_width=True,hide_index=True)
-        st.caption(f"Current {rarity} median Scout Score: {median_score:.1f}. A 16-year-old 67 OVR scores 73.0, while a 28-year-old 71 OVR scores 71.0. Rankings describe player quality/value within the live MFL-owned pool; they do not claim pack draw odds.")
-
 
 elif page=="Sync Centre":
     if not wallet:
