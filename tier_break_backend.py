@@ -421,13 +421,42 @@ def fetch_transfer_listings(
         if before_id is not None:
             call_params["beforeListingId"] = before_id
 
-        response = requests.get(
-            LISTINGS_URL,
-            headers=headers,
-            params=call_params,
-            timeout=30,
-        )
-        response.raise_for_status()
+        response = None
+        for attempt in range(6):
+            try:
+                response = requests.get(
+                    LISTINGS_URL,
+                    headers=headers,
+                    params=call_params,
+                    timeout=30,
+                )
+
+                if response.status_code == 429:
+                    retry_after = response.headers.get("Retry-After")
+                    try:
+                        wait_seconds = float(retry_after) if retry_after else min(45, 4 * (2 ** attempt))
+                    except (TypeError, ValueError):
+                        wait_seconds = min(45, 4 * (2 ** attempt))
+                    time.sleep(wait_seconds)
+                    continue
+
+                if response.status_code in (500, 502, 503, 504):
+                    time.sleep(min(20, 2 * (2 ** attempt)))
+                    continue
+
+                response.raise_for_status()
+                break
+
+            except (requests.Timeout, requests.ConnectionError):
+                if attempt == 5:
+                    raise
+                time.sleep(min(20, 2 * (2 ** attempt)))
+        else:
+            raise RuntimeError("MFL listings API remained rate-limited after several retries.")
+
+        if response is None or response.status_code == 429:
+            raise RuntimeError("MFL listings API is temporarily rate-limiting requests. Please try the scan again shortly.")
+
         rows = response.json()
         if not isinstance(rows, list) or not rows:
             break
@@ -447,6 +476,9 @@ def fetch_transfer_listings(
         before_id = rows[-1].get("listingResourceId") or rows[-1].get("id")
         if before_id is None:
             break
+
+        # Be deliberately gentle with the live marketplace API.
+        time.sleep(1.25)
 
     return listings
 
