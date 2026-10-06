@@ -523,3 +523,244 @@ def scan_transfer_market(
         )
     )
     return rows
+
+
+def fetch_wallet_players(wallet, limit=100, max_pages=20):
+    wallet = (wallet or "").strip().lower()
+    if not wallet:
+        return []
+
+    headers = _headers()
+    players = []
+    seen = set()
+    before_id = None
+
+    for _ in range(max_pages):
+        params = {
+            "limit": limit,
+            "ownerWalletAddress": wallet,
+        }
+        if before_id is not None:
+            params["beforePlayerId"] = before_id
+
+        response = None
+        for attempt in range(5):
+            response = requests.get(
+                PLAYERS_URL,
+                headers=headers,
+                params=params,
+                timeout=30,
+            )
+            if response.status_code == 429:
+                retry_after = response.headers.get("Retry-After")
+                try:
+                    wait_seconds = float(retry_after) if retry_after else min(30, 3 * (2 ** attempt))
+                except (TypeError, ValueError):
+                    wait_seconds = min(30, 3 * (2 ** attempt))
+                time.sleep(wait_seconds)
+                continue
+            if response.status_code in (500, 502, 503, 504):
+                time.sleep(min(15, 2 * (2 ** attempt)))
+                continue
+            response.raise_for_status()
+            break
+
+        if response is None or response.status_code == 429:
+            raise RuntimeError("MFL players API is temporarily rate-limiting the wallet scan.")
+
+        rows = response.json()
+        if not isinstance(rows, list) or not rows:
+            break
+
+        new_count = 0
+        for row in rows:
+            pid = row.get("id") if isinstance(row, dict) else None
+            if pid in seen:
+                continue
+            seen.add(pid)
+            players.append(row)
+            new_count += 1
+
+        if len(rows) < limit or new_count == 0:
+            break
+
+        before_id = rows[-1].get("id")
+        if before_id is None:
+            break
+        time.sleep(0.8)
+
+    return players
+
+
+def fetch_wallet_listings(wallet, max_pages=12):
+    wallet = (wallet or "").strip().lower()
+    if not wallet:
+        return {}
+
+    headers = _headers()
+    by_player = {}
+    before_id = None
+
+    for _ in range(max_pages):
+        params = {
+            "limit": 25,
+            "type": "PLAYER",
+            "status": "AVAILABLE",
+            "view": "full",
+            "sellerAddress": wallet,
+        }
+        if before_id is not None:
+            params["beforeListingId"] = before_id
+
+        response = None
+        for attempt in range(5):
+            response = requests.get(
+                LISTINGS_URL,
+                headers=headers,
+                params=params,
+                timeout=30,
+            )
+            if response.status_code == 429:
+                retry_after = response.headers.get("Retry-After")
+                try:
+                    wait_seconds = float(retry_after) if retry_after else min(30, 3 * (2 ** attempt))
+                except (TypeError, ValueError):
+                    wait_seconds = min(30, 3 * (2 ** attempt))
+                time.sleep(wait_seconds)
+                continue
+            if response.status_code in (500, 502, 503, 504):
+                time.sleep(min(15, 2 * (2 ** attempt)))
+                continue
+            response.raise_for_status()
+            break
+
+        if response is None or response.status_code == 429:
+            break
+
+        rows = response.json()
+        if not isinstance(rows, list) or not rows:
+            break
+
+        matched = 0
+        for listing in rows:
+            seller = str(listing.get("sellerAddress") or "").lower()
+            if seller and seller != wallet:
+                continue
+            player = listing.get("player") if isinstance(listing.get("player"), dict) else {}
+            pid = player.get("id")
+            if pid is None:
+                continue
+            price = listing.get("price")
+            try:
+                price = float(price) if price is not None else None
+            except (TypeError, ValueError):
+                price = None
+            by_player[pid] = {
+                "price": price,
+                "listing_id": listing.get("listingResourceId") or listing.get("id"),
+            }
+            matched += 1
+
+        if len(rows) < 25:
+            break
+
+        before_id = rows[-1].get("listingResourceId") or rows[-1].get("id")
+        if before_id is None:
+            break
+
+        # If the endpoint ignored sellerAddress entirely, don't crawl the whole market.
+        if matched == 0 and any(str(r.get("sellerAddress") or "").lower() not in ("", wallet) for r in rows):
+            break
+
+        time.sleep(1.25)
+
+    return by_player
+
+
+def analyse_wallet_player(player, listing=None):
+    if not isinstance(player, dict):
+        return None
+    metadata = player.get("metadata") if isinstance(player.get("metadata"), dict) else {}
+    positions = metadata.get("positions") or []
+    primary = positions[0] if positions else None
+    current_ovr = int(metadata.get("overall") or 0)
+    if current_ovr <= 0:
+        return None
+
+    raw = raw_ovr(metadata, primary)
+    if raw is None:
+        return None
+
+    next_ovr = current_ovr + 1
+    threshold = float(next_ovr) - 0.5
+    gap = max(0.0, threshold - raw)
+    min_points, route, _ = _minimum_route(metadata, primary, threshold)
+    one_point = _one_point_breaks(metadata, primary, threshold)
+    tier_break = next_ovr in TIER_BREAK_OVRS
+
+    if tier_break and one_point:
+        signal = "🚨 TIER BREAK +1 AWAY"
+    elif tier_break and min_points is not None and min_points <= 2:
+        signal = "🔥 Near tier break"
+    elif one_point:
+        signal = "⚡ +1 OVR close"
+    elif min_points is not None and min_points <= 2:
+        signal = "🟢 Near +1 OVR"
+    else:
+        signal = ""
+
+    contract = player.get("activeContract") if isinstance(player.get("activeContract"), dict) else {}
+    club = contract.get("club") if isinstance(contract.get("club"), dict) else {}
+
+    return {
+        "id": player.get("id"),
+        "name": (str(metadata.get("firstName") or "") + " " + str(metadata.get("lastName") or "")).strip(),
+        "age": metadata.get("age"),
+        "position": primary,
+        "positions": ", ".join(positions),
+        "overall": current_ovr,
+        "next_ovr": next_ovr,
+        "raw_ovr": round(raw, 3),
+        "gap": round(gap, 3),
+        "min_points": min_points,
+        "best_route": route,
+        "one_point_stats": ", ".join(one_point),
+        "tier_break": tier_break,
+        "signal": signal,
+        "price": listing.get("price") if isinstance(listing, dict) else None,
+        "listed": isinstance(listing, dict),
+        "club": club.get("name") or "",
+        "PAC": metadata.get("pace"),
+        "SHO": metadata.get("shooting"),
+        "PAS": metadata.get("passing"),
+        "DRI": metadata.get("dribbling"),
+        "DEF": metadata.get("defense"),
+        "PHY": metadata.get("physical"),
+        "GK": metadata.get("goalkeeping"),
+        "mfl_url": f"https://app.playmfl.com/players/{player.get('id')}",
+    }
+
+
+def scan_agency(wallet, include_listings=True):
+    players = fetch_wallet_players(wallet)
+    listings = fetch_wallet_listings(wallet) if include_listings else {}
+
+    rows = []
+    for player in players:
+        pid = player.get("id") if isinstance(player, dict) else None
+        row = analyse_wallet_player(player, listings.get(pid))
+        if row is not None:
+            rows.append(row)
+
+    rows.sort(
+        key=lambda r: (
+            0 if r["tier_break"] and r["one_point_stats"] else
+            1 if r["tier_break"] else
+            2 if r["one_point_stats"] else
+            3,
+            999 if r["min_points"] is None else r["min_points"],
+            r["gap"],
+            r["age"] if r["age"] is not None else 999,
+        )
+    )
+    return rows
