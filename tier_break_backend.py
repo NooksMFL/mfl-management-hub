@@ -593,89 +593,14 @@ def fetch_wallet_players(wallet, limit=100, max_pages=20):
 
 
 def fetch_wallet_listings(wallet, max_pages=12):
-    wallet = (wallet or "").strip().lower()
-    if not wallet:
-        return {}
-
-    headers = _headers()
-    by_player = {}
-    before_id = None
-
-    for _ in range(max_pages):
-        params = {
-            "limit": 25,
-            "type": "PLAYER",
-            "status": "AVAILABLE",
-            "view": "full",
-            "sellerAddress": wallet,
-        }
-        if before_id is not None:
-            params["beforeListingId"] = before_id
-
-        response = None
-        for attempt in range(5):
-            response = requests.get(
-                LISTINGS_URL,
-                headers=headers,
-                params=params,
-                timeout=30,
-            )
-            if response.status_code == 429:
-                retry_after = response.headers.get("Retry-After")
-                try:
-                    wait_seconds = float(retry_after) if retry_after else min(30, 3 * (2 ** attempt))
-                except (TypeError, ValueError):
-                    wait_seconds = min(30, 3 * (2 ** attempt))
-                time.sleep(wait_seconds)
-                continue
-            if response.status_code in (500, 502, 503, 504):
-                time.sleep(min(15, 2 * (2 ** attempt)))
-                continue
-            response.raise_for_status()
-            break
-
-        if response is None or response.status_code == 429:
-            break
-
-        rows = response.json()
-        if not isinstance(rows, list) or not rows:
-            break
-
-        matched = 0
-        for listing in rows:
-            seller = str(listing.get("sellerAddress") or "").lower()
-            if seller and seller != wallet:
-                continue
-            player = listing.get("player") if isinstance(listing.get("player"), dict) else {}
-            pid = player.get("id")
-            if pid is None:
-                continue
-            price = listing.get("price")
-            try:
-                price = float(price) if price is not None else None
-            except (TypeError, ValueError):
-                price = None
-            by_player[pid] = {
-                "price": price,
-                "listing_id": listing.get("listingResourceId") or listing.get("id"),
-            }
-            matched += 1
-
-        if len(rows) < 25:
-            break
-
-        before_id = rows[-1].get("listingResourceId") or rows[-1].get("id")
-        if before_id is None:
-            break
-
-        # If the endpoint ignored sellerAddress entirely, don't crawl the whole market.
-        if matched == 0 and any(str(r.get("sellerAddress") or "").lower() not in ("", wallet) for r in rows):
-            break
-
-        time.sleep(1.25)
-
-    return by_player
-
+    """
+    The public MFL /listings endpoint does not accept sellerAddress as a filter.
+    Do not crawl the full marketplace just to price one wallet's squad, as that
+    quickly triggers 429s. Agency scans therefore prioritise development/tier
+    analysis and leave listing price blank until a wallet-specific listing
+    source is available.
+    """
+    return {}
 
 def analyse_wallet_player(player, listing=None):
     if not isinstance(player, dict):
