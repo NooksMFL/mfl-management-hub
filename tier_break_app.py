@@ -3,7 +3,7 @@ import streamlit as st
 
 import tier_break_backend as tierbreak
 
-st.set_page_config(page_title="MFL Transfer Player Tracker", page_icon="⚡", layout="wide")
+st.set_page_config(page_title="MFL Player Tracker", page_icon="⚡", layout="wide")
 
 st.markdown("""
 <style>
@@ -17,91 +17,47 @@ st.markdown("""
 
 st.markdown("""
 <div class="hero">
-  <div class="kicker">NOOKS · TRANSFER MARKET SCOUTING</div>
-  <div class="title">Tier Break Bargain Finder</div>
+  <div class="kicker">NOOKS · MFL SCOUTING</div>
+  <div class="title">Player Tracker</div>
   <div class="copy">
-    Scan players currently listed for transfer and rank the ones closest to a +1 OVR.
-    Players whose next +1 also crosses a rarity boundary are highlighted as tier-break opportunities.
+    Find players closest to their next +1 OVR and highlight the ones approaching a rarity tier break.
+    Scan the live transfer market or inspect a specific MFL wallet/agency.
   </div>
 </div>
 """, unsafe_allow_html=True)
 
-all_positions=["GK","RB","LB","CB","RWB","LWB","CDM","CM","CAM","RM","LM","RW","LW","CF","ST"]
+mode=st.radio("Mode",["Agency scan","Transfer market"],horizontal=True)
 
-with st.expander("Filters", expanded=True):
-    c1,c2,c3,c4=st.columns(4)
-    with c1:
-        age_range=st.slider("Age",16,42,(16,28))
-    with c2:
-        ovr_range=st.slider("OVR",45,94,(60,84))
-    with c3:
-        price_min=st.number_input("Min price",min_value=0.0,value=0.0,step=1.0)
-    with c4:
-        price_max=st.number_input("Max price",min_value=0.0,value=100.0,step=5.0)
+def render_rows(rows, agency=False):
+    if not rows:
+        st.info("No players returned for this scan.")
+        return
 
-    selected_positions=st.multiselect("Positions",all_positions,default=[])
-
-scan=st.button("Scan live transfer listings",type="primary")
-
-if "market_rows" not in st.session_state:
-    st.session_state.market_rows=[]
-    st.session_state.market_key=None
-
-key=(tuple(age_range),tuple(ovr_range),float(price_min),float(price_max),tuple(selected_positions))
-
-if scan:
-    try:
-        with st.spinner("Scanning MFL transfer listings…"):
-            rows=tierbreak.scan_transfer_market(
-                age_min=int(age_range[0]),
-                age_max=int(age_range[1]),
-                overall_min=int(ovr_range[0]),
-                overall_max=int(ovr_range[1]),
-                price_min=float(price_min),
-                price_max=float(price_max) if price_max > 0 else None,
-                positions=selected_positions or None,
-                max_pages=24,
-            )
-        st.session_state.market_rows=rows
-        st.session_state.market_key=key
-    except Exception as e:
-        st.error("Could not load MFL transfer listings.")
-        with st.expander("Technical detail"):
-            st.code(str(e))
-
-rows=st.session_state.market_rows if st.session_state.market_key==key else []
-
-if not rows:
-    st.info("Choose your filters and click **Scan live transfer listings**.")
-else:
     tier_breaks=sum(1 for r in rows if r["tier_break"])
     tier_one=sum(1 for r in rows if r["tier_break"] and r["one_point_stats"])
     plus_one=sum(1 for r in rows if r["one_point_stats"])
-    closest=min((r["gap"] for r in rows), default=0)
 
     m1,m2,m3,m4=st.columns(4)
-    m1.metric("Listings scanned",f"{len(rows):,}")
-    m2.metric("Tier-break listings",f"{tier_breaks:,}")
+    m1.metric("Players scanned",f"{len(rows):,}")
+    m2.metric("Tier-break candidates",f"{tier_breaks:,}")
     m3.metric("Tier break +1 away",f"{tier_one:,}")
     m4.metric("Any +1 OVR close",f"{plus_one:,}")
 
-    st.subheader("Transfer market player tracker")
-
-    f1,f2,f3=st.columns([1.4,1.4,1.4])
-    with f1:
+    c1,c2,c3=st.columns(3)
+    with c1:
         view=st.selectbox(
             "Show",
-            ["Best development targets","Tier breaks only","1-stat-gain only","All listings"],
-            index=0,
+            ["Best development targets","Tier breaks only","1-stat-gain only","All players"],
+            key="agency_view" if agency else "market_view",
         )
-    with f2:
-        max_rows=st.selectbox("Rows", [25,50,100,250,500], index=2)
-    with f3:
+    with c2:
         sort_mode=st.selectbox(
             "Rank by",
-            ["Opportunity","Closest to +1","Cheapest","Youngest"],
-            index=0,
+            ["Opportunity","Closest to +1","Cheapest","Youngest"] if not agency else ["Opportunity","Closest to +1","Youngest","Cheapest"],
+            key="agency_sort" if agency else "market_sort",
         )
+    with c3:
+        max_rows=st.selectbox("Rows",[25,50,100,250,500],index=2,key="agency_rows" if agency else "market_rows_count")
 
     filtered=list(rows)
     if view=="Tier breaks only":
@@ -112,9 +68,9 @@ else:
         filtered=[r for r in filtered if r["tier_break"] or r["one_point_stats"] or (r["min_points"] is not None and r["min_points"]<=2)]
 
     if sort_mode=="Closest to +1":
-        filtered.sort(key=lambda r:(r["gap"],999 if r["min_points"] is None else r["min_points"],r["price"] if r["price"] is not None else 1e18))
+        filtered.sort(key=lambda r:(r["gap"],999 if r["min_points"] is None else r["min_points"],r["age"] if r["age"] is not None else 999))
     elif sort_mode=="Cheapest":
-        filtered.sort(key=lambda r:(r["price"] if r["price"] is not None else 1e18,r["gap"]))
+        filtered.sort(key=lambda r:(r.get("price") if r.get("price") is not None else 1e18,r["gap"]))
     elif sort_mode=="Youngest":
         filtered.sort(key=lambda r:(r["age"] if r["age"] is not None else 999,r["gap"]))
     else:
@@ -124,13 +80,14 @@ else:
             2 if r["one_point_stats"] else 3,
             999 if r["min_points"] is None else r["min_points"],
             r["gap"],
-            r["price"] if r["price"] is not None else 1e18
+            r["age"] if r["age"] is not None else 999
         ))
 
     display=[]
     for r in filtered[:int(max_rows)]:
+        signal=r.get("signal") or r.get("opportunity") or r.get("closeness") or ""
         display.append({
-            "Signal":r["opportunity"] or r["closeness"],
+            "Signal":signal,
             "Player":r["name"],
             "Age":r["age"],
             "Pos":r["position"],
@@ -142,7 +99,8 @@ else:
             "Min gains":r["min_points"],
             "Best route":r["best_route"],
             "1-point break":r["one_point_stats"] or "—",
-            "Price":r["price"],
+            "Listed":"YES" if r.get("listed") else "",
+            "Price":r.get("price"),
             "PAC":r["PAC"],
             "SHO":r["SHO"],
             "PAS":r["PAS"],
@@ -154,7 +112,6 @@ else:
         })
 
     df=pd.DataFrame(display)
-
     st.dataframe(
         df,
         use_container_width=True,
@@ -167,7 +124,63 @@ else:
         }
     )
 
-    st.caption(
-        "‘+1 soon’ here means mathematically close to the next displayed OVR based on current attributes. "
-        "It does not yet predict when training/development will happen. A tier break is flagged when the next OVR crosses 55, 65, 75, 85 or 95."
-    )
+if mode=="Agency scan":
+    st.subheader("Agency scan")
+    wallet=st.text_input("MFL wallet",value="0x47a30c890908c506",placeholder="0x…")
+    st.caption("Scans every player owned by the wallet, then ranks the players closest to +1 OVR and rarity tier breaks.")
+
+    if st.button("Scan agency",type="primary"):
+        try:
+            with st.spinner("Loading agency players and checking development distance…"):
+                rows=tierbreak.scan_agency(wallet,include_listings=True)
+            st.session_state["agency_scan_rows"]=rows
+            st.session_state["agency_scan_wallet"]=wallet.strip().lower()
+        except Exception as e:
+            st.error("Could not scan this agency.")
+            with st.expander("Technical detail"):
+                st.code(str(e))
+
+    if st.session_state.get("agency_scan_wallet")==wallet.strip().lower():
+        rows=st.session_state.get("agency_scan_rows",[])
+        render_rows(rows,agency=True)
+
+else:
+    st.subheader("Transfer market")
+    all_positions=["GK","RB","LB","CB","RWB","LWB","CDM","CM","CAM","RM","LM","RW","LW","CF","ST"]
+    with st.expander("Filters",expanded=True):
+        c1,c2,c3,c4=st.columns(4)
+        with c1:
+            age_range=st.slider("Age",16,42,(16,28))
+        with c2:
+            ovr_range=st.slider("OVR",45,94,(60,84))
+        with c3:
+            price_min=st.number_input("Min price",min_value=0.0,value=0.0,step=1.0)
+        with c4:
+            price_max=st.number_input("Max price",min_value=0.0,value=100.0,step=5.0)
+        selected_positions=st.multiselect("Positions",all_positions,default=[])
+
+    if st.button("Scan live transfer listings",type="primary"):
+        try:
+            with st.spinner("Scanning MFL transfer listings…"):
+                rows=tierbreak.scan_transfer_market(
+                    age_min=int(age_range[0]),
+                    age_max=int(age_range[1]),
+                    overall_min=int(ovr_range[0]),
+                    overall_max=int(ovr_range[1]),
+                    price_min=float(price_min),
+                    price_max=float(price_max) if price_max>0 else None,
+                    positions=selected_positions or None,
+                    max_pages=24,
+                )
+            st.session_state["market_scan_rows"]=rows
+        except Exception as e:
+            st.error("Could not load MFL transfer listings.")
+            with st.expander("Technical detail"):
+                st.code(str(e))
+
+    render_rows(st.session_state.get("market_scan_rows",[]),agency=False)
+
+st.caption(
+    "‘+1 close’ means mathematically close to the next displayed OVR from current attributes. "
+    "Tier breaks are the rarity boundaries at 55, 65, 75, 85 and 95."
+)
