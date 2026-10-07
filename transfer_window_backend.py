@@ -91,13 +91,25 @@ def _is_official(rec):
     return not any(x in name for x in blocked)
 
 def player_apps(pid, token):
-    raw=agency.get(f"/players/{int(pid)}/competitions",token)
-    rows=_arr(raw)
-    season_rows=[r for r in rows if isinstance(r,dict) and _season(r)==SEASON and _is_official(r)]
-    if not season_rows:
-        seasons=sorted({x for x in (_season(r) for r in rows if isinstance(r,dict)) if x is not None})
-        raise ValueError(f"No Season {SEASON} official competition records found; seasons returned={seasons}")
-    return sum(_apps(r) for r in season_rows), season_rows
+    """Count official Season 17 appearances from MFL's proven MATCH progression events.
+    Season 17 began 23 Sep 2026; preseason friendlies were before this boundary.
+    One MATCH progression event corresponds to a player appearance.
+    """
+    events=agency.exp_history(int(pid),token)
+    season_start=pd.Timestamp("2026-09-23T00:00:00Z")
+    matches=[]
+    for e in events:
+        if not isinstance(e,dict) or agency.event_reason(e)!="MATCH":
+            continue
+        dt=agency.activity_event_date(e)
+        if dt is None:
+            continue
+        ts=pd.Timestamp(dt)
+        if ts.tzinfo is None: ts=ts.tz_localize("UTC")
+        else: ts=ts.tz_convert("UTC")
+        if ts>=season_start:
+            matches.append(e)
+    return len(matches),matches
 
 def _owned_names(wallet, token):
     clubs=shared.fetch_clubs(wallet,token,force=False)
