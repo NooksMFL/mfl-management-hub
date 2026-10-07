@@ -36,33 +36,15 @@ def _club_id(c):
     except:return None
 
 def fetch_division_clubs(division,t=None):
-    """Enumerate clubs from MFL's club endpoint. Division names are MFL's real
-    league tiers: Diamond through Flint; no synthetic club/player totals."""
-    # Club discovery is a public read. Do not make a historical scan depend on
-    # /auth/refresh, which MFL intermittently returns 500 for.
-    out=[]; seen=set(); before=None
-    import requests
-    for _ in range(200):
-        params={"limit":100,"division":division}
-        if before is not None:params["beforeClubId"]=before
-        resp=requests.get(agency.BASE+"/clubs",headers=agency.H,params=params,timeout=30)
-        if not resp.ok:raise RuntimeError(f"/clubs returned {resp.status_code}: {resp.text[:180]}")
-        batch=_arr(resp.json())
-        if not batch:break
-        fresh=0
-        for c in batch:
-            if not isinstance(c,dict):continue
-            cid=_club_id(c)
-            if cid is None or cid in seen:continue
-            # Guard against APIs that ignore the division parameter.
-            div=str(c.get("division") or c.get("divisionName") or ((c.get("league") or {}).get("division") if isinstance(c.get("league"),dict) else "") or "")
-            if div and division.casefold() not in div.casefold():continue
-            seen.add(cid);out.append(c);fresh+=1
-        if len(batch)<100 or fresh==0:break
-        before=_club_id(batch[-1])
-        if before is None:break
-        time.sleep(.25)
-    return out
+    """Division-wide enumeration is not exposed by MFL's /clubs endpoint.
+    That endpoint requires walletAddress, so do not pretend it can scan a tier.
+    We keep this explicit until a validated competition/league enumeration
+    endpoint is wired in.
+    """
+    raise RuntimeError(
+        "MFL /clubs only supports walletAddress lookup; it cannot enumerate a division. "
+        "Division scan disabled until a real league/competition club source is validated."
+    )
 
 def fetch_club_players(club_id,t=None):
     t=t or agency.token()
