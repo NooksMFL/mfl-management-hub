@@ -304,9 +304,10 @@ def smart_matches(start_ovr,mint_age,groups=None,min_seasons=8,target_min=30):
     available=max(1,int(stats["max_seasons"] or 1))
     effective=min(requested,available)
 
-    attempts=[(0,0),(1,0),(1,1),(2,1),(2,2),(3,2),(4,3),(5,4)]
+    attempts=[(0,0),(1,0),(1,1),(2,1),(2,2),(3,2),(4,3),(5,4),(7,6),(10,8)]
     best=[]
     used=(0,0)
+    relaxed_position=False
     for ovr_tol,age_tol in attempts:
         found=find_matches(start_ovr,mint_age,groups,{},None,None,None,
                            min_seasons=effective,ovr_tolerance=ovr_tol,age_tolerance=age_tol)
@@ -315,10 +316,31 @@ def smart_matches(start_ovr,mint_age,groups=None,min_seasons=8,target_min=30):
         if len(found)>=int(target_min):
             return {"matches":found,"ovr_tolerance":ovr_tol,"age_tolerance":age_tol,
                     "requested_min_seasons":requested,"effective_min_seasons":effective,
-                    "max_available_seasons":stats["max_seasons"]}
+                    "max_available_seasons":stats["max_seasons"],"relaxed_position":False}
+    # If a small early dataset has no comparable player in the selected broad
+    # position group, widen to all positions rather than making the button appear dead.
+    if groups and len(best)<5:
+        for ovr_tol,age_tol in attempts:
+            found=find_matches(start_ovr,mint_age,[],{},None,None,None,
+                               min_seasons=effective,ovr_tolerance=ovr_tol,age_tolerance=age_tol)
+            if len(found)>len(best):
+                best=found; used=(ovr_tol,age_tol); relaxed_position=True
+            if len(found)>=int(target_min):
+                break
+    # Final fallback: nearest real careers of the available length. Never fabricate.
+    if not best:
+        pool=rows(effective)
+        scored=[]
+        for r in pool:
+            if r.get("mint_age") is None: continue
+            score=abs(float(r.get("start_ovr") or 0)-float(start_ovr))*3 + abs(int(r["mint_age"])-int(mint_age))*2
+            scored.append((score,r))
+        scored.sort(key=lambda x:(x[0],-float(x[1].get("career_gain") or 0)))
+        best=[r for _,r in scored[:max(10,min(int(target_min),len(scored)))]]
+        if best: relaxed_position=bool(groups)
     return {"matches":best,"ovr_tolerance":used[0],"age_tolerance":used[1],
             "requested_min_seasons":requested,"effective_min_seasons":effective,
-            "max_available_seasons":stats["max_seasons"]}
+            "max_available_seasons":stats["max_seasons"],"relaxed_position":relaxed_position}
 
 def projection_summary(matches,max_seasons=10):
     """Independent projection statistics calculated only from matched careers."""
