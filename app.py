@@ -1602,7 +1602,7 @@ elif page=="Career Projection":
     with st.expander("Historical Dataset Builder",expanded=True):
         a,b,c,d=st.columns(4)
         a.metric("Players indexed",f"{stats['indexed']:,}")
-        b.metric("8+ season candidates",f"{stats['eligible']:,}")
+        b.metric("8+ season careers",f"{stats['eligible']:,}")
         c.metric("Careers reconstructed",f"{stats['careers']:,}")
         d.metric("Errors",f"{stats['errors']:,}")
         st.caption(
