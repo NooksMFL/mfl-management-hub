@@ -38,11 +38,16 @@ def _club_id(c):
 def fetch_division_clubs(division,t=None):
     """Enumerate clubs from MFL's club endpoint. Division names are MFL's real
     league tiers: Diamond through Flint; no synthetic club/player totals."""
-    t=t or agency.token(); out=[]; seen=set(); before=None
+    # Club discovery is a public read. Do not make a historical scan depend on
+    # /auth/refresh, which MFL intermittently returns 500 for.
+    out=[]; seen=set(); before=None
+    import requests
     for _ in range(200):
         params={"limit":100,"division":division}
         if before is not None:params["beforeClubId"]=before
-        raw=agency.get("/clubs",t,params); batch=_arr(raw)
+        resp=requests.get(agency.BASE+"/clubs",headers=agency.H,params=params,timeout=30)
+        if not resp.ok:raise RuntimeError(f"/clubs returned {resp.status_code}: {resp.text[:180]}")
+        batch=_arr(resp.json())
         if not batch:break
         fresh=0
         for c in batch:
@@ -73,7 +78,12 @@ def fetch_club_players(club_id,t=None):
 
 def scan_division(division,progress=None,max_clubs=None):
     if division not in DIVISIONS:raise ValueError("Unknown MFL division")
-    label=DIV_LABEL[division];t=agency.token();clubs=fetch_division_clubs(division,t)
+    label=DIV_LABEL[division];clubs=fetch_division_clubs(division,None)
+    # Only player-history calls need auth. If auth is unavailable, fail here
+    # after proving club discovery itself works, with a precise message.
+    try:t=agency.token()
+    except Exception as e:
+        raise RuntimeError(f"Found {len(clubs):,} {division} clubs, but MFL's authenticated player-history service is currently unavailable: {e}")
     if max_clubs:clubs=clubs[:int(max_clubs)]
     c=db();c.execute("""INSERT OR REPLACE INTO scan_status(division,status,clubs_scanned,players,last_run,error)
       VALUES(?,?,?,?,?,?)""",(label,"Running",0,0,datetime.now(timezone.utc).isoformat(),None));c.commit();c.close()
