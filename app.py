@@ -829,7 +829,7 @@ def valid_wallet(v):
 if "wallet" not in st.session_state: st.session_state.wallet=""
 
 # ---------------- SIDEBAR ----------------
-nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Watchlist","Compare","Insights","Sync Centre"]
+nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Transfer Window","Watchlist","Compare","Insights","Sync Centre"]
 query_page=st.query_params.get("page","Home")
 if query_page not in nav_pages:
     query_page="Home"
@@ -1591,6 +1591,40 @@ elif page=="Club Development":
             use_container_width=True,hide_index=True,height=520
         )
 
+
+elif page=="Transfer Window":
+    import transfer_window_backend as tw
+    st.markdown('<div class="suite-hero"><div class="suite-kicker">SEASON 17 · MID-SEASON</div><div class="suite-title">Transfer Window</div><div class="suite-copy">Scan every player at your owned clubs and flag anyone with fewer than four official Season 17 appearances. Friendlies and preseason are excluded.</div></div>',unsafe_allow_html=True)
+    if not wallet:
+        st.warning("Connect a wallet first.");st.stop()
+    if "tw_results" not in st.session_state: st.session_state.tw_results=None
+    if "tw_errors" not in st.session_state: st.session_state.tw_errors=[]
+    if st.button("Scan all managed clubs",type="primary",use_container_width=True,key="tw_scan"):
+        bar=st.progress(0); status=st.empty()
+        def tw_progress(done,total,flagged,errors):
+            bar.progress(done/max(total,1))
+            status.caption(f"Scanning {done}/{total} players · {flagged} under 4 apps · {errors} API errors")
+        try:
+            with st.spinner("Checking official Season 17 appearances…"):
+                twdf,twerrs,twtotal=tw.candidates(wallet,tw_progress)
+            st.session_state.tw_results=twdf;st.session_state.tw_errors=twerrs
+            status.success(f"Scan complete · {twtotal} managed-club players checked.")
+        except Exception as e: st.error(f"Scan stopped: {e}")
+    twdf=st.session_state.tw_results
+    if twdf is not None:
+        if twdf.empty: st.success("No managed-club players are below 4 official Season 17 appearances.")
+        else:
+            a,b,c,d=st.columns(4)
+            a.metric("Under 4 apps",len(twdf));b.metric("0 apps",int((twdf["Apps"]==0).sum()))
+            c.metric("1–2 apps",int(twdf["Apps"].isin([1,2]).sum()));d.metric("3 apps",int((twdf["Apps"]==3).sum()))
+            clubs=["All clubs"]+sorted(twdf["Club"].dropna().unique().tolist())
+            chosen=st.selectbox("Club",clubs,key="tw_club")
+            view=twdf if chosen=="All clubs" else twdf[twdf["Club"]==chosen]
+            st.dataframe(view,use_container_width=True,hide_index=True)
+            st.download_button("Download shortlist CSV",twdf.to_csv(index=False).encode("utf-8-sig"),file_name="mfl_s17_under_4_apps.csv",mime="text/csv",key="tw_csv")
+    if st.session_state.tw_errors:
+        with st.expander(f"API errors ({len(st.session_state.tw_errors)})"):
+            st.dataframe(pd.DataFrame(st.session_state.tw_errors,columns=["Player ID","Error"]),use_container_width=True,hide_index=True)
 
 elif page=="Watchlist":
     if not wallet:
