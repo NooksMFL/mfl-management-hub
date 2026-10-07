@@ -18,6 +18,9 @@ SOURCES={
     "agency": Path(agency.DB),
     "club": Path(club.DB),
 }
+# Daily/point-in-time snapshot tables can grow indefinitely and are not needed
+# to avoid reloading the wallet/agency. Keep the browser backup compact.
+SKIP_TABLES={"snapshots","club_snapshots"}
 
 def _ensure_schemas():
     c=shared.db(); c.close()
@@ -32,7 +35,7 @@ def _wallet_tables(path: Path):
     out=[]
     for table in tables:
         cols=[r["name"] for r in c.execute(f'PRAGMA table_info("{table}")').fetchall()]
-        if "wallet" in cols:
+        if "wallet" in cols and table not in SKIP_TABLES:
             out.append(table)
     c.close()
     return out
