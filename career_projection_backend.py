@@ -281,6 +281,23 @@ def _quantile(values,q):
     w=pos-lo
     return vals[lo]*(1-w)+vals[hi]*w
 
+def smart_matches(start_ovr,mint_age,groups=None,min_seasons=8,target_min=30):
+    """Find comparable careers without making the user tune tolerances.
+    Starts exact, then widens age/OVR gradually until there is a useful sample.
+    Returns the actual tolerances used so the UI can be transparent.
+    """
+    attempts=[(0,0),(1,0),(1,1),(2,1),(2,2),(3,2)]
+    best=[]
+    used=(0,0)
+    for ovr_tol,age_tol in attempts:
+        found=find_matches(start_ovr,mint_age,groups,{},None,None,None,
+                           min_seasons=min_seasons,ovr_tolerance=ovr_tol,age_tolerance=age_tol)
+        if len(found)>len(best):
+            best=found; used=(ovr_tol,age_tol)
+        if len(found)>=int(target_min):
+            return {"matches":found,"ovr_tolerance":ovr_tol,"age_tolerance":age_tol}
+    return {"matches":best,"ovr_tolerance":used[0],"age_tolerance":used[1]}
+
 def projection_summary(matches,max_seasons=10):
     """Independent projection statistics calculated only from matched careers."""
     if not matches:
