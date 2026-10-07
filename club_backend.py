@@ -161,42 +161,49 @@ def owned_clubs(wallet,t=None,refresh=False):
     if saved and not refresh:
         return [{"id":r["club_id"],"name":r["club_name"]} for r in saved]
 
+    # Try the public shared-cache route first. A temporary failure of
+    # /auth/refresh should never make a wallet's owned clubs disappear.
+    last_error=None
+    try:
+        found=shared.fetch_clubs(wallet,t=None,force=refresh)
+        if found:
+            _save_owned(wallet,found)
+            return found
+    except Exception as e:
+        last_error=e
+
     if t is None:
         try:t=token()
         except Exception:
-            return []
+            t=None
 
-    # The actual MFL web response mixes owned and staff-role clubs. The reliable
-    # discriminator is title == MFL_OWNER. Do NOT send withLeague; MFL rejects it
-    # on this API route in some sessions.
     attempts=[
         {"walletAddress":wallet},
         {"walletAddress":wallet,"withStaffContracts":"true"},
     ]
-    last_error=None
-    for params in attempts:
-        try:
-            raw=get("/clubs",t,params,timeout=(3,7))
-            found=[]
-            for x in arr(raw):
-                if not isinstance(x,dict):continue
-                if str(x.get("title") or "").strip().upper()!="MFL_OWNER":continue
-                club=x.get("club") if isinstance(x.get("club"),dict) else x
-                name=club.get("name") or club.get("clubName")
-                cid=club.get("id") or club.get("clubId")
-                if name:found.append({"id":cid,"name":str(name).strip()})
-            if found:
-                # unique
-                uniq=[];seen=set()
-                for x in found:
-                    k=(x["id"],x["name"].casefold())
-                    if k not in seen:
-                        seen.add(k);uniq.append(x)
-                _save_owned(wallet,uniq)
-                shared.save_clubs(wallet,uniq)
-                return uniq
-        except Exception as e:
-            last_error=e
+    if t is not None:
+        for params in attempts:
+            try:
+                raw=get("/clubs",t,params,timeout=(3,7))
+                found=[]
+                for x in arr(raw):
+                    if not isinstance(x,dict):continue
+                    if str(x.get("title") or "").strip().upper()!="MFL_OWNER":continue
+                    club=x.get("club") if isinstance(x.get("club"),dict) else x
+                    name=club.get("name") or club.get("clubName")
+                    cid=club.get("id") or club.get("clubId")
+                    if name:found.append({"id":cid,"name":str(name).strip()})
+                if found:
+                    uniq=[];seen=set()
+                    for x in found:
+                        k=(x["id"],x["name"].casefold())
+                        if k not in seen:
+                            seen.add(k);uniq.append(x)
+                    _save_owned(wallet,uniq)
+                    shared.save_clubs(wallet,uniq)
+                    return uniq
+            except Exception as e:
+                last_error=e
 
     fallback=KNOWN_OWNER_CLUBS.get(wallet,[])
     if fallback:
