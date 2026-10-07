@@ -143,7 +143,7 @@ def index_source(retired=False, pages=4, progress=None):
 def index_stats():
     c=db()
     total=int(c.execute("SELECT COUNT(*) FROM player_index").fetchone()[0])
-    eligible=int(c.execute("SELECT COUNT(*) FROM player_index WHERE seasons_hint>=8").fetchone()[0])
+    eligible=int(c.execute("SELECT COUNT(*) FROM careers WHERE seasons>=8").fetchone()[0])
     processed=int(c.execute("SELECT COUNT(*) FROM player_index WHERE processed=1").fetchone()[0])
     errors=int(c.execute("SELECT COUNT(*) FROM player_index WHERE error IS NOT NULL AND error<>''").fetchone()[0])
     careers=int(c.execute("SELECT COUNT(*) FROM careers").fetchone()[0])
@@ -204,8 +204,11 @@ def save(row):
 
 def process_history_batch(limit=100, progress=None):
     c=db()
+    # The global /players index does not reliably expose ageAtMint/playerSeasons.
+    # Therefore every indexed player is eligible for a history check; the real
+    # 8+ season determination is made only after reconstructing their history.
     rs=[dict(r) for r in c.execute("""SELECT * FROM player_index
-      WHERE processed=0 AND seasons_hint>=8 ORDER BY player_id DESC LIMIT ?""",(int(limit),)).fetchall()]
+      WHERE processed=0 ORDER BY player_id DESC LIMIT ?""",(int(limit),)).fetchall()]
     c.close()
     done=0; errors=0
     for i,idx in enumerate(rs,1):
