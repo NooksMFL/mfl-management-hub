@@ -89,8 +89,15 @@ def _access_token():
 
 
 def _headers():
+    """Use auth when available, but do not make public player/listing scans depend on it.
+    MFL's player and listing read endpoints are public; /auth/refresh can intermittently
+    return 500 even while those reads are healthy.
+    """
     headers = dict(COMMON_HEADERS)
-    headers["Authorization"] = "Bearer " + _access_token()
+    try:
+        headers["Authorization"] = "Bearer " + _access_token()
+    except Exception:
+        pass
     return headers
 
 
