@@ -212,7 +212,7 @@ def process_history_batch(limit=100, progress=None):
     # Therefore every indexed player is eligible for a history check; the real
     # 8+ season determination is made only after reconstructing their history.
     rs=[dict(r) for r in c.execute("""SELECT * FROM player_index
-      WHERE processed=0 ORDER BY player_id DESC LIMIT ?""",(int(limit),)).fetchall()]
+      WHERE processed=0 ORDER BY player_id ASC LIMIT ?""",(int(limit),)).fetchall()]
     c.close()
     done=0; errors=0
     for i,idx in enumerate(rs,1):
@@ -281,22 +281,44 @@ def _quantile(values,q):
     w=pos-lo
     return vals[lo]*(1-w)+vals[hi]*w
 
+def dataset_season_stats():
+    c=db()
+    rows=c.execute("""SELECT seasons,COUNT(*) n FROM careers GROUP BY seasons ORDER BY seasons""").fetchall()
+    c.close()
+    counts={int(r["seasons"]):int(r["n"]) for r in rows}
+    return {
+        "counts":counts,
+        "max_seasons":max(counts) if counts else 0,
+        "four_plus":sum(n for k,n in counts.items() if k>=4),
+        "eight_plus":sum(n for k,n in counts.items() if k>=8),
+    }
+
 def smart_matches(start_ovr,mint_age,groups=None,min_seasons=8,target_min=30):
-    """Find comparable careers without making the user tune tolerances.
-    Starts exact, then widens age/OVR gradually until there is a useful sample.
-    Returns the actual tolerances used so the UI can be transparent.
+    """Find comparable careers automatically and tell the UI why there may be none.
+    Start with the requested minimum career length. If the database does not yet
+    contain enough careers of that length, use the longest available meaningful
+    history rather than silently returning an empty result.
     """
-    attempts=[(0,0),(1,0),(1,1),(2,1),(2,2),(3,2)]
+    stats=dataset_season_stats()
+    requested=max(1,int(min_seasons))
+    available=max(1,int(stats["max_seasons"] or 1))
+    effective=min(requested,available)
+
+    attempts=[(0,0),(1,0),(1,1),(2,1),(2,2),(3,2),(4,3),(5,4)]
     best=[]
     used=(0,0)
     for ovr_tol,age_tol in attempts:
         found=find_matches(start_ovr,mint_age,groups,{},None,None,None,
-                           min_seasons=min_seasons,ovr_tolerance=ovr_tol,age_tolerance=age_tol)
+                           min_seasons=effective,ovr_tolerance=ovr_tol,age_tolerance=age_tol)
         if len(found)>len(best):
             best=found; used=(ovr_tol,age_tol)
         if len(found)>=int(target_min):
-            return {"matches":found,"ovr_tolerance":ovr_tol,"age_tolerance":age_tol}
-    return {"matches":best,"ovr_tolerance":used[0],"age_tolerance":used[1]}
+            return {"matches":found,"ovr_tolerance":ovr_tol,"age_tolerance":age_tol,
+                    "requested_min_seasons":requested,"effective_min_seasons":effective,
+                    "max_available_seasons":stats["max_seasons"]}
+    return {"matches":best,"ovr_tolerance":used[0],"age_tolerance":used[1],
+            "requested_min_seasons":requested,"effective_min_seasons":effective,
+            "max_available_seasons":stats["max_seasons"]}
 
 def projection_summary(matches,max_seasons=10):
     """Independent projection statistics calculated only from matched careers."""
