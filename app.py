@@ -1596,23 +1596,42 @@ elif page=="Career Projection":
     import career_projection_backend as cp
     st.markdown("""<div class="suite-hero"><div class="suite-kicker">MFL · HISTORICAL DEVELOPMENT</div>
     <div class="suite-title">Career Projection Model</div>
-    <div class="suite-copy">Compare a player profile against multi-season historical careers and find the closest development paths.</div></div>""",unsafe_allow_html=True)
+    <div class="suite-copy">Build an independent historical MFL player dataset, then compare a player against genuine multi-season development paths.</div></div>""",unsafe_allow_html=True)
 
-    with st.expander("Historical Dataset",expanded=True):
-        statuses=cp.status_rows()
-        names={cp.DIV_LABEL[n]:n for n in cp.DIVISIONS}
-        for i in range(0,10,2):
-            cols=st.columns(2)
-            for col,x in zip(cols,statuses[i:i+2]):
-                with col:
-                    state=x.get("status") or "Not run"; icon="✓" if state=="Complete" else "○"
-                    st.markdown(f"**{x['division']} · {names.get(x['division'],'')}** &nbsp; {icon} {state}")
-                    st.caption(f"{int(x.get('clubs_scanned') or 0):,} clubs scanned · {int(x.get('players') or 0):,} player histories saved")
-                    st.button(f"Run {x['division']}",key=f"cp_run_{x['division']}",use_container_width=True,
-                        disabled=True,help="Disabled until MFL league membership can be enumerated from a validated data source.")
-        allrows=cp.rows(0); mature=sum(1 for x in allrows if x.get("seasons",0)>=8)
-        st.caption(f"{len(allrows):,} real historical player histories stored · {mature:,} currently have 8+ reconstructed seasons")
-        st.info("Division-wide collection is temporarily disabled: MFL's public /clubs endpoint requires a wallet address. The database and projection engine remain available; division buttons will only be enabled once league membership is sourced from a validated MFL route.")
+    stats=cp.index_stats()
+    with st.expander("Historical Dataset Builder",expanded=True):
+        a,b,c,d=st.columns(4)
+        a.metric("Players indexed",f"{stats['indexed']:,}")
+        b.metric("8+ season candidates",f"{stats['eligible']:,}")
+        c.metric("Careers reconstructed",f"{stats['careers']:,}")
+        d.metric("Errors",f"{stats['errors']:,}")
+        st.caption(
+            ("Active population complete" if stats["active_done"] else "Active population still indexing")
+            +" · "+
+            ("Retired population complete" if stats["retired_done"] else "Retired population still indexing")
+        )
+        x1,x2=st.columns([2,1])
+        batch_hist=x2.number_input("Histories per run",min_value=25,max_value=500,value=100,step=25,key="cp_hist_batch")
+        if x1.button("Build / Continue Historical Dataset",type="primary",use_container_width=True,key="cp_build"):
+            bar=st.progress(0);msg=st.empty()
+            def prog(*args):
+                if len(args)==4 and isinstance(args[0],str):
+                    source,pages,saved,last=args
+                    msg.caption(f"Indexing {source}: {pages} pages this run · {saved:,} players saved · latest page {last:,}")
+                elif len(args)==4:
+                    done,total,saved,errs=args
+                    bar.progress(done/max(total,1))
+                    msg.caption(f"Histories: {done}/{total} checked · {saved} saved · {errs} errors")
+            try:
+                result=cp.build_batch(index_pages=4,history_limit=int(batch_hist),progress=prog)
+                st.success(
+                    f"Batch complete · {result['stats']['indexed']:,} players indexed · "
+                    f"{result['stats']['careers']:,} careers reconstructed."
+                )
+                st.rerun()
+            except Exception as e:
+                st.error(f"Dataset build stopped: {e}")
+        st.info("All counts above come from data this tool has actually retrieved from MFL. Nothing is pre-filled from another tool or screenshot.")
 
     with st.expander("Career Projection Model",expanded=True):
         c1,c2,c3=st.columns([1,1,3])
@@ -1635,11 +1654,12 @@ elif page=="Career Projection":
         if st.button("Find Matches",type="primary",key="cp_find"):
             st.session_state.cp_matches=cp.find_matches(start_ovr,mint_age,groups,ranges,total_min,total_max,first_n,8)
         matches=st.session_state.get("cp_matches",cp.rows(8))
-        st.caption(f"{len(cp.rows(8)):,} players with 8+ seasons in dataset")
+        st.caption(f"{len(cp.rows(8)):,} reconstructed players currently have 8+ seasons of progression data")
 
     if matches:
         f1,f2,f3,f4,f5=st.columns([1,1,1,1,4])
-        div=f1.selectbox("Division",["All Divisions"]+list(cp.STATUSES),label_visibility="collapsed")
+        divisions=sorted({str(x.get("division") or "") for x in matches if str(x.get("division") or "")})
+        div=f1.selectbox("Division",["All Divisions"]+divisions,label_visibility="collapsed")
         pos=f2.selectbox("Position",["All Positions","GK","DEF","MID","ATT"],label_visibility="collapsed")
         min_gain=f3.number_input("Min +OVR",value=None,label_visibility="collapsed",placeholder="Min +OVR")
         min_ovr=f4.number_input("Min OVR",value=None,label_visibility="collapsed",placeholder="Min OVR")
@@ -1666,7 +1686,7 @@ elif page=="Career Projection":
         st.dataframe(df,use_container_width=True,hide_index=True,height=620)
         if not df.empty:st.download_button("Export CSV",df.to_csv(index=False).encode(),file_name="mfl_career_projection.csv",mime="text/csv")
     else:
-        st.info("The projection interface is ready. Build the historical dataset to populate career matches.")
+        st.info("No matching reconstructed careers yet. Continue building the historical dataset above.")
 
 elif page=="Transfer Window":
     import transfer_window_backend as tw
