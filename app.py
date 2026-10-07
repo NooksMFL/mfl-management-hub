@@ -1593,52 +1593,110 @@ elif page=="Club Development":
 
 
 elif page=="Career Projection":
+    import altair as alt
     import career_projection_backend as cp
+
     st.markdown("""<div class="suite-hero"><div class="suite-kicker">MFL · HISTORICAL DEVELOPMENT</div>
     <div class="suite-title">Career Projection Model</div>
-    <div class="suite-copy">Build an independent historical MFL player dataset, then compare a player against genuine multi-season development paths.</div></div>""",unsafe_allow_html=True)
+    <div class="suite-copy">Independent MFL career modelling built from player records retrieved by this tool. Build the history bank, find comparable careers, and view percentile development paths.</div></div>""",unsafe_allow_html=True)
+    st.caption("Career Projection build · v2.0 · real-data only")
+
+    st.markdown("""
+    <style>
+    .cp-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin:8px 0 14px}
+    .cp-stat{background:#07161d;border:1px solid #173843;border-radius:10px;padding:12px}
+    .cp-stat-l{font-size:.58rem;color:#648087;text-transform:uppercase;letter-spacing:.07em;font-weight:850}
+    .cp-stat-v{font-size:1.55rem;color:#f2f7f6;font-weight:930;margin-top:5px}
+    .cp-pct-title{font-size:.60rem;color:#688188;text-transform:uppercase;letter-spacing:.08em;font-weight:900;margin:10px 0 6px}
+    .cp-pct-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .cp-pct{background:#07131a;border:1px solid #1a3640;border-radius:9px;padding:10px 11px}
+    .cp-pct b{font-size:1.05rem;color:#13e0b4}.cp-pct small{display:block;color:#789096;font-size:.56rem;margin-bottom:5px}
+    .cp-pct.blue b{color:#3aaeff}.cp-median{background:#07131a;border:1px solid #1a3640;border-radius:11px;padding:16px;text-align:center;height:100%}
+    .cp-median small{font-size:.56rem;color:#789096;text-transform:uppercase}.cp-median strong{display:block;font-size:2rem;color:#13e0b4;margin-top:5px}
+    .cp-median.blue strong{color:#3aaeff}
+    @media(max-width:900px){.cp-grid{grid-template-columns:1fr 1fr}.cp-pct-row{grid-template-columns:1fr 1fr}}
+    </style>
+    """, unsafe_allow_html=True)
 
     stats=cp.index_stats()
     with st.expander("Historical Dataset Builder",expanded=True):
-        a,b,c,d=st.columns(4)
-        a.metric("Players indexed",f"{stats['indexed']:,}")
-        b.metric("8+ season careers",f"{stats['eligible']:,}")
-        c.metric("Careers reconstructed",f"{stats['careers']:,}")
-        d.metric("Errors",f"{stats['errors']:,}")
-        st.caption(
-            ("Active population complete" if stats["active_done"] else "Active population still indexing")
-            +" · "+
-            ("Retired population complete" if stats["retired_done"] else "Retired population still indexing")
+        st.markdown(
+            f"""<div class="cp-grid">
+              <div class="cp-stat"><div class="cp-stat-l">Players indexed</div><div class="cp-stat-v">{stats['indexed']:,}</div></div>
+              <div class="cp-stat"><div class="cp-stat-l">Histories checked</div><div class="cp-stat-v">{stats['checked']:,}</div></div>
+              <div class="cp-stat"><div class="cp-stat-l">Careers reconstructed</div><div class="cp-stat-v">{stats['careers']:,}</div></div>
+              <div class="cp-stat"><div class="cp-stat-l">8+ season careers</div><div class="cp-stat-v">{stats['eligible']:,}</div></div>
+              <div class="cp-stat"><div class="cp-stat-l">Errors</div><div class="cp-stat-v">{stats['errors']:,}</div></div>
+            </div>""", unsafe_allow_html=True
         )
-        x1,x2=st.columns([2,1])
-        batch_hist=x2.number_input("Histories per run",min_value=25,max_value=500,value=100,step=25,key="cp_hist_batch")
-        if x1.button("Build / Continue Historical Dataset",type="primary",use_container_width=True,key="cp_build"):
-            bar=st.progress(0);msg=st.empty()
+        st.caption(
+            ("✓ Active population indexed" if stats["active_done"] else "Active population still indexing")
+            +" · "+
+            ("✓ Retired population indexed" if stats["retired_done"] else "Retired population still indexing")
+            +f" · {stats['pending']:,} indexed histories still pending"
+        )
+
+        b1,b2,b3=st.columns([2.2,1,1])
+        hist_limit=b2.number_input("Histories per run",min_value=25,max_value=500,value=150,step=25,key="cp_hist_batch")
+        index_pages=b3.number_input("Index pages per run",min_value=1,max_value=30,value=10,step=1,key="cp_index_pages")
+
+        if b1.button("Build / Continue Historical Dataset",type="primary",use_container_width=True,key="cp_build"):
+            bar=st.progress(0); msg=st.empty()
             def prog(*args):
                 if len(args)==4 and isinstance(args[0],str):
                     source,pages,saved,last=args
-                    msg.caption(f"Indexing {source}: {pages} pages this run · {saved:,} players saved · latest page {last:,}")
+                    msg.caption(f"Indexing {source}: {pages} pages · {saved:,} records saved this run · latest page {last:,}")
                 elif len(args)==4:
                     done,total,saved,errs=args
                     bar.progress(done/max(total,1))
-                    msg.caption(f"Histories: {done}/{total} checked · {saved} saved · {errs} errors")
+                    msg.caption(f"History reconstruction: {done}/{total} checked · {saved} careers saved · {errs} errors")
             try:
-                result=cp.build_batch(index_pages=4,history_limit=int(batch_hist),progress=prog)
+                result=cp.build_batch(index_pages=int(index_pages),history_limit=int(hist_limit),progress=prog)
                 st.success(
-                    f"Batch complete · {result['stats']['indexed']:,} players indexed · "
-                    f"{result['stats']['careers']:,} careers reconstructed."
+                    f"Batch complete · {result['stats']['indexed']:,} indexed · "
+                    f"{result['stats']['careers']:,} reconstructed · "
+                    f"{result['stats']['eligible']:,} with 8+ seasons."
                 )
                 st.rerun()
             except Exception as e:
                 st.error(f"Dataset build stopped: {e}")
-        st.info("All counts above come from data this tool has actually retrieved from MFL. Nothing is pre-filled from another tool or screenshot.")
 
-    with st.expander("Career Projection Model",expanded=True):
-        c1,c2,c3=st.columns([1,1,3])
-        start_ovr=c1.number_input("START OVR",min_value=1,max_value=99,value=52,step=1,key="cp_start")
-        mint_age=c2.number_input("MINT AGE",min_value=16,max_value=40,value=24,step=1,key="cp_age")
-        groups=c3.multiselect("POSITION/S",["GK","DEF","MID","ATT"],default=[],key="cp_groups")
-        st.caption("SEASON PROGRESSION RANGES (leave blank to skip)")
+        p1,p2=st.columns([2,1])
+        if p1.button("Process already-indexed histories",use_container_width=True,key="cp_hist_only"):
+            bar=st.progress(0); msg=st.empty()
+            def hprog(done,total,saved,errs):
+                bar.progress(done/max(total,1))
+                msg.caption(f"{done}/{total} checked · {saved} careers saved · {errs} errors")
+            try:
+                result=cp.process_history_batch(int(hist_limit),hprog)
+                st.success(f"History batch complete: {result['saved']} careers reconstructed from {result['requested']} players.")
+                st.rerun()
+            except Exception as e:
+                st.error(f"History processing stopped: {e}")
+        if stats["errors"] and p2.button("Retry failed histories",use_container_width=True,key="cp_retry"):
+            n=cp.retry_errors()
+            st.success(f"{n} failed histories queued for another attempt.")
+            st.rerun()
+
+        if stats["errors"]:
+            with st.expander("Recent history errors",expanded=False):
+                st.dataframe(pd.DataFrame(cp.recent_errors()),use_container_width=True,hide_index=True)
+
+        st.info("Every count and projection on this page is calculated from MFL records retrieved by this tool. No figures are copied from Ricky's tool or pre-filled to imitate it.")
+
+    with st.expander("Career Projection Search",expanded=True):
+        r1,r2,r3,r4,r5=st.columns([1,1,1,1,2.2])
+        start_ovr=r1.number_input("START OVR",min_value=1,max_value=99,value=52,step=1,key="cp_start")
+        mint_age=r2.number_input("MINT AGE",min_value=16,max_value=40,value=24,step=1,key="cp_age")
+        ovr_tol=r3.number_input("OVR ±",min_value=0,max_value=5,value=0,step=1,key="cp_ovr_tol")
+        age_tol=r4.number_input("AGE ±",min_value=0,max_value=5,value=0,step=1,key="cp_age_tol")
+        groups=r5.multiselect("POSITION GROUP/S",["GK","DEF","MID","ATT"],default=[],key="cp_groups")
+
+        rr1,rr2=st.columns(2)
+        min_seasons=rr1.slider("Minimum reconstructed seasons",min_value=3,max_value=12,value=8,step=1,key="cp_min_seasons")
+        horizon=rr2.slider("Projection horizon",min_value=5,max_value=16,value=10,step=1,key="cp_horizon")
+
+        st.caption("SEASON PROGRESSION RANGES · leave blank to ignore a season")
         ranges={}; cols=st.columns(5)
         for i,col in enumerate(cols):
             with col:
@@ -1646,47 +1704,116 @@ elif page=="Career Projection":
                 lo=st.number_input("Min",value=None,step=1.0,key=f"cp_lo_{i}",label_visibility="collapsed",placeholder="Min")
                 hi=st.number_input("Max",value=None,step=1.0,key=f"cp_hi_{i}",label_visibility="collapsed",placeholder="Max")
                 if lo is not None or hi is not None:ranges[i]=(lo,hi)
-        st.divider();st.caption("QUICK PROGRESSION FILTER (leave blank to skip)")
-        q1,q2,q3=st.columns(3)
-        total_min=q1.number_input("Total min",value=None,step=1.0,key="cp_total_min",placeholder="Min")
-        total_max=q2.number_input("Total max",value=None,step=1.0,key="cp_total_max",placeholder="Max")
-        first_n=q3.number_input("in first N seasons",min_value=1,max_value=16,value=5,step=1,key="cp_first_n")
-        if st.button("Find Matches",type="primary",key="cp_find"):
-            st.session_state.cp_matches=cp.find_matches(start_ovr,mint_age,groups,ranges,total_min,total_max,first_n,8)
-        matches=st.session_state.get("cp_matches",cp.rows(8))
-        st.caption(f"{len(cp.rows(8)):,} reconstructed players currently have 8+ seasons of progression data")
 
+        st.caption("QUICK PROGRESSION FILTER · leave blank to ignore")
+        q1,q2,q3=st.columns(3)
+        total_min=q1.number_input("Total min",value=None,step=1.0,key="cp_total_min",placeholder="Min total progression")
+        total_max=q2.number_input("Total max",value=None,step=1.0,key="cp_total_max",placeholder="Max total progression")
+        first_n=q3.number_input("Within first N seasons",min_value=1,max_value=16,value=5,step=1,key="cp_first_n")
+
+        f1,f2=st.columns([1.2,4])
+        if f1.button("Find Matches",type="primary",use_container_width=True,key="cp_find"):
+            st.session_state.cp_matches=cp.find_matches(
+                start_ovr,mint_age,groups,ranges,total_min,total_max,first_n,
+                min_seasons=int(min_seasons),ovr_tolerance=int(ovr_tol),age_tolerance=int(age_tol)
+            )
+            st.session_state.cp_match_params={
+                "start_ovr":start_ovr,"mint_age":mint_age,"min_seasons":min_seasons,
+                "horizon":horizon,"ovr_tol":ovr_tol,"age_tol":age_tol
+            }
+        f2.caption(f"{len(cp.rows(int(min_seasons))):,} reconstructed careers currently meet the {min_seasons}+ season requirement")
+
+    matches=st.session_state.get("cp_matches",[])
     if matches:
-        f1,f2,f3,f4,f5=st.columns([1,1,1,1,4])
-        divisions=sorted({str(x.get("division") or "") for x in matches if str(x.get("division") or "")})
-        div=f1.selectbox("Division",["All Divisions"]+divisions,label_visibility="collapsed")
-        pos=f2.selectbox("Position",["All Positions","GK","DEF","MID","ATT"],label_visibility="collapsed")
-        min_gain=f3.number_input("Min +OVR",value=None,label_visibility="collapsed",placeholder="Min +OVR")
-        min_ovr=f4.number_input("Min OVR",value=None,label_visibility="collapsed",placeholder="Min OVR")
-        search=f5.text_input("Search",placeholder="🔍 Search player…",label_visibility="collapsed")
-        def pg(p):
-            if p=="GK":return "GK"
-            if p in {"CB","LB","RB","LWB","RWB"}:return "DEF"
-            if p in {"CDM","CM","LM","RM"}:return "MID"
-            return "ATT"
+        summary=cp.projection_summary(matches,int(horizon))
+        st.markdown(f"### {summary['n']:,} matching historical careers")
+        st.caption("Percentiles below are calculated independently from the matched MFL histories. Final OVR uses the same projection horizon as the chart.")
+
+        pct={x["label"]:x for x in summary["percentiles"]}
+        left,mid=st.columns([4.5,1.15])
+        with left:
+            st.markdown('<div class="cp-pct-title">TOTAL PROGRESSION · BOTTOM</div>',unsafe_allow_html=True)
+            st.markdown(
+                '<div class="cp-pct-row">'+''.join(
+                    f'<div class="cp-pct"><small>{lab} · N={pct[lab]["n"]:,}</small><b>+{pct[lab]["progression"]}</b></div>'
+                    for lab in ["Bottom 1%","Bottom 5%","Bottom 10%","Bottom 25%"]
+                )+'</div>',unsafe_allow_html=True)
+            st.markdown('<div class="cp-pct-title">FINAL OVR · BOTTOM</div>',unsafe_allow_html=True)
+            st.markdown(
+                '<div class="cp-pct-row">'+''.join(
+                    f'<div class="cp-pct blue"><small>{lab} · N={pct[lab]["n"]:,}</small><b>{pct[lab]["final_ovr"]}</b></div>'
+                    for lab in ["Bottom 1%","Bottom 5%","Bottom 10%","Bottom 25%"]
+                )+'</div>',unsafe_allow_html=True)
+        with mid:
+            st.markdown(f'<div class="cp-median"><small>Median · N={summary["n"]:,}</small><strong>+{summary["median_progression"]}</strong><small>Total progression</small></div>',unsafe_allow_html=True)
+            st.markdown(f'<div class="cp-median blue" style="margin-top:8px"><small>Median · N={summary["n"]:,}</small><strong>{summary["median_final_ovr"]}</strong><small>Final OVR</small></div>',unsafe_allow_html=True)
+
+        st.markdown('<div class="cp-pct-title">TOTAL PROGRESSION · TOP</div>',unsafe_allow_html=True)
+        st.markdown(
+            '<div class="cp-pct-row">'+''.join(
+                f'<div class="cp-pct"><small>{lab} · N={pct[lab]["n"]:,}</small><b>+{pct[lab]["progression"]}</b></div>'
+                for lab in ["Top 25%","Top 10%","Top 5%","Top 1%"]
+            )+'</div>',unsafe_allow_html=True)
+        st.markdown('<div class="cp-pct-title">FINAL OVR · TOP</div>',unsafe_allow_html=True)
+        st.markdown(
+            '<div class="cp-pct-row">'+''.join(
+                f'<div class="cp-pct blue"><small>{lab} · N={pct[lab]["n"]:,}</small><b>{pct[lab]["final_ovr"]}</b></div>'
+                for lab in ["Top 25%","Top 10%","Top 5%","Top 1%"]
+            )+'</div>',unsafe_allow_html=True)
+
+        chart_rows=[]
+        for path in summary["paths"]:
+            for point in path["points"]:
+                if point["value"] is not None:
+                    chart_rows.append({"Season":f"S{point['season']}","SeasonNo":point["season"],
+                                       "Progression":point["value"],"Path":path["label"],"Sample":point["sample"]})
+        chart_df=pd.DataFrame(chart_rows)
+        if not chart_df.empty:
+            line_order=["Bottom 5%","Bottom 25%","Median","Top 25%","Top 5%"]
+            palette=["#ff9d45","#526d74","#35c759","#526d74","#a66cff"]
+            chart=alt.Chart(chart_df).mark_line(point=True,strokeWidth=3).encode(
+                x=alt.X("SeasonNo:Q",title="Season",axis=alt.Axis(labelExpr="'S' + datum.value",tickMinStep=1)),
+                y=alt.Y("Progression:Q",title="Cumulative OVR progression"),
+                color=alt.Color("Path:N",sort=line_order,scale=alt.Scale(domain=line_order,range=palette),legend=alt.Legend(orient="top")),
+                tooltip=["Path","Season","Progression","Sample"]
+            ).properties(height=420)
+            st.altair_chart(chart,use_container_width=True)
+
+        st.markdown("### Historical career matches")
+        closest=cp.closest_matches(matches,start_ovr,mint_age,100)
         view=[]
-        for x in matches:
-            if div!="All Divisions" and x.get("division")!=div:continue
-            if pos!="All Positions" and pg(x.get("position"))!=pos:continue
-            if min_gain is not None and x.get("career_gain",0)<min_gain:continue
-            if min_ovr is not None and x.get("current_ovr",0)<min_ovr:continue
-            if search and search.casefold() not in x.get("name","").casefold():continue
+        for x in closest:
             row={"POS":x.get("position"),"MINT":x.get("mint_age"),"AGE":x.get("current_age"),"ID":x.get("player_id"),
                  "PLAYER":x.get("name"),"DIV":x.get("division"),"START":x.get("start_ovr"),"OVR":x.get("current_ovr"),
                  "CAREER":x.get("career_gain")}
             for j,g in enumerate(x.get("gains",[])[:16]):row[f"S{j+1}"]=g
             view.append(row)
-        df=pd.DataFrame(view).sort_values("CAREER",ascending=False) if view else pd.DataFrame()
-        st.caption(f"{len(view):,} / {len(matches):,} players")
-        st.dataframe(df,use_container_width=True,hide_index=True,height=620)
-        if not df.empty:st.download_button("Export CSV",df.to_csv(index=False).encode(),file_name="mfl_career_projection.csv",mime="text/csv")
+        df=pd.DataFrame(view)
+        sf1,sf2,sf3,sf4=st.columns([1,1,1,4])
+        divs=sorted([x for x in df["DIV"].dropna().astype(str).unique().tolist() if x]) if not df.empty else []
+        div=sf1.selectbox("Division",["All Divisions"]+divs,label_visibility="collapsed")
+        pgroup=sf2.selectbox("Position",["All Positions","GK","DEF","MID","ATT"],label_visibility="collapsed")
+        min_gain=sf3.number_input("Min +OVR",value=None,label_visibility="collapsed",placeholder="Min +OVR")
+        search=sf4.text_input("Search careers",placeholder="🔍 Search player…",label_visibility="collapsed",key="cp_search")
+        if not df.empty:
+            filtered=[]
+            for row in view:
+                if div!="All Divisions" and str(row.get("DIV") or "")!=div:continue
+                if pgroup!="All Positions" and cp._position_group(row.get("POS"))!=pgroup:continue
+                if min_gain is not None and float(row.get("CAREER") or 0)<float(min_gain):continue
+                if search and search.casefold() not in str(row.get("PLAYER") or "").casefold():continue
+                filtered.append(row)
+            outdf=pd.DataFrame(filtered)
+            st.caption(f"Showing {len(outdf):,} of {len(matches):,} matching careers")
+            st.dataframe(outdf,use_container_width=True,hide_index=True,height=620)
+            if not outdf.empty:
+                st.download_button("Export matching careers CSV",outdf.to_csv(index=False).encode(),
+                                   file_name="mfl_career_projection_matches.csv",mime="text/csv")
     else:
-        st.info("No matching reconstructed careers yet. Continue building the historical dataset above.")
+        if stats["careers"]==0:
+            st.warning("No careers have been reconstructed yet. Use **Process already-indexed histories** above; once the first histories are saved, projections will become available.")
+        else:
+            st.info("Choose the player profile above and press **Find Matches** to generate the percentile projection and historical career table.")
 
 elif page=="Transfer Window":
     import transfer_window_backend as tw
