@@ -141,6 +141,30 @@ def index_source(retired=False, pages=4, progress=None):
         time.sleep(.2)
     return {"source":prefix,"done":False,"pages":page_count,"saved":saved}
 
+def index_historical_seed(progress=None):
+    """Quickly seed the database with genuinely older MFL players so useful
+    multi-season careers are available without paging through the entire live population.
+    Player IDs are sampled at historical anchors; every saved row still comes from MFL.
+    """
+    if _state("historical_seed_done","0")=="1":
+        return {"done":True,"saved":0,"pages":0}
+    anchors=[20000,40000,60000,80000,100000,120000,140000,160000]
+    saved=0; pages=0
+    for retired in (False,True):
+        for anchor in anchors:
+            payload=_get("/players",{
+                "limit":PAGE_SIZE,
+                "isRetired":"true" if retired else "false",
+                "beforePlayerId":anchor,
+            })
+            if isinstance(payload,list):
+                fresh=[x for x in payload if isinstance(x,dict) and x.get("id") is not None]
+                saved+=_save_index(fresh,retired); pages+=1
+                if progress: progress("historical sample",pages,saved,len(fresh))
+            time.sleep(.12)
+    _set_state("historical_seed_done","1")
+    return {"done":True,"saved":saved,"pages":pages}
+
 def index_stats():
     c=db()
     total=int(c.execute("SELECT COUNT(*) FROM player_index").fetchone()[0])
@@ -228,8 +252,12 @@ def process_history_batch(limit=100, progress=None):
 
 def build_batch(index_pages=10,history_limit=150,progress=None):
     results=[]
-    if _state("active_done","0")!="1": results.append(index_source(False,index_pages,progress))
-    elif _state("retired_done","0")!="1": results.append(index_source(True,index_pages,progress))
+    if _state("historical_seed_done","0")!="1":
+        results.append(index_historical_seed(progress))
+    if _state("active_done","0")!="1":
+        results.append(index_source(False,index_pages,progress))
+    elif _state("retired_done","0")!="1":
+        results.append(index_source(True,index_pages,progress))
     hist=process_history_batch(history_limit,progress)
     return {"index":results,"history":hist,"stats":index_stats()}
 
