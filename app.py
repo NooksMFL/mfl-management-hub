@@ -829,7 +829,7 @@ def valid_wallet(v):
 if "wallet" not in st.session_state: st.session_state.wallet=""
 
 # ---------------- SIDEBAR ----------------
-nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Transfer Window","Watchlist","Compare","Insights","Sync Centre"]
+nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Career Projection","Transfer Window","Watchlist","Compare","Insights","Sync Centre"]
 query_page=st.query_params.get("page","Home")
 if query_page not in nav_pages:
     query_page="Home"
@@ -1591,6 +1591,77 @@ elif page=="Club Development":
             use_container_width=True,hide_index=True,height=520
         )
 
+
+elif page=="Career Projection":
+    import career_projection_backend as cp
+    st.markdown("""<div class="suite-hero"><div class="suite-kicker">MFL · HISTORICAL DEVELOPMENT</div>
+    <div class="suite-title">Career Projection Model</div>
+    <div class="suite-copy">Compare a player profile against multi-season historical careers and find the closest development paths.</div></div>""",unsafe_allow_html=True)
+
+    with st.expander("Historical Dataset",expanded=True):
+        statuses=cp.status_rows()
+        for i in range(0,10,2):
+            cols=st.columns(2)
+            for col,x in zip(cols,statuses[i:i+2]):
+                with col:
+                    state=x.get("status") or "Not run"; icon="✓" if state=="Complete" else "○"
+                    st.markdown(f"**{x['division']}** &nbsp; {icon} {state} &nbsp; · &nbsp; {int(x.get('clubs_scanned') or 0):,} clubs &nbsp; · &nbsp; {int(x.get('players') or 0):,} players")
+        allrows=cp.rows(0); mature=sum(1 for x in allrows if x.get("seasons",0)>=8)
+        st.caption(f"{len(allrows):,} historical players in local dataset · {mature:,} players with 8+ seasons")
+
+    with st.expander("Career Projection Model",expanded=True):
+        c1,c2,c3=st.columns([1,1,3])
+        start_ovr=c1.number_input("START OVR",min_value=1,max_value=99,value=52,step=1,key="cp_start")
+        mint_age=c2.number_input("MINT AGE",min_value=16,max_value=40,value=24,step=1,key="cp_age")
+        groups=c3.multiselect("POSITION/S",["GK","DEF","MID","ATT"],default=[],key="cp_groups")
+        st.caption("SEASON PROGRESSION RANGES (leave blank to skip)")
+        ranges={}; cols=st.columns(5)
+        for i,col in enumerate(cols):
+            with col:
+                st.markdown(f"**S{i+1}**")
+                lo=st.number_input("Min",value=None,step=1.0,key=f"cp_lo_{i}",label_visibility="collapsed",placeholder="Min")
+                hi=st.number_input("Max",value=None,step=1.0,key=f"cp_hi_{i}",label_visibility="collapsed",placeholder="Max")
+                if lo is not None or hi is not None:ranges[i]=(lo,hi)
+        st.divider();st.caption("QUICK PROGRESSION FILTER (leave blank to skip)")
+        q1,q2,q3=st.columns(3)
+        total_min=q1.number_input("Total min",value=None,step=1.0,key="cp_total_min",placeholder="Min")
+        total_max=q2.number_input("Total max",value=None,step=1.0,key="cp_total_max",placeholder="Max")
+        first_n=q3.number_input("in first N seasons",min_value=1,max_value=16,value=5,step=1,key="cp_first_n")
+        if st.button("Find Matches",type="primary",key="cp_find"):
+            st.session_state.cp_matches=cp.find_matches(start_ovr,mint_age,groups,ranges,total_min,total_max,first_n,8)
+        matches=st.session_state.get("cp_matches",cp.rows(8))
+        st.caption(f"{len(cp.rows(8)):,} players with 8+ seasons in dataset")
+
+    if matches:
+        f1,f2,f3,f4,f5=st.columns([1,1,1,1,4])
+        div=f1.selectbox("Division",["All Divisions"]+list(cp.STATUSES),label_visibility="collapsed")
+        pos=f2.selectbox("Position",["All Positions","GK","DEF","MID","ATT"],label_visibility="collapsed")
+        min_gain=f3.number_input("Min +OVR",value=None,label_visibility="collapsed",placeholder="Min +OVR")
+        min_ovr=f4.number_input("Min OVR",value=None,label_visibility="collapsed",placeholder="Min OVR")
+        search=f5.text_input("Search",placeholder="🔍 Search player…",label_visibility="collapsed")
+        def pg(p):
+            if p=="GK":return "GK"
+            if p in {"CB","LB","RB","LWB","RWB"}:return "DEF"
+            if p in {"CDM","CM","LM","RM"}:return "MID"
+            return "ATT"
+        view=[]
+        for x in matches:
+            if div!="All Divisions" and x.get("division")!=div:continue
+            if pos!="All Positions" and pg(x.get("position"))!=pos:continue
+            if min_gain is not None and x.get("career_gain",0)<min_gain:continue
+            if min_ovr is not None and x.get("current_ovr",0)<min_ovr:continue
+            if search and search.casefold() not in x.get("name","").casefold():continue
+            row={"POS":x.get("position"),"MINT":x.get("mint_age"),"AGE":x.get("current_age"),"ID":x.get("player_id"),
+                 "PLAYER":x.get("name"),"DIV":x.get("division"),"START":x.get("start_ovr"),"OVR":x.get("current_ovr"),
+                 "CAREER":x.get("career_gain")}
+            for j,g in enumerate(x.get("gains",[])[:16]):row[f"S{j+1}"]=g
+            view.append(row)
+        df=pd.DataFrame(view).sort_values("CAREER",ascending=False) if view else pd.DataFrame()
+        st.caption(f"{len(view):,} / {len(matches):,} players")
+        st.dataframe(df,use_container_width=True,hide_index=True,height=620)
+        if not df.empty:st.download_button("Export CSV",df.to_csv(index=False).encode(),file_name="mfl_career_projection.csv",mime="text/csv")
+    else:
+        st.info("The projection interface is ready. Build the historical dataset to populate career matches.")
 
 elif page=="Transfer Window":
     import transfer_window_backend as tw
