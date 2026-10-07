@@ -1677,10 +1677,10 @@ elif page=="Career Projection":
         result=cp.smart_matches(start_ovr,mint_age,groups,min_seasons=int(min_seasons),target_min=30)
         st.session_state.cp_simple_matches=result["matches"]
         st.session_state.cp_simple_tol=(result["ovr_tolerance"],result["age_tolerance"])
-        st.session_state.cp_simple_horizon=int(horizon)
+        st.session_state.cp_projection_horizon=int(horizon)
 
     matches=st.session_state.get("cp_simple_matches",[])
-    horizon=st.session_state.get("cp_simple_horizon",10)
+    horizon=st.session_state.get("cp_projection_horizon",int(horizon))
 
     st.markdown('<div class="cp-step"><span class="cp-step-num">3</span><span class="cp-step-title">Your projection</span><div class="cp-mini">This section appears after you press “Show my projection”.</div></div>',unsafe_allow_html=True)
 
