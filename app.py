@@ -1600,14 +1600,25 @@ elif page=="Career Projection":
 
     with st.expander("Historical Dataset",expanded=True):
         statuses=cp.status_rows()
+        names={cp.DIV_LABEL[n]:n for n in cp.DIVISIONS}
         for i in range(0,10,2):
             cols=st.columns(2)
             for col,x in zip(cols,statuses[i:i+2]):
                 with col:
                     state=x.get("status") or "Not run"; icon="✓" if state=="Complete" else "○"
-                    st.markdown(f"**{x['division']}** &nbsp; {icon} {state} &nbsp; · &nbsp; {int(x.get('clubs_scanned') or 0):,} clubs &nbsp; · &nbsp; {int(x.get('players') or 0):,} players")
+                    st.markdown(f"**{x['division']} · {names.get(x['division'],'')}** &nbsp; {icon} {state}")
+                    st.caption(f"{int(x.get('clubs_scanned') or 0):,} clubs scanned · {int(x.get('players') or 0):,} player histories saved")
+                    if st.button(f"Run {x['division']}",key=f"cp_run_{x['division']}",use_container_width=True):
+                        bar=st.progress(0);msg=st.empty()
+                        def prog(done,total,players,errs):
+                            bar.progress(done/max(total,1));msg.caption(f"{done}/{total} clubs · {players:,} histories · {errs} errors")
+                        try:
+                            result=cp.scan_division(names[x["division"]],prog)
+                            st.success(f"{x['division']} complete: {result['clubs']:,} clubs, {result['players']:,} histories saved.")
+                            st.rerun()
+                        except Exception as e:st.error(f"{x['division']} scan stopped: {e}")
         allrows=cp.rows(0); mature=sum(1 for x in allrows if x.get("seasons",0)>=8)
-        st.caption(f"{len(allrows):,} historical players in local dataset · {mature:,} players with 8+ seasons")
+        st.caption(f"{len(allrows):,} real historical player histories stored · {mature:,} currently have 8+ reconstructed seasons")
 
     with st.expander("Career Projection Model",expanded=True):
         c1,c2,c3=st.columns([1,1,3])
