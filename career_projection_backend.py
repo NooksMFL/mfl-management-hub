@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import sqlite3
 import time
 from datetime import datetime, timezone
@@ -145,10 +146,13 @@ def index_stats():
     total=int(c.execute("SELECT COUNT(*) FROM player_index").fetchone()[0])
     eligible=int(c.execute("SELECT COUNT(*) FROM careers WHERE seasons>=8").fetchone()[0])
     processed=int(c.execute("SELECT COUNT(*) FROM player_index WHERE processed=1").fetchone()[0])
-    errors=int(c.execute("SELECT COUNT(*) FROM player_index WHERE error IS NOT NULL AND error<>''").fetchone()[0])
+    checked=int(c.execute("SELECT COUNT(*) FROM player_index WHERE processed<>0").fetchone()[0])
+    errors=int(c.execute("SELECT COUNT(*) FROM player_index WHERE processed=-1").fetchone()[0])
     careers=int(c.execute("SELECT COUNT(*) FROM careers").fetchone()[0])
+    pending=max(0,total-checked)
     c.close()
-    return {"indexed":total,"eligible":eligible,"processed":processed,"errors":errors,"careers":careers,
+    return {"indexed":total,"eligible":eligible,"processed":processed,"checked":checked,"pending":pending,
+            "errors":errors,"careers":careers,
             "active_done":_state("active_done","0")=="1","retired_done":_state("retired_done","0")=="1"}
 
 def _vals(e):
@@ -216,13 +220,13 @@ def process_history_batch(limit=100, progress=None):
             row=career_from_events(idx,public_history(idx["player_id"]))
             save(row); done+=1
         except Exception as e:
-            c=db(); c.execute("UPDATE player_index SET error=? WHERE player_id=?",(str(e)[:500],idx["player_id"])); c.commit(); c.close()
+            c=db(); c.execute("UPDATE player_index SET processed=-1,error=? WHERE player_id=?",(str(e)[:500],idx["player_id"])); c.commit(); c.close()
             errors+=1
         if progress: progress(i,len(rs),done,errors)
         time.sleep(.08)
     return {"requested":len(rs),"saved":done,"errors":errors}
 
-def build_batch(index_pages=4,history_limit=100,progress=None):
+def build_batch(index_pages=10,history_limit=150,progress=None):
     results=[]
     if _state("active_done","0")!="1": results.append(index_source(False,index_pages,progress))
     elif _state("retired_done","0")!="1": results.append(index_source(True,index_pages,progress))
@@ -234,30 +238,118 @@ def rows(min_seasons=0):
     for r in rs:r["gains"]=[float(x) for x in (r.pop("season_gains") or "").split(",") if x!=""]
     return rs
 
-def find_matches(start_ovr=None,mint_age=None,groups=None,ranges=None,total_min=None,total_max=None,first_n=None,min_seasons=8):
-    data=rows(min_seasons);out=[]
-    def group(pos):
-        if pos=="GK":return "GK"
-        if pos in {"CB","LB","RB","LWB","RWB"}:return "DEF"
-        if pos in {"CDM","CM","LM","RM"}:return "MID"
-        return "ATT"
+def _position_group(pos):
+    if pos=="GK": return "GK"
+    if pos in {"CB","LB","RB","LWB","RWB"}: return "DEF"
+    if pos in {"CDM","CM","LM","RM"}: return "MID"
+    return "ATT"
+
+def find_matches(start_ovr=None,mint_age=None,groups=None,ranges=None,total_min=None,total_max=None,
+                 first_n=None,min_seasons=8,ovr_tolerance=0,age_tolerance=0):
+    data=rows(min_seasons); out=[]
     for r in data:
-        if start_ovr is not None and int(round(r["start_ovr"]))!=int(start_ovr):continue
-        if mint_age is not None and r.get("mint_age") is not None and int(r["mint_age"])!=int(mint_age):continue
-        if groups and group(r["position"]) not in groups:continue
+        if start_ovr is not None and abs(float(r["start_ovr"])-float(start_ovr))>float(ovr_tolerance): continue
+        if mint_age is not None:
+            if r.get("mint_age") is None: continue
+            if abs(int(r["mint_age"])-int(mint_age))>int(age_tolerance): continue
+        if groups and _position_group(r["position"]) not in groups: continue
         ok=True
         for idx,(lo,hi) in (ranges or {}).items():
-            if idx>=len(r["gains"]):ok=False;break
+            if idx>=len(r["gains"]): ok=False; break
             g=r["gains"][idx]
-            if lo is not None and g<lo:ok=False
-            if hi is not None and g>hi:ok=False
-        if not ok:continue
+            if lo is not None and g<lo: ok=False
+            if hi is not None and g>hi: ok=False
+        if not ok: continue
         if total_min is not None or total_max is not None:
             n=int(first_n or len(r["gains"])); tot=sum(r["gains"][:n])
-            if total_min is not None and tot<total_min:continue
-            if total_max is not None and tot>total_max:continue
+            if total_min is not None and tot<total_min: continue
+            if total_max is not None and tot>total_max: continue
         out.append(r)
     return out
+
+def _round_half_up(v):
+    if v is None: return None
+    return int(math.floor(float(v)+0.5))
+
+def _quantile(values,q):
+    vals=sorted(float(v) for v in values if v is not None)
+    if not vals: return None
+    if len(vals)==1: return vals[0]
+    pos=(len(vals)-1)*float(q)
+    lo=int(math.floor(pos)); hi=int(math.ceil(pos))
+    if lo==hi: return vals[lo]
+    w=pos-lo
+    return vals[lo]*(1-w)+vals[hi]*w
+
+def projection_summary(matches,max_seasons=10):
+    """Independent projection statistics calculated only from matched careers."""
+    if not matches:
+        return {"n":0,"percentiles":[],"paths":[],"max_seasons":int(max_seasons)}
+    horizon=max(1,int(max_seasons))
+    totals=[]; finals=[]
+    cumulative_by_season={0:[0.0 for _ in matches]}
+    samples={0:len(matches)}
+    for r in matches:
+        gains=[float(x) for x in r.get("gains",[])[:horizon]]
+        total=sum(gains)
+        totals.append(total)
+        finals.append(float(r.get("start_ovr") or 0)+total)
+    for season in range(1,horizon+1):
+        vals=[]
+        for r in matches:
+            gains=[float(x) for x in r.get("gains",[])]
+            if len(gains)>=season:
+                vals.append(sum(gains[:season]))
+        cumulative_by_season[season]=vals
+        samples[season]=len(vals)
+
+    defs=[
+        ("Bottom 1%",.01),("Bottom 5%",.05),("Bottom 10%",.10),("Bottom 25%",.25),
+        ("Median",.50),("Top 25%",.75),("Top 10%",.90),("Top 5%",.95),("Top 1%",.99),
+    ]
+    pct=[]
+    for label,q in defs:
+        pct.append({
+            "label":label,"q":q,
+            "progression":_round_half_up(_quantile(totals,q)),
+            "final_ovr":_round_half_up(_quantile(finals,q)),
+            "n":max(1,int(round(len(matches)*min(q,1-q)))) if q!=.5 else len(matches)
+        })
+    paths=[]
+    path_defs=[("Bottom 5%",.05),("Bottom 25%",.25),("Median",.50),("Top 25%",.75),("Top 5%",.95)]
+    for label,q in path_defs:
+        pts=[]
+        for season in range(0,horizon+1):
+            vals=cumulative_by_season.get(season,[])
+            pts.append({
+                "season":season,
+                "value":_quantile(vals,q) if vals else None,
+                "sample":samples.get(season,0),
+            })
+        paths.append({"label":label,"q":q,"points":pts})
+    return {"n":len(matches),"percentiles":pct,"paths":paths,"max_seasons":horizon,
+            "median_progression":_round_half_up(_quantile(totals,.5)),
+            "median_final_ovr":_round_half_up(_quantile(finals,.5))}
+
+def closest_matches(matches,start_ovr=None,mint_age=None,limit=50):
+    def score(r):
+        s=0.0
+        if start_ovr is not None: s+=abs(float(r.get("start_ovr") or 0)-float(start_ovr))*3
+        if mint_age is not None and r.get("mint_age") is not None: s+=abs(int(r["mint_age"])-int(mint_age))*2
+        return s
+    return sorted(matches,key=lambda r:(score(r),-float(r.get("career_gain") or 0),int(r.get("player_id") or 0)))[:int(limit)]
+
+def retry_errors():
+    c=db()
+    n=c.execute("UPDATE player_index SET processed=0,error=NULL WHERE processed=-1").rowcount
+    c.commit(); c.close()
+    return n
+
+def recent_errors(limit=15):
+    c=db()
+    rs=[dict(r) for r in c.execute("""SELECT player_id,name,error,updated_at FROM player_index
+      WHERE processed=-1 ORDER BY updated_at DESC LIMIT ?""",(int(limit),)).fetchall()]
+    c.close(); return rs
 
 def reset_build():
     c=db()
