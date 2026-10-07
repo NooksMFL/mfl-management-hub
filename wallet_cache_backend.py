@@ -138,7 +138,7 @@ def roster_rows(wallet):
 def roster_payload(wallet,t=None,force=False):
     wallet=wallet.strip().lower()
     rows=roster_rows(wallet)
-    if rows and not force and _is_fresh(wallet,"roster_updated"):
+    if rows and not force:
         return [{
           "id":r["player_id"],"name":r["player_name"],
           "metadata":{"id":r["player_id"],"age":r["age"],"positions":[r["position"]] if r["position"] else [],
@@ -147,7 +147,25 @@ def roster_payload(wallet,t=None,force=False):
           "club":{"name":r["club"]} if r["club"] else None
         } for r in rows]
     t=t or token()
-    raw=_arr(_get("/players",t,{"ownerWalletAddress":wallet,"limit":1200},timeout=30))
+    raw=[]; seen=set(); before=None
+    while True:
+        params={"ownerWalletAddress":wallet,"limit":100}
+        if before is not None: params["beforePlayerId"]=before
+        batch=_arr(_get("/players",t,params,timeout=30))
+        fresh=[]
+        for item in batch:
+            p=_unwrap(item); m=p.get("metadata") if isinstance(p.get("metadata"),dict) else {}
+            pid=p.get("id") or p.get("playerId") or m.get("id")
+            try: pid=int(pid)
+            except: continue
+            if pid in seen: continue
+            seen.add(pid); fresh.append(item); raw.append(item)
+        if len(batch)<100 or not fresh: break
+        nxt=min(int((_unwrap(x).get("id") or _unwrap(x).get("playerId") or ((_unwrap(x).get("metadata") or {}).get("id")))) for x in fresh)
+        if before is not None and nxt>=before: break
+        before=nxt
+        time.sleep(.12)
+
     now=_iso()
     c=db()
     c.execute("DELETE FROM roster WHERE wallet=?",(wallet,))
@@ -181,7 +199,7 @@ def save_clubs(wallet,clubs):
 def fetch_clubs(wallet,t=None,force=False):
     wallet=wallet.strip().lower()
     saved=clubs_rows(wallet)
-    if saved and not force and _is_fresh(wallet,"clubs_updated"): return saved
+    if saved and not force: return saved
     t=t or token()
     found=[]
     for params in ({"walletAddress":wallet},{"walletAddress":wallet,"withStaffContracts":"true"}):
