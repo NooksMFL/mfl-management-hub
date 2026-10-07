@@ -877,6 +877,8 @@ with st.sidebar:
     if st.session_state.wallet:
         _fresh=shared.freshness(st.session_state.wallet)
         st.caption(f"Roster: {age_text(_fresh.get('roster'))} · Clubs: {age_text(_fresh.get('clubs'))}")
+        if shared.roster_rows(st.session_state.wallet):
+            st.caption("✓ Wallet data saved for this browser")
     st.markdown("""<div class="season-box">
       <div class="season-top"><span>Season 17</span><span>PUBLIC</span></div>
       <div class="connected"><i></i><span>MFL API ready</span></div>
