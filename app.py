@@ -1608,17 +1608,11 @@ elif page=="Career Projection":
                     state=x.get("status") or "Not run"; icon="✓" if state=="Complete" else "○"
                     st.markdown(f"**{x['division']} · {names.get(x['division'],'')}** &nbsp; {icon} {state}")
                     st.caption(f"{int(x.get('clubs_scanned') or 0):,} clubs scanned · {int(x.get('players') or 0):,} player histories saved")
-                    if st.button(f"Run {x['division']}",key=f"cp_run_{x['division']}",use_container_width=True):
-                        bar=st.progress(0);msg=st.empty()
-                        def prog(done,total,players,errs):
-                            bar.progress(done/max(total,1));msg.caption(f"{done}/{total} clubs · {players:,} histories · {errs} errors")
-                        try:
-                            result=cp.scan_division(names[x["division"]],prog)
-                            st.success(f"{x['division']} complete: {result['clubs']:,} clubs, {result['players']:,} histories saved.")
-                            st.rerun()
-                        except Exception as e:st.error(f"{x['division']} scan stopped: {e}")
+                    st.button(f"Run {x['division']}",key=f"cp_run_{x['division']}",use_container_width=True,
+                        disabled=True,help="Disabled until MFL league membership can be enumerated from a validated data source.")
         allrows=cp.rows(0); mature=sum(1 for x in allrows if x.get("seasons",0)>=8)
         st.caption(f"{len(allrows):,} real historical player histories stored · {mature:,} currently have 8+ reconstructed seasons")
+        st.info("Division-wide collection is temporarily disabled: MFL's public /clubs endpoint requires a wallet address. The database and projection engine remain available; division buttons will only be enabled once league membership is sourced from a validated MFL route.")
 
     with st.expander("Career Projection Model",expanded=True):
         c1,c2,c3=st.columns([1,1,3])
