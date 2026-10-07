@@ -1227,32 +1227,19 @@ elif page=="Agency Development":
         st.markdown("""<div class="public-connect">
           <div class="public-connect-kicker">FIRST-TIME AGENCY LOAD</div>
           <div class="public-connect-title">Load this wallet once</div>
-          <div class="public-connect-copy">No shared wallet roster exists yet. Load the first small batch here, or load the wallet from Club Development / Sync Centre. Once the shared roster exists, Agency opens immediately without loading the wallet list again.</div>
+          <div class="public-connect-copy">No saved wallet roster exists yet. Load the wallet once here. The roster and owned clubs use MFL's public read endpoints, so a temporary authentication outage will not block this first load.</div>
         </div>""",unsafe_allow_html=True)
-        if st.button("Load first 4 players",type="primary",key="public_agency_first_load"):
-            bar=st.progress(0,text="Loading agency safely…")
-            try:
-                def p(n,total):
-                    bar.progress(n/max(total,1),text=f"{n}/{max(total,1)}")
-                total,added,errs,analysed,planned=agency.sync(wallet,p,batch_size=4)
-                bar.empty()
-                if added:
-                    st.success(f"Loaded {added} player(s). Continue in small batches once the page opens.")
+        if st.button("Load wallet",type="primary",key="public_agency_first_load"):
+            with st.spinner("Loading your wallet roster and clubs…"):
+                try:
+                    loaded=shared.sync_wallet(wallet,True)
+                    seeded=agency.seed_from_shared(wallet)
+                    st.success(f"Wallet loaded: {loaded['players']} players · {loaded['clubs']} clubs. {seeded} agency rows created.")
                     st.rerun()
-                elif total == 0:
-                    st.info("MFL returned no players for this wallet.")
-                elif errs:
-                    st.warning(f"MFL returned {len(errs)} player error(s) before anything could be saved. Wait a moment and try again.")
-                    with st.expander("Import detail"):
-                        for pid,msg in errs[:8]:
-                            st.code(f"{pid}: {msg}")
-                else:
-                    st.warning("Nothing was saved yet. Try again in a moment.")
-            except Exception as e:
-                bar.empty()
-                st.error("MFL could not load this wallet yet.")
-                with st.expander("Technical detail"):
-                    st.code(str(e))
+                except Exception as e:
+                    st.error("MFL could not load this wallet yet.")
+                    with st.expander("Technical detail"):
+                        st.code(str(e))
     else:
         df=pd.DataFrame([dict(r) for r in rows])
         for lab,cur,start_col in [
