@@ -1,5 +1,6 @@
 from __future__ import annotations
 import time
+import json
 import pandas as pd
 import agency_backend as agency
 import wallet_cache_backend as shared
@@ -64,7 +65,18 @@ def _apps(rec):
     # Aspirants Cup 3 matches + Spark League 14 matches = 17 appearances).
     v=_first(rec,("matches","appearances","apps","gamesPlayed","matchesPlayed","played"))
     if v is None:
-        raise ValueError("Competition record has no recognised appearance/match field")
+        keys=[]
+        def collect(x,prefix=""):
+            if isinstance(x,dict):
+                for k,val in x.items():
+                    path=f"{prefix}.{k}" if prefix else str(k)
+                    if isinstance(val,(str,int,float,bool)) or val is None:
+                        keys.append(f"{path}={val!r}")
+                    else: collect(val,path)
+            elif isinstance(x,list):
+                for i,val in enumerate(x[:2]): collect(val,f"{prefix}[{i}]")
+        collect(rec)
+        raise ValueError("No recognised appearance field. RAW RECORD: "+json.dumps(rec,default=str)[:3500]+" | FLAT: "+"; ".join(keys[:120]))
     try:return int(float(v))
     except Exception as e:raise ValueError(f"Unrecognised appearance value: {v!r}") from e
 
