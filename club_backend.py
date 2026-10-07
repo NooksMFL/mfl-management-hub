@@ -212,7 +212,7 @@ def owned_clubs(wallet,t=None,refresh=False):
     if last_error: raise last_error
     return []
 
-def roster(wallet,t):
+def roster(wallet,t=None):
     raw=shared.roster_payload(wallet,t,force=False)
     rows=[]
     for item in raw:
@@ -232,8 +232,8 @@ def todt(v):
         return pd.to_datetime(v,utc=True).to_pydatetime()
     except:return None
 
-def events(pid,t):
-    return arr(get(f"/players/{pid}/experiences/history",t,timeout=(2.5,5)))
+def events(pid,t=None):
+    return arr(shared._public_get(f"/players/{pid}/experiences/history",timeout=10))
 
 def vals(e):
     return e.get("values") if isinstance(e,dict) and isinstance(e.get("values"),dict) else {}
@@ -288,10 +288,10 @@ def sync_batch(wallet,season_start,batch_size=None,progress=None):
         return {"saved":0,"errors":[],"batch":0,"eligible":0,"excluded":0,"owned":owned_clubs(wallet),
                 "cooldown":remaining,"rate_limited":True}
 
-    t=token()
-    mine=owned_clubs(wallet,t)
+    t=None
+    mine=owned_clubs(wallet,None)
     names={x["name"].strip().casefold():x["name"] for x in mine}
-    rs=roster(wallet,t)
+    rs=roster(wallet,None)
     eligible=[]
     excluded=0
     for r in rs:
