@@ -36,17 +36,37 @@ def _first(obj, names):
     return None
 
 def _season(rec):
-    v=_first(rec,("season","seasonNumber","seasonId","season_id"))
-    if isinstance(v,dict):
-        v=v.get("number") or v.get("id") or v.get("name")
-    s=str(v or "")
-    digits="".join(ch for ch in s if ch.isdigit())
+    # MFL competition records use a nested season object, e.g. season.name == "Season 17".
+    # _first deliberately returns scalars only, so inspect season objects explicitly first.
+    def walk(x):
+        if isinstance(x,dict):
+            season=x.get("season")
+            if isinstance(season,dict):
+                v=season.get("name") or season.get("number") or season.get("id")
+                if v is not None:return v
+            for k in ("seasonName","seasonNumber","seasonId","season_id"):
+                if x.get(k) is not None:return x.get(k)
+            for v in x.values():
+                hit=walk(v)
+                if hit is not None:return hit
+        elif isinstance(x,list):
+            for v in x:
+                hit=walk(v)
+                if hit is not None:return hit
+        return None
+    v=walk(rec)
+    text=str(v or "")
+    digits="".join(ch for ch in text if ch.isdigit())
     return int(digits) if digits else None
 
 def _apps(rec):
-    v=_first(rec,("appearances","apps","gamesPlayed","matchesPlayed","played"))
+    # The working MFL competition payload calls this "matches" (older scanner:
+    # Aspirants Cup 3 matches + Spark League 14 matches = 17 appearances).
+    v=_first(rec,("matches","appearances","apps","gamesPlayed","matchesPlayed","played"))
+    if v is None:
+        raise ValueError("Competition record has no recognised appearance/match field")
     try:return int(float(v))
-    except:return 0
+    except Exception as e:raise ValueError(f"Unrecognised appearance value: {v!r}") from e
 
 def _competition_name(rec):
     v=_first(rec,("competitionName","competition","name","type","competitionType"))
@@ -62,6 +82,9 @@ def player_apps(pid, token):
     raw=agency.get(f"/players/{int(pid)}/competitions",token)
     rows=_arr(raw)
     season_rows=[r for r in rows if isinstance(r,dict) and _season(r)==SEASON and _is_official(r)]
+    if not season_rows:
+        seasons=sorted({x for x in (_season(r) for r in rows if isinstance(r,dict)) if x is not None})
+        raise ValueError(f"No Season {SEASON} official competition records found; seasons returned={seasons}")
     return sum(_apps(r) for r in season_rows), season_rows
 
 def _owned_names(wallet, token):
