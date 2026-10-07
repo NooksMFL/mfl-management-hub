@@ -1677,24 +1677,39 @@ elif page=="Career Projection":
         result=cp.smart_matches(start_ovr,mint_age,groups,min_seasons=int(min_seasons),target_min=30)
         st.session_state.cp_simple_matches=result["matches"]
         st.session_state.cp_simple_tol=(result["ovr_tolerance"],result["age_tolerance"])
+        st.session_state.cp_simple_meta={
+            "requested_min_seasons":result.get("requested_min_seasons",int(min_seasons)),
+            "effective_min_seasons":result.get("effective_min_seasons",int(min_seasons)),
+            "max_available_seasons":result.get("max_available_seasons",0),
+            "relaxed_position":result.get("relaxed_position",False),
+        }
         st.session_state.cp_projection_horizon=int(horizon)
+        st.session_state.cp_projection_attempted=True
 
     matches=st.session_state.get("cp_simple_matches",[])
     horizon=st.session_state.get("cp_projection_horizon",int(horizon))
+    meta=st.session_state.get("cp_simple_meta",{})
+    attempted=st.session_state.get("cp_projection_attempted",False)
 
     st.markdown('<div class="cp-step"><span class="cp-step-num">3</span><span class="cp-step-title">Your projection</span><div class="cp-mini">This section appears after you press “Show my projection”.</div></div>',unsafe_allow_html=True)
 
     if not matches:
         if stats["careers"]==0:
             st.info("No careers have been built yet. Press **Update career database** above first.")
+        elif attempted:
+            st.warning("I couldn't find a usable comparable career in the database yet. Press **Update career database** once more — it now prioritises older MFL players with longer histories.")
         else:
             st.info("Enter the player details above, then press **Show my projection**.")
     else:
         tol=st.session_state.get("cp_simple_tol",(0,0))
         summary=cp.projection_summary(matches,int(horizon))
-        st.success(
-            f"Found {summary['n']:,} comparable careers. Comparison used Start OVR ±{tol[0]} and Mint Age ±{tol[1]}."
-        )
+        note=f"Found {summary['n']:,} comparable careers."
+        if meta.get("effective_min_seasons",int(min_seasons)) < meta.get("requested_min_seasons",int(min_seasons)):
+            note += f" Your database currently only reaches {meta.get('max_available_seasons',0)} reconstructed seasons, so I used {meta.get('effective_min_seasons')}+ season careers for now."
+        if meta.get("relaxed_position"):
+            note += " The position filter was widened because the current sample was too small."
+        note += f" Start OVR match: ±{tol[0]}; mint-age match: ±{tol[1]}."
+        st.success(note)
 
         st.markdown(
             f"""<div class="cp-summary">
