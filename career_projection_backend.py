@@ -1,11 +1,13 @@
 from __future__ import annotations
-import sqlite3, time, math
+import sqlite3, time, math, json
 from datetime import datetime, timezone
 import pandas as pd
 import agency_backend as agency
 
 DB="career_projection.db"
-STATUSES=("D1","D2","D3","D4","D5","D6","D7","D8","D9","D10")
+DIVISIONS=("Diamond","Platinum","Gold","Silver","Bronze","Iron","Stone","Ice","Spark","Flint")
+DIV_LABEL={name:f"D{i+1}" for i,name in enumerate(DIVISIONS)}
+STATUSES=tuple(DIV_LABEL[x] for x in DIVISIONS)
 
 def db():
     c=sqlite3.connect(DB);c.row_factory=sqlite3.Row
@@ -21,6 +23,85 @@ def _vals(e):
 
 def _reason(e):
     return str((e or {}).get("reasonType") or (e or {}).get("reason") or "").upper()
+
+def _arr(x):
+    if isinstance(x,list):return x
+    if isinstance(x,dict):
+        for k in ("data","items","results","clubs","players"):
+            if isinstance(x.get(k),list):return x[k]
+    return []
+
+def _club_id(c):
+    try:return int(c.get("id") or c.get("clubId"))
+    except:return None
+
+def fetch_division_clubs(division,t=None):
+    """Enumerate clubs from MFL's club endpoint. Division names are MFL's real
+    league tiers: Diamond through Flint; no synthetic club/player totals."""
+    t=t or agency.token(); out=[]; seen=set(); before=None
+    for _ in range(200):
+        params={"limit":100,"division":division}
+        if before is not None:params["beforeClubId"]=before
+        raw=agency.get("/clubs",t,params); batch=_arr(raw)
+        if not batch:break
+        fresh=0
+        for c in batch:
+            if not isinstance(c,dict):continue
+            cid=_club_id(c)
+            if cid is None or cid in seen:continue
+            # Guard against APIs that ignore the division parameter.
+            div=str(c.get("division") or c.get("divisionName") or ((c.get("league") or {}).get("division") if isinstance(c.get("league"),dict) else "") or "")
+            if div and division.casefold() not in div.casefold():continue
+            seen.add(cid);out.append(c);fresh+=1
+        if len(batch)<100 or fresh==0:break
+        before=_club_id(batch[-1])
+        if before is None:break
+        time.sleep(.25)
+    return out
+
+def fetch_club_players(club_id,t=None):
+    t=t or agency.token()
+    probes=[(f"/clubs/{int(club_id)}/players",None),("/players",{"clubId":int(club_id),"limit":100})]
+    last=None
+    for path,params in probes:
+        try:
+            rows=_arr(agency.get(path,t,params))
+            if rows:return rows
+        except Exception as e:last=e
+    if last:raise last
+    return []
+
+def scan_division(division,progress=None,max_clubs=None):
+    if division not in DIVISIONS:raise ValueError("Unknown MFL division")
+    label=DIV_LABEL[division];t=agency.token();clubs=fetch_division_clubs(division,t)
+    if max_clubs:clubs=clubs[:int(max_clubs)]
+    c=db();c.execute("""INSERT OR REPLACE INTO scan_status(division,status,clubs_scanned,players,last_run,error)
+      VALUES(?,?,?,?,?,?)""",(label,"Running",0,0,datetime.now(timezone.utc).isoformat(),None));c.commit();c.close()
+    club_done=0;players_saved=0;errors=[]
+    for club in clubs:
+        cid=_club_id(club)
+        try:
+            ps=fetch_club_players(cid,t)
+            for p in ps:
+                pid=p.get("id") if isinstance(p,dict) else None
+                if pid is None:continue
+                try:
+                    row=career_from_history(pid,t);save(row,label);players_saved+=1
+                    time.sleep(.15)
+                except Exception as e:
+                    errors.append({"club_id":cid,"player_id":pid,"error":str(e)})
+                    if "429" in str(e):time.sleep(15)
+            club_done+=1
+        except Exception as e:errors.append({"club_id":cid,"error":str(e)})
+        c=db();c.execute("""INSERT OR REPLACE INTO scan_status(division,status,clubs_scanned,players,last_run,error)
+          VALUES(?,?,?,?,?,?)""",(label,"Running",club_done,players_saved,datetime.now(timezone.utc).isoformat(),
+          json.dumps(errors[-3:]) if errors else None));c.commit();c.close()
+        if progress:progress(club_done,len(clubs),players_saved,len(errors))
+        time.sleep(.35)
+    c=db();c.execute("""INSERT OR REPLACE INTO scan_status(division,status,clubs_scanned,players,last_run,error)
+      VALUES(?,?,?,?,?,?)""",(label,"Complete",club_done,players_saved,datetime.now(timezone.utc).isoformat(),
+      json.dumps(errors[-10:]) if errors else None));c.commit();c.close()
+    return {"division":label,"clubs":club_done,"players":players_saved,"errors":errors}
 
 def _profile(pid,t):
     p=agency.profile(int(pid),t)
