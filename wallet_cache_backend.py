@@ -74,6 +74,23 @@ def _get(path,t,params=None,timeout=25):
             last=str(e); time.sleep(min(20,2*(2**attempt)))
     raise RuntimeError(f"{path} failed after retries: {last}")
 
+def _public_get(path,params=None,timeout=25):
+    """Read public MFL endpoints without depending on /auth/refresh."""
+    last=None
+    for attempt in range(4):
+        try:
+            r=requests.get(BASE+path,headers=H,params=params,timeout=timeout)
+            if r.status_code==429:
+                last="HTTP 429"; time.sleep(min(45,5*(2**attempt))); continue
+            if r.status_code in (500,502,503,504):
+                last=f"HTTP {r.status_code}"; time.sleep(min(20,2*(2**attempt))); continue
+            if not r.ok:
+                raise RuntimeError(f"{path} returned {r.status_code}: {r.text[:160]}")
+            return r.json()
+        except (requests.Timeout,requests.ConnectionError) as e:
+            last=str(e); time.sleep(min(20,2*(2**attempt)))
+    raise RuntimeError(f"{path} public read failed after retries: {last}")
+
 def _arr(d):
     if isinstance(d,list): return d
     if isinstance(d,dict):
@@ -146,12 +163,18 @@ def roster_payload(wallet,t=None,force=False):
                       "dribbling":r["dribbling"],"defense":r["defense"],"physical":r["physical"]},
           "club":{"name":r["club"]} if r["club"] else None
         } for r in rows]
-    t=t or token()
     raw=[]; seen=set(); before=None
     while True:
         params={"ownerWalletAddress":wallet,"limit":100}
         if before is not None: params["beforePlayerId"]=before
-        batch=_arr(_get("/players",t,params,timeout=30))
+        try:
+            batch=_arr(_public_get("/players",params,timeout=30))
+        except Exception:
+            if t is None:
+                try: t=token()
+                except Exception: t=None
+            if t is None: raise
+            batch=_arr(_get("/players",t,params,timeout=30))
         fresh=[]
         for item in batch:
             p=_unwrap(item); m=p.get("metadata") if isinstance(p.get("metadata"),dict) else {}
@@ -182,7 +205,7 @@ def roster_payload(wallet,t=None,force=False):
                    _val(p,"physical","physicality","PHY"),now))
     c.commit(); c.close()
     _meta_set(wallet,"roster_updated",now)
-    return roster_payload(wallet,t,False)
+    return roster_payload(wallet,None,False)
 
 def clubs_rows(wallet):
     c=db(); rows=c.execute("SELECT * FROM clubs WHERE wallet=? ORDER BY club_name",(wallet.lower(),)).fetchall(); c.close()
@@ -200,11 +223,17 @@ def fetch_clubs(wallet,t=None,force=False):
     wallet=wallet.strip().lower()
     saved=clubs_rows(wallet)
     if saved and not force: return saved
-    t=t or token()
     found=[]
     for params in ({"walletAddress":wallet},{"walletAddress":wallet,"withStaffContracts":"true"}):
         try:
-            raw=_arr(_get("/clubs",t,params,timeout=15))
+            try:
+                raw=_arr(_public_get("/clubs",params,timeout=15))
+            except Exception:
+                if t is None:
+                    try: t=token()
+                    except Exception: t=None
+                if t is None: raise
+                raw=_arr(_get("/clubs",t,params,timeout=15))
             for x in raw:
                 if not isinstance(x,dict):continue
                 if str(x.get("title") or "").upper()!="MFL_OWNER":continue
@@ -222,9 +251,10 @@ def fetch_clubs(wallet,t=None,force=False):
     return uniq
 
 def sync_wallet(wallet,force=True):
-    t=token()
-    roster=roster_payload(wallet,t,force=force)
-    clubs=fetch_clubs(wallet,t,force=force)
+    # Wallet roster and owned-club discovery are public reads. Authentication is
+    # only a fallback, so a broken /auth/refresh no longer blocks first load.
+    roster=roster_payload(wallet,None,force=force)
+    clubs=fetch_clubs(wallet,None,force=force)
     return {"players":len(roster),"clubs":len(clubs),"updated_at":_iso()}
 
 def freshness(wallet):
