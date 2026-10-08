@@ -70,29 +70,21 @@ def scan(listing_pages=12,sales_pages=24,max_age=24,min_discount=15,progress=Non
     # Marketplace listings do not need wallet data; don't refresh a wallet token.
     live=_fetch_pages("/listings",None,listing_pages,
                       {"limit":25,"type":"PLAYER","status":"AVAILABLE","view":"full"},progress)
-    # Sale-history endpoints differ from active listings. Query completed listings,
-    # but fail explicitly if the API does not support this filter.
-    try:
-        sales=_fetch_pages("/listings",None,sales_pages,
-                           {"limit":25,"type":"PLAYER","status":"SOLD","view":"full"},progress)
-    except RuntimeError as e:
-        raise RuntimeError("Live listings loaded, but completed-sales data could not be verified. "
-                           "Bargain valuation is unavailable: "+str(e)) from e
-    sold=[]
-    for x in sales:
-        typ=str(x.get("type") or "").upper()
-        status=str(x.get("status") or "").upper()
-        if status not in ("BOUGHT","SOLD","COMPLETED"):continue
+    # MFL /listings rejects SOLD; use other active asking prices as a
+    # clearly labelled comparison, NEVER describe them as realised sales.
+    reference=[]
+    for x in live:
+        if str(x.get("status") or "").upper() not in ("AVAILABLE","ACTIVE"):continue
         info=_player(x)
         price=_num(x.get("price"))
         if price is not None and price>0 and info["overall"] is not None and info["age"] is not None:
-            sold.append({**info,"price":price})
+            reference.append({**info,"price":price,"listing_id":x.get("listingResourceId") or x.get("id")})
     output=[]
     for x in live:
         if str(x.get("status") or "").upper() not in ("AVAILABLE","ACTIVE"):continue
         info=_player(x);ask=_num(x.get("price"))
         if ask is None or ask<=0 or info["age"] is None or info["age"]>max_age or info["overall"] is None:continue
-        comps=[s["price"] for s in sold if s["position"]==info["position"]
+        comps=[s["price"] for s in reference if s["listing_id"] != (x.get("listingResourceId") or x.get("id")) and s["position"]==info["position"]
                and abs(s["overall"]-info["overall"])<=3 and abs(s["age"]-info["age"])<=3]
         if len(comps)<5:continue
         fair=_median(comps)
@@ -100,11 +92,11 @@ def scan(listing_pages=12,sales_pages=24,max_age=24,min_discount=15,progress=Non
         if discount<min_discount:continue
         output.append({"Player":info["player"],"Age":int(info["age"]),
                        "Position":info["position"],"OVR":int(info["overall"]),
-                       "Asking Price":ask,"Estimated Value":round(fair,2),
+                       "Asking Price":ask,"Comparable Asking Median":round(fair,2),
                        "Discount %":round(discount,1),"Comparables":len(comps),
                        "Player ID":info["player_id"],
                        "Listing ID":x.get("listingResourceId") or x.get("id")})
     df=pd.DataFrame(output)
     if not df.empty:df=df.sort_values("Discount %",ascending=False).reset_index(drop=True)
-    return df,{"listings":len(live),"sales_feed":len(sales),"completed_player_sales":len(sold),
+    return df,{"listings":len(live),"reference_listings":len(reference),
                "minimum_comparables":5}
