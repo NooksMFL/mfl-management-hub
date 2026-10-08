@@ -2,6 +2,7 @@
 from __future__ import annotations
 import time
 import statistics
+import requests
 import pandas as pd
 import agency_backend as agency
 
@@ -25,12 +26,26 @@ def _player(obj):
     return {"player":name,"age":age,"overall":overall,"position":position,
             "player_id":p.get("id") or p.get("playerId") or m.get("id")}
 
+def _public_market_get(path, params):
+    url=agency.BASE+path
+    try:
+        r=requests.get(url,headers=agency.H,params=params,timeout=25)
+    except requests.RequestException as e:
+        raise RuntimeError(f"MFL market API connection failed: {e}") from e
+    if r.status_code in (401,403):
+        raise RuntimeError("MFL does not permit unauthenticated market access. A working MFL session is required.")
+    if r.status_code==429:
+        raise RuntimeError("MFL market rate limit reached (429). Try a smaller scan later.")
+    if not r.ok:
+        raise RuntimeError(f"MFL market endpoint {path} returned HTTP {r.status_code}: {r.text[:180]}")
+    return r.json()
+
 def _fetch_pages(path, token, pages, params, progress=None):
     rows=[];seen=set();before=None
     for page in range(pages):
         opts=dict(params)
         if before is not None: opts["beforeListingId"]=before
-        data=agency.get(path,token,opts)
+        data=_public_market_get(path,opts)
         batch=agency.arr(data)
         if not batch:break
         fresh=0
@@ -52,15 +67,22 @@ def _median(vals):
     return statistics.median(vals)
 
 def scan(listing_pages=12,sales_pages=24,max_age=24,min_discount=15,progress=None):
-    token=agency.token()
-    live=_fetch_pages("/listings",token,listing_pages,
+    # Marketplace listings do not need wallet data; don't refresh a wallet token.
+    live=_fetch_pages("/listings",None,listing_pages,
                       {"limit":25,"type":"PLAYER","status":"AVAILABLE","view":"full"},progress)
-    sales=_fetch_pages("/listings/feed",token,sales_pages,{"limit":25},progress)
+    # Sale-history endpoints differ from active listings. Query completed listings,
+    # but fail explicitly if the API does not support this filter.
+    try:
+        sales=_fetch_pages("/listings",None,sales_pages,
+                           {"limit":25,"type":"PLAYER","status":"SOLD","view":"full"},progress)
+    except RuntimeError as e:
+        raise RuntimeError("Live listings loaded, but completed-sales data could not be verified. "
+                           "Bargain valuation is unavailable: "+str(e)) from e
     sold=[]
     for x in sales:
         typ=str(x.get("type") or "").upper()
         status=str(x.get("status") or "").upper()
-        if typ not in ("SALE","OFFER") or status not in ("BOUGHT","SOLD","COMPLETED"):continue
+        if status not in ("BOUGHT","SOLD","COMPLETED"):continue
         info=_player(x)
         price=_num(x.get("price"))
         if price is not None and price>0 and info["overall"] is not None and info["age"] is not None:
