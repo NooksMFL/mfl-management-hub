@@ -836,7 +836,7 @@ if "wallet" not in st.session_state:
     st.session_state.wallet=saved_wallet.strip().lower() if valid_wallet(saved_wallet) else ""
 
 # ---------------- SIDEBAR ----------------
-nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Transfer Window","Watchlist","Compare","Insights","Sync Centre"]
+nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Transfer Window","Transfer Bargains","Watchlist","Compare","Insights","Sync Centre"]
 query_page=st.query_params.get("page","Home")
 if query_page not in nav_pages:
     query_page="Home"
@@ -1640,6 +1640,42 @@ elif page=="Transfer Window":
     if st.session_state.tw_errors:
         with st.expander(f"API errors ({len(st.session_state.tw_errors)})"):
             st.dataframe(pd.DataFrame(st.session_state.tw_errors,columns=["Player ID","Error"]),use_container_width=True,hide_index=True)
+
+elif page=="Transfer Bargains":
+    import transfer_bargains_backend as bargains
+    st.markdown('<div class="suite-hero"><div class="suite-kicker">LIVE TRANSFER MARKET</div><div class="suite-title">Transfer Bargains</div><div class="suite-copy">Find underpriced young players by comparing active listings against recent completed MFL player sales. Estimates are indicative, not guaranteed resale values.</div></div>',unsafe_allow_html=True)
+    c1,c2,c3=st.columns(3)
+    with c1: max_age=st.slider("Maximum age",16,35,24,key="bargain_age")
+    with c2: discount=st.slider("Minimum discount (%)",5,60,15,5,key="bargain_discount")
+    with c3: depth=st.selectbox("Scan depth",["Quick","Standard","Deep"],index=1,key="bargain_depth")
+    pages={"Quick":(6,12),"Standard":(12,24),"Deep":(20,40)}
+    if st.button("Scan live transfer bargains",type="primary",key="bargain_scan",use_container_width=True):
+        status=st.empty()
+        def progress(path,page,total,count):
+            status.caption(f"Checking {'live listings' if path=='/listings' else 'recent completed sales'}: page {page}/{total} · {count} records")
+        try:
+            with st.spinner("Comparing listings with recent market sales…"):
+                results,stats=bargains.scan(*pages[depth],max_age=max_age,min_discount=discount,progress=progress)
+            st.session_state["bargains_results"]=results
+            st.session_state["bargains_stats"]=stats
+            status.success(f"Scan complete: {stats['listings']} listings and {stats['completed_player_sales']} completed sales.")
+        except Exception as e:
+            st.error(f"Scan failed: {e}")
+    if "bargains_results" in st.session_state:
+        result=st.session_state["bargains_results"]
+        stats=st.session_state["bargains_stats"]
+        if not stats["completed_player_sales"]:
+            st.warning("No completed player sales were returned by the API, so fair prices cannot be verified.")
+        if result.empty:
+            st.info("No bargains met the selected criteria in this scan. Try a lower discount or Deep scan.")
+        else:
+            a,b,c=st.columns(3)
+            a.metric("Bargains found",len(result))
+            b.metric("Largest estimated discount",f"{result['Discount %'].max():.1f}%")
+            c.metric("Recent player sales checked",stats["completed_player_sales"])
+            st.dataframe(result,use_container_width=True,hide_index=True)
+            st.download_button("Export bargains as CSV",result.to_csv(index=False).encode("utf-8-sig"),"mfl_transfer_bargains.csv","text/csv",key="bargains_csv")
+    st.caption("Valuation method: median of at least five completed sales with matching position, within ±3 OVR and ±3 years. Small samples, changing markets, and player attributes can distort estimates.")
 
 elif page=="Watchlist":
     if not wallet:
