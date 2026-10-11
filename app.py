@@ -1124,29 +1124,45 @@ elif page=="Grower or Shower":
             os.environ["GROWER_START"]=grower_start
 
     if refresh:
+        auth_warning=None
         try:
             tok=grower.refresh_access_token()
-            bar=st.progress(0,text="Refreshing entrants…")
-            errs=[]
-            for i,(pid,owner) in enumerate(grower.ENTRANTS.items(),1):
-                try:
-                    grower.sync_player(conn,tok,pid,owner)
-                except Exception:
-                    errs.append(owner)
-                bar.progress(i/len(grower.ENTRANTS),text=f"{i}/{len(grower.ENTRANTS)} entrants")
-            bar.empty()
-            if errs:
-                st.warning(f"Updated competition with {len(errs)} entrant(s) skipped.")
-            else:
-                st.success("Competition refreshed.")
-            rows=grower.leaderboard(conn)
-        except Exception as e:
-            st.error("MFL could not refresh the competition.")
-            with st.expander("Technical detail"):
-                st.code(str(e))
+        except Exception as auth_exc:
+            # Public player endpoints can still work when /auth/refresh is down.
+            # Do not display token values or raw response bodies in the public UI.
+            tok=None
+            auth_warning=str(auth_exc)
+            st.info("MFL authentication is unavailable. Trying public player data instead.")
+
+        bar=st.progress(0,text="Refreshing entrants…")
+        failures=[]
+        successes=0
+        for i,(pid,owner) in enumerate(grower.ENTRANTS.items(),1):
+            try:
+                grower.sync_player(conn,tok,pid,owner)
+                successes+=1
+            except Exception as exc:
+                failures.append((owner,str(exc)))
+            bar.progress(i/len(grower.ENTRANTS),text=f"{i}/{len(grower.ENTRANTS)} entrants")
+        bar.empty()
+        rows=grower.leaderboard(conn)
+        if successes:
+            st.success(f"Updated {successes} of {len(grower.ENTRANTS)} entrants.")
+        if failures:
+            st.warning(
+                f"{len(failures)} entrant(s) could not be refreshed. "
+                "Any previously saved standings are still displayed."
+            )
+            with st.expander("Refresh diagnostics"):
+                if auth_warning:
+                    st.write(f"Authentication: {auth_warning}")
+                for owner,detail in failures:
+                    st.write(f"{owner}: {detail}")
+        elif auth_warning:
+            st.caption("Competition refreshed using public MFL data.")
 
     if not rows:
-        st.markdown('<div class="empty"><b>Competition cache is empty on this fresh public deployment</b>Click <strong>Refresh competition</strong> above once to load the 14 entrants and current Season 17 data.</div>',unsafe_allow_html=True)
+        st.markdown('<div class="empty"><b>No competition snapshots are available yet</b>Refresh competition to try loading the entrants. If MFL is unavailable, check back when the service recovers.</div>',unsafe_allow_html=True)
     else:
         st.markdown('<div class="section-head2"><h3>Front runners</h3><span class="small-note2">OVR → ATTR → RATING</span></div>',unsafe_allow_html=True)
         cards="".join(grower_leader_card(i,r) for i,r in enumerate(rows[:3],1))
