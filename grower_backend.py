@@ -57,41 +57,65 @@ ENTRANTS = {
 
 
 def refresh_access_token() -> str:
-    refresh_token = os.getenv("MFL_REFRESH_TOKEN")
+    """Obtain a token, retrying transient MFL auth failures."""
+    refresh_token = os.getenv("MFL_REFRESH_TOKEN", "").strip()
     if not refresh_token:
-        raise RuntimeError("MFL_REFRESH_TOKEN is missing from .env")
-    response = requests.post(
-        f"{BASE_URL}/auth/refresh",
-        headers=BROWSER_HEADERS,
-        json={"refreshToken": refresh_token},
-        timeout=8,
-    )
-    response.raise_for_status()
-    data = response.json()
-    access = data.get("access")
-    if access is None and isinstance(data.get("data"), dict):
-        access = data["data"].get("access")
-    if isinstance(access, dict):
-        access = access.get("token")
-    if not access:
-        raise RuntimeError("MFL refresh succeeded but no access token was returned")
-    return access
+        raise RuntimeError("MFL_REFRESH_TOKEN is not configured")
+    last_error = "Unknown authentication error"
+    for attempt in range(3):
+        try:
+            response = requests.post(
+                f"{BASE_URL}/auth/refresh",
+                headers=BROWSER_HEADERS,
+                json={"refreshToken": refresh_token},
+                timeout=15,
+            )
+            if response.status_code in (429, 500, 502, 503, 504):
+                last_error = f"MFL auth service returned HTTP {response.status_code}"
+                if attempt < 2:
+                    time.sleep(1.5 * (attempt + 1))
+                continue
+            if response.status_code in (400, 401, 403):
+                raise RuntimeError(
+                    f"MFL rejected the refresh token (HTTP {response.status_code}). "
+                    "Update MFL_REFRESH_TOKEN in Streamlit Secrets."
+                )
+            response.raise_for_status()
+            data = response.json()
+            access = data.get("access")
+            if access is None and isinstance(data.get("data"), dict):
+                access = data["data"].get("access")
+            if isinstance(access, dict):
+                access = access.get("token")
+            if not access:
+                raise RuntimeError("MFL refresh succeeded but no access token was returned")
+            return access
+        except (requests.Timeout, requests.ConnectionError) as exc:
+            last_error = f"MFL authentication network error: {type(exc).__name__}"
+            if attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+    raise RuntimeError(last_error)
 
 
-def mfl_get(token: str, endpoint: str, params: dict | None = None) -> Any:
+def mfl_get(token: str | None, endpoint: str, params: dict | None = None) -> Any:
+    """Read MFL data. No bearer token is required for public endpoints."""
     headers = BROWSER_HEADERS.copy()
-    headers["Authorization"] = f"Bearer {token}"
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
     last_error = None
     for attempt in range(3):
-        r = requests.get(f"{BASE_URL}{endpoint}", headers=headers, params=params, timeout=8)
-        if r.status_code == 200:
-            return r.json()
-        last_error = RuntimeError(f"GET {endpoint}: HTTP {r.status_code} - {r.text[:300]}")
-        if r.status_code not in (429, 500, 502, 503, 504):
-            raise last_error
-        time.sleep(0.35 * (attempt + 1))
+        try:
+            r = requests.get(f"{BASE_URL}{endpoint}", headers=headers, params=params, timeout=15)
+            if r.status_code == 200:
+                return r.json()
+            last_error = RuntimeError(f"GET {endpoint}: HTTP {r.status_code}")
+            if r.status_code not in (429, 500, 502, 503, 504):
+                raise last_error
+        except (requests.Timeout, requests.ConnectionError) as exc:
+            last_error = RuntimeError(f"GET {endpoint}: {type(exc).__name__}")
+        if attempt < 2:
+            time.sleep(0.8 * (attempt + 1))
     raise last_error or RuntimeError(f"GET {endpoint} failed")
-
 
 def unwrap(data: Any, keys: tuple[str, ...] = ()) -> Any:
     """Unwrap common API envelopes without assuming one exact response shape."""
