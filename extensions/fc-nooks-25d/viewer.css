@@ -12,7 +12,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:16px;pa
 #fcn25d-view[data-stadium="harbour-park"] .eyebrow{color:#87cac1}#fcn25d-view[data-stadium="harbour-park"] .broadcast{background:linear-gradient(90deg,#102d37,#11232a 40%,#271f3a)}
 .broadcast{position:static;align-self:center;margin:5px 0;display:grid;grid-template-columns:minmax(60px,1fr) 55px minmax(60px,1fr) auto;align-items:center;text-align:center;gap:10px;border:1px solid #ffffff25;border-radius:4px;background:linear-gradient(90deg,#38222a,#211f26 40%,#352028);padding:8px 14px;max-width:40%;font-size:11px;min-height:35px}
 .broadcast span{overflow-wrap:anywhere}.broadcast strong{font-size:17px;font-variant-numeric:tabular-nums}.broadcast small{font-size:10px;letter-spacing:.5px;color:#bfd0cd;font-variant-numeric:tabular-nums}
-#fcn-stage{width:min(100%,calc((100vh - var(--fcn-native-top,0px) - 125px)*1.7768),1920px);margin:auto;flex:1;display:grid;align-content:center;min-height:240px}#fcn-stage>svg{display:block;width:100%;height:auto;max-height:calc(100vh - var(--fcn-native-top,0px) - 125px)}
+#fcn-stage{width:min(100%,calc((100vh - var(--fcn-native-top,0px) - 125px)*1.7768),1920px);margin:auto;flex:1;display:grid;align-content:center;min-height:240px}#fcn-stage>svg{overflow:hidden;display:block;width:100%;height:auto;max-height:calc(100vh - var(--fcn-native-top,0px) - 125px)}
 .fcn-player{transition:none!important;animation:none!important}
 footer{display:flex;gap:15px;justify-content:space-between;padding:7px 18px;color:#82949a;font:10px system-ui;border-top:1px solid #ffffff0d;background:#0b1116}
 .footer-status{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.footer-status button{padding:3px 7px;font-size:10px;background:#142630}

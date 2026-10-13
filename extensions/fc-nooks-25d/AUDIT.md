@@ -67,3 +67,12 @@ The ball previously had one bounding-box centre and was always drawn on the grou
 Seven new real-ground-inspired local images cover large and tiny grounds. Minty Stadium is an eighth addition, making eleven themes. Per-theme registry calibration changes one scene camera shared by markings, goals and actors. Switches rebuild static geometry while retaining actor nodes and tracker state. Tiny grounds show one physical display only.
 
 Minty decoration uses a locally selected original photo for crowd faces, banner and player heads, persisted in extension storage. The inline chat avatar lacked a downloadable file; an inaccurate generated portrait was rejected and never packaged. The release requires selecting the original photo once. Face effects remain separate from source extraction and appear only in Minty Stadium.
+
+
+## v1.11: closer action camera
+
+The v1.10 view framed the complete 1672 × 941 stadium plate, so players occupied a small fraction of the screen. This release adds a separate `camera.js` viewport controller and defaults to 1.75× magnification. Full stadium and 2.5× presets remain available and preferences persist locally.
+
+The controller changes only the root overlay SVG viewBox. Backdrop, markings, goals, actors, sphere and shadow therefore share exactly the same pan and zoom. A central region holds the shot steady until the rendered ball moves out of it; camera bounds stay inside the packaged image. Sphere/ground separation participates in framing. There is no interpolation of source positions, added actor lag, separate motion clock or guessed ball position.
+
+`tracking.js`, `renderer.js`, `scoreboard.js`, `scene.js` and all eleven images are byte-for-byte unchanged from v1.10. Camera updates consume the existing snapshot after rendering in the same requestAnimationFrame. Browser checks verify actual on-screen 1.75×/2.5× magnification, unchanged actor coordinates/node identity, screen-space player/ball alignment through camera changes, ball-following at all four pitch corners, airborne/ground visibility, persisted preferences and delayed-read protection.

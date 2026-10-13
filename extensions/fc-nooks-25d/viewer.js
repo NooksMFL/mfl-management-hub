@@ -4,14 +4,14 @@
   if (api.started) return;
   api.started = true;
   const tracker = new api.Tracker(), scene = api.buildScene(), renderer = new api.Renderer(scene);
-  const scoreboard=api.scoreboard;
+  const scoreboard=api.scoreboard, camera=new api.ViewportCamera(scene);
   const host = document.createElement('div'); host.dataset.fcn25d=''; host.id='fcn25d-host';
   // Shadow DOM shields the extension from MFL styles and vice versa.
   const shadow=host.attachShadow({mode:'open'});
   const styles=document.createElement('link'); styles.rel='stylesheet'; styles.href=chrome.runtime.getURL('viewer.css');
   const toggle=document.createElement('button'); toggle.id='fcn25d-toggle'; toggle.type='button'; toggle.textContent='FC Nooks · 2.5D'; toggle.setAttribute('aria-expanded','false');
   const view=document.createElement('section'); view.id='fcn25d-view'; view.hidden=true; view.setAttribute('role','dialog'); view.setAttribute('aria-label','FC Nooks stadium match view');
-  view.innerHTML='<header><div><span class="eyebrow">FC NOOKS</span><h1>Under the lights</h1></div><div class="tools"><label class="stadium-control">Stadium <select id="fcn-stadium" aria-label="Stadium"></select></label><span id="fcn-minty-controls" hidden><button id="fcn-minty-photo" type="button">Choose Minty face</button><input id="fcn-minty-file" type="file" accept="image/png,image/jpeg,image/webp" hidden><span id="fcn-minty-message">Choose the original photo once</span></span><button id="fcn-select" type="button">Select ball</button><button id="fcn-select-scoreboard" type="button">Select scoreboard</button><button id="fcn-diagnostics" type="button">Diagnostics</button><button id="fcn-close" type="button" aria-label="Close stadium view">Close ✕</button></div></header><div class="broadcast" aria-live="polite"><span id="fcn-home">HOME</span><strong id="fcn-score">—</strong><span id="fcn-away">AWAY</span><small id="fcn-clock">AWAITING MFL</small></div><div id="fcn-stage"></div><footer><div class="footer-status"><span id="fcn-status">Waiting for MFL pitch</span><button id="fcn-select-shadow" type="button" title="Choose the ball’s ground shadow for flight tracking">Set ball shadow</button></div><span>VIEW ONLY · Alt+Shift+M</span></footer><pre id="fcn-diagnostic-output" hidden></pre>';
+  view.innerHTML='<header><div><span class="eyebrow">FC NOOKS</span><h1>Under the lights</h1></div><div class="tools"><label class="stadium-control">Stadium <select id="fcn-stadium" aria-label="Stadium"></select></label><label class="stadium-control">Camera <select id="fcn-camera" aria-label="Camera distance"></select></label><span id="fcn-minty-controls" hidden><button id="fcn-minty-photo" type="button">Choose Minty face</button><input id="fcn-minty-file" type="file" accept="image/png,image/jpeg,image/webp" hidden><span id="fcn-minty-message">Choose the original photo once</span></span><button id="fcn-select" type="button">Select ball</button><button id="fcn-select-scoreboard" type="button">Select scoreboard</button><button id="fcn-diagnostics" type="button">Diagnostics</button><button id="fcn-close" type="button" aria-label="Close stadium view">Close ✕</button></div></header><div class="broadcast" aria-live="polite"><span id="fcn-home">HOME</span><strong id="fcn-score">—</strong><span id="fcn-away">AWAY</span><small id="fcn-clock">AWAITING MFL</small></div><div id="fcn-stage"></div><footer><div class="footer-status"><span id="fcn-status">Waiting for MFL pitch</span><button id="fcn-select-shadow" type="button" title="Choose the ball’s ground shadow for flight tracking">Set ball shadow</button></div><span>VIEW ONLY · Alt+Shift+M</span></footer><pre id="fcn-diagnostic-output" hidden></pre>';
   const pickNotice=document.createElement('div');pickNotice.id='fcn-pick-notice';pickNotice.hidden=true;pickNotice.setAttribute('role','status');
   pickNotice.innerHTML='<span></span><button type="button">Cancel</button>';
   view.querySelector('#fcn-stage').append(scene.svg); shadow.append(styles,toggle,view,pickNotice);
@@ -23,11 +23,26 @@
   for(const [id,stadium] of Object.entries(api.stadiums)) {
     const option=document.createElement('option');option.value=id;option.textContent=stadium.name;stadiumSelect.append(option);
   }
-  let stadiumRevision=0,portraitRevision=0,preferenceError='';
+  let stadiumRevision=0,portraitRevision=0,cameraRevision=0,preferenceError='';
+  const cameraSelect=view.querySelector('#fcn-camera');
+  for(const option of api.cameraViews) {
+    const el=document.createElement('option');el.value=String(option.zoom);el.textContent=option.name;cameraSelect.append(el);
+  }
+  function chooseCamera(zoom,persist=true) {
+    if(!camera.setZoom(zoom))return;
+    cameraRevision++;cameraSelect.value=String(zoom);camera.update(lastSnapshot);
+    if(persist) {
+      try {chrome.storage.local.set({cameraZoom:zoom},()=>{if(chrome.runtime.lastError)preferenceError='Camera choice could not be saved';});}
+      catch(_){preferenceError='Camera choice could not be saved';}
+    }
+  }
+  chooseCamera(1.75,false);
+  cameraSelect.addEventListener('change',()=>chooseCamera(Number(cameraSelect.value)));
+  const initialCameraRevision=cameraRevision;
   const mintyControls=view.querySelector('#fcn-minty-controls'),mintyMessage=view.querySelector('#fcn-minty-message');
   function chooseStadium(id,persist=true) {
     if(!api.isStadium(id))return;
-    stadiumRevision++;scene.setStadium(id);mintyControls.hidden=id!=='minty-stadium';stadiumSelect.value=id;view.dataset.stadium=id;
+    stadiumRevision++;scene.setStadium(id);camera.update(lastSnapshot);mintyControls.hidden=id!=='minty-stadium';stadiumSelect.value=id;view.dataset.stadium=id;
     view.querySelector('.eyebrow').textContent='FC NOOKS / '+api.stadiums[id].label;
     if(persist) {
       try {
@@ -39,9 +54,10 @@
   stadiumSelect.addEventListener('change',()=>chooseStadium(stadiumSelect.value));
   const preferenceRevision=stadiumRevision;
   try {
-    chrome.storage.local.get(['stadiumId','mintyFace'],saved=>{
+    chrome.storage.local.get(['stadiumId','mintyFace','cameraZoom'],saved=>{
       if(chrome.runtime.lastError){preferenceError='Saved stadium choice could not be read';return;}
       if(!portraitRevision && api.isPortrait(saved?.mintyFace)){scene.setPortrait(saved.mintyFace);mintyMessage.textContent='Face saved on this browser';}
+      if(cameraRevision===initialCameraRevision && api.isCameraZoom(saved?.cameraZoom))chooseCamera(saved.cameraZoom,false);
       // A late storage response must not undo a choice made by the user.
       if(stadiumRevision===preferenceRevision && api.isStadium(saved?.stadiumId))chooseStadium(saved.stadiumId,false);
     });
@@ -77,7 +93,7 @@
       // Score parsing errors must never clear player tracks or stop motion.
     }
   }
-  function reset() { tracker.reset(); scoreboard.reset(); renderer.clear(); lastSnapshot=null; lastStatus=-Infinity; scoreData=api.emptyScoreboard();updateBoard(scoreData); }
+  function reset() { tracker.reset(); scoreboard.reset(); renderer.clear(); camera.reset(); lastSnapshot=null; lastStatus=-Infinity; scoreData=api.emptyScoreboard();updateBoard(scoreData); }
   function available() { return /\/matches\/[^/]+/.test(location.pathname) || !!document.querySelector('svg [id^="match-v2-p"]'); }
   function stopPicking() { picking=false; clearTimeout(pickTimer);pickNotice.hidden=true;document.removeEventListener('click',pick,true); }
   function setOpen(value) {
@@ -94,7 +110,7 @@
       const now=performance.now();
       // Read both ball and players BEFORE any overlay writes.
       const snapshot=tracker.sample(now); lastSnapshot=snapshot;
-      renderer.render(snapshot);
+      renderer.render(snapshot);camera.update(snapshot);
       if (now-lastStatus>600) { status.textContent=`${snapshot.players.length} players · ${snapshot.diagnostic}${scoreData.found?'':' · Select scoreboard if scores are missing'}${scene.svg.dataset.assetState==='failed'?' · stadium image missing':''}`; lastStatus=now; }
       failures=0;
     } catch (error) {
@@ -131,7 +147,7 @@
   pickNotice.querySelector('button').addEventListener('click',()=>{stopPicking();setOpen(true);});
   view.querySelector('#fcn-diagnostics').addEventListener('click',()=>{
     output.hidden=!output.hidden;
-    output.textContent=JSON.stringify({version:'1.10.0',stadium:scene.stadiumId,stadiumImage:scene.svg.dataset.assetState,preferenceError,source:tracker.root?.getAttribute('viewBox'),players:lastSnapshot?.players.length,ball:lastSnapshot?.ball,candidates:tracker.balls.map(el=>({tag:el.tagName,id:el.id})),shadows:tracker.shadows.map(el=>({tag:el.tagName,id:el.id})),bounds:lastSnapshot?.bounds,scoreboard:scoreboard.diagnostics(),scoreError},null,2);
+    output.textContent=JSON.stringify({version:'1.11.0',camera:camera.diagnostics(),stadium:scene.stadiumId,stadiumImage:scene.svg.dataset.assetState,preferenceError,source:tracker.root?.getAttribute('viewBox'),players:lastSnapshot?.players.length,ball:lastSnapshot?.ball,candidates:tracker.balls.map(el=>({tag:el.tagName,id:el.id})),shadows:tracker.shadows.map(el=>({tag:el.tagName,id:el.id})),bounds:lastSnapshot?.bounds,scoreboard:scoreboard.diagnostics(),scoreError},null,2);
   });
   toggle.addEventListener('click',()=>setOpen(!open));
   view.querySelector('#fcn-close').addEventListener('click',()=>setOpen(false));

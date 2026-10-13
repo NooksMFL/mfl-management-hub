@@ -1,6 +1,6 @@
 # FC Nooks 2.5D match extension
 
-[Download the ready-to-load v1.10 ZIP](./FC-Nooks-2.5D-Extension-v1.10.zip?raw=true)
+[Download the ready-to-load v1.11 ZIP](./FC-Nooks-2.5D-Extension-v1.11.zip?raw=true)
 
 1. Download and extract the ZIP on Windows.
 2. Disable the older FC Nooks extension.
@@ -8,7 +8,9 @@
 4. Click **Load unpacked** and select the extracted `fc-nooks-25d` folder containing `manifest.json`.
 5. Reload MFL, open a Pro match and click **FC Nooks · 2.5D**.
 
-Seven new real-ground-inspired themes—Wembley, San Siro, Camp Nou, Craven Cottage, The Dripping Pan, Bracken Moor and Sandygate—plus Minty Stadium join Selhurst Park, Ironwood Lane and Harbour Park. All eleven backdrops are packaged locally; named stadiums are approximate artistic interpretations.
+**New in v1.11:** a default 1.75× close camera and a 2.5× option, with ball-following framing. Use **Camera** to adjust distance or return to Full stadium. The fixed broadcast scoreboard stays visible; zoom and pan apply to the complete scene without changing actor coordinates.
+
+Seven real-ground-inspired themes—Wembley, San Siro, Camp Nou, Craven Cottage, The Dripping Pan, Bracken Moor and Sandygate—plus Minty Stadium join Selhurst Park, Ironwood Lane and Harbour Park. All eleven backdrops are packaged locally; named stadiums are approximate artistic interpretations.
 
 Score extraction now handles compact/split playback-row markup, refreshes independently every 100 ms and offers **Select scoreboard**. Ball flight follows rendered ball/shadow separation, with **Set ball shadow** for unlabelled shadows. The rendered player movement foundation and single motion loop are preserved.
 

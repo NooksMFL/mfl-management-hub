@@ -1,10 +1,10 @@
-# FC Nooks Match View 2.5D — v1.10.0
+# FC Nooks Match View 2.5D — v1.11.0
 
 Chrome / Edge Manifest V3 extension for MFL Pro matches. Eleven photographic stadium backdrops are packaged locally, with live SVG pitch markings, players, ball, netted goals and scoreboards. The original rendered-CTM player movement foundation is preserved: one frame samples native players and ball, with no extra motion smoothing.
 
 ## Install or update on Windows
 
-1. Extract `FC-Nooks-2.5D-Extension-v1.10.zip`; keep the extracted `fc-nooks-25d` folder in a permanent location.
+1. Extract `FC-Nooks-2.5D-Extension-v1.11.zip`; keep the extracted `fc-nooks-25d` folder in a permanent location.
 2. Disable/remove older FC Nooks extensions so only one version draws the overlay.
 3. Open `chrome://extensions` or `edge://extensions` and enable **Developer mode**.
 4. Choose **Load unpacked** and select the extracted folder containing `manifest.json`. Keep the entire `assets` folder.
@@ -34,6 +34,14 @@ Named real grounds are generated artistic interpretations with approximate archi
 
 Switches retain player/ball nodes, the source tracker and animation loop. Art loads locally; stale image callbacks are ignored. Missing art reports an error, retains the inline live pitch and permits switching to another theme.
 
+## Closer camera
+
+The default **Close · 1.75×** shot makes players 75% larger than Full stadium. Use the **Camera** menu for **Full stadium**, **Close · 1.75×** or **Very close · 2.5×**. Your choice is saved locally and restored on reload; invalid saved choices return to Close.
+
+Close shots follow the ball when play leaves the central region of the picture. The complete SVG viewport pans/zooms together, including the backdrop, field markings, goals, players, ball and shadow. Actor coordinates and the original rendered-motion tracker are unchanged; no extra actor smoothing or animation clock is added. When a pass lifts off the ground, framing accounts for sphere and shadow. If the ball is unavailable, the shot holds its position. Match navigation resets its focus.
+
+The broadcast score/clock stays above the cropped scene. Close shots show a portion of the pitch; goals, roof and stadium screens come into view as the camera follows play. Select Full stadium to see the entire ground at once.
+
 ## Minty's face
 
 Select **Minty Stadium**, then **Choose Minty face**, and choose his original PNG/JPG/WebP photo under 1 MB. It appears on player heads, repeated across the crowd and on the large stand banner. Team-colour shirts and players' foot positions remain intact. Face effects appear only in Minty Stadium.
@@ -60,8 +68,9 @@ Without a usable shadow, native rendered ball growth/scaling can provide an appr
 - `scoreboard.js`: score/clock parsing and source binding, independent of actor rendering.
 - `stadiums.js`: theme names, local assets, per-theme pitch/screen calibration and default choice.
 - `scene.js`: camera, live markings/goals/displays, Minty decoration and image-failure fallback.
+- `camera.js`: shared SVG viewport, closer framing, bounded ball-following and camera presets; source extraction remains separate.
 - `renderer.js`: direct placement from one snapshot, with separate ground shadow and airborne sphere.
-- `viewer.js`: shadow DOM UI, stadium/photo preferences, one motion requestAnimationFrame, independent score polling and SPA lifecycle.
+- `viewer.js`: shadow DOM UI, stadium/photo preferences, camera preferences, one motion requestAnimationFrame, independent score polling and SPA lifecycle.
 - `viewer.css`: isolated UI styling.
 - `assets/*.jpg`: all eleven local backdrops; no remote image/CDN or font dependency.
 

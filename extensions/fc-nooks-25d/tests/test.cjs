@@ -48,6 +48,8 @@ const fixture = fs.readFileSync(__dirname+'/fixture.html','utf8');
   console.log('PASS: packaged scripts create toggle (fixture injection; MV3 install blocked by administrator policy)');
   await page.locator('#fcn25d-toggle').click();
   await page.waitForTimeout(300);
+  assert.equal(await page.locator('#fcn-camera').inputValue(),'1.75');
+  assert.equal(await page.locator('#fcn-stage > svg').getAttribute('data-camera-zoom'),'1.75');
   assert.equal(await page.locator('#fcn-stadium').inputValue(),'selhurst-park');
   assert.deepEqual(await page.locator('#fcn-stadium option').allTextContents(),['Selhurst Park','Ironwood Lane','Harbour Park','Wembley','San Siro','Camp Nou','Craven Cottage','The Dripping Pan','Bracken Moor','Sandygate','Minty Stadium']);
   await ready(page,'selhurst-park');
@@ -100,7 +102,9 @@ const fixture = fs.readFileSync(__dirname+'/fixture.html','utf8');
     const actualP=transform(sh.querySelector('[data-player="match-v2-p1"]'));
     const actualB=transform(sh.querySelector('[data-ball]'));
     const error=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
-    return {player:error(actualP,project(p)),ball:error(actualB,project(b)),sync:error(actualP,actualB),x:p.x};
+    const foot=new DOMPoint(0,0).matrixTransform(sh.querySelector('[data-player="match-v2-p1"]').getScreenCTM());
+    const ballFoot=new DOMPoint(0,0).matrixTransform(sh.querySelector('[data-ball]').getScreenCTM());
+    return {player:error(actualP,project(p)),ball:error(actualB,project(b)),sync:error(actualP,actualB),screenSync:Math.hypot(foot.x-ballFoot.x,foot.y-ballFoot.y),x:p.x};
   });}
   assert.ok((await alignment()).sync < .01);
   await page.evaluate(()=>{
@@ -115,6 +119,7 @@ const fixture = fs.readFileSync(__dirname+'/fixture.html','utf8');
   });
   for(let i=0;i<8;i++){
     await page.locator('#fcn-stadium').selectOption(['ironwood-lane','harbour-park','selhurst-park'][i%3]);
+    await page.locator('#fcn-camera').selectOption(['1','2.5','1.75'][i%3]);
     await page.waitForTimeout(45);samples.push(await alignment());
   }
   assert.ok(await page.evaluate(()=>{
@@ -123,10 +128,11 @@ const fixture = fs.readFileSync(__dirname+'/fixture.html','utf8');
   }),'Switching must keep player and ball DOM nodes');
   console.log('PASS: stadium switches during motion preserve player/ball nodes and source timing');
   assert.ok(samples.some(s=>s.x>24 && s.x<60),'Must sample rendered transition, not jump to target');
-  assert.ok(samples.every(s=>s.sync<.05),'Player and ball must stay in sync');
+  assert.ok(samples.every(s=>s.sync<.05 && s.screenSync<.1),'Player and ball must stay in sync through zoom and pan');
   assert.ok(samples.every(s=>s.player<20 && s.ball<20),'Tracking must stay within roughly one rendered frame');
   console.log('PASS: rendered movement during native CSS transition, synchronized ball',JSON.stringify(samples));
   await page.waitForTimeout(300);
+  await page.locator('#fcn-camera').selectOption('1.75');
   assert.ok((await alignment()).player<.01);
   for(const id of ['ironwood-lane','harbour-park','selhurst-park','wembley','san-siro','camp-nou','craven-cottage','dripping-pan','bracken-moor','sandygate','minty-stadium']){
     await page.locator('#fcn-stadium').selectOption(id);await ready(page,id);
@@ -168,6 +174,35 @@ const fixture = fs.readFileSync(__dirname+'/fixture.html','utf8');
   await page.waitForTimeout(850);
   assert.equal(await page.locator('[data-player]').count(),22);
   console.log('PASS: full 22-player roster and node discovery');
+  const actor=page.locator('[data-player="match-v2-p1"]');
+  const retained=await actor.evaluate(el=>{window.__cameraActor=el;return el.getAttribute('transform');});
+  await page.locator('#fcn-camera').selectOption('1');
+  const wideHeight=(await actor.boundingBox()).height;
+  assert.equal(await page.locator('#fcn-stage > svg').getAttribute('viewBox'),'0.000 0.000 1672.000 941.000');
+  await page.locator('#fcn-camera').selectOption('1.75');
+  const closeHeight=(await actor.boundingBox()).height;
+  assert.ok(Math.abs(closeHeight/wideHeight-1.75)<.01,'Close camera must make players 75% larger on screen');
+  await page.locator('#fcn-camera').selectOption('2.5');
+  const nearestHeight=(await actor.boundingBox()).height;
+  assert.ok(Math.abs(nearestHeight/wideHeight-2.5)<.01);
+  assert.equal(await actor.getAttribute('transform'),retained,'Camera cannot rewrite player coordinates');
+  assert.ok(await actor.evaluate(el=>el===window.__cameraActor));
+  assert.ok((await alignment()).screenSync<.01);
+  assert.equal(await page.locator('#fcn-score').textContent(),'2 – 1');
+  // Keep ball-following shots within the complete local plate at both goals.
+  for(const position of [[0,0],[105,0],[105,68],[0,68],[52.5,34]]) {
+    await page.evaluate(([x,y])=>{const ball=document.querySelector('#match-v2-puck');ball.style.transition='none';ball.style.transform=`translate(${x-2}px,${y-3}px)`;},position);
+    await page.waitForTimeout(60);
+    assert.ok(await page.locator('#fcn-stage > svg').evaluate(svg=>{
+      const box=svg.viewBox.baseVal,ball=svg.querySelector('[data-ball]'),p=new DOMPoint(0,0).matrixTransform(ball.transform.baseVal.consolidate().matrix);
+      return box.x>=-.001 && box.y>=-.001 && box.x+box.width<=1672.001 && box.y+box.height<=941.001 && p.x>=box.x-1 && p.x<=box.x+box.width+1 && p.y>=box.y-1 && p.y<=box.y+box.height+1;
+    }),'Camera must follow the rendered ball at pitch edges without showing outside the plate');
+  }
+  await page.evaluate(()=>{document.querySelector('#match-v2-puck').style.transform='translate(61px,42px)';});
+  await page.waitForTimeout(60);
+  await page.locator('#fcn-camera').selectOption('1.75');
+  console.log('PASS: 1.75×/2.5× on-screen magnification, unchanged actor coordinates, screen synchronization and ball follow at every pitch corner');
+
   await page.waitForFunction(()=>document.querySelector('#fcn25d-host').shadowRoot.querySelector('svg').dataset.assetState==='ready');
   console.log('PASS: complete packaged stadium photograph loads');
   await page.screenshot({path:__dirname+'/selhurst-park-desktop.png'});
@@ -253,20 +288,26 @@ const fixture = fs.readFileSync(__dirname+'/fixture.html','utf8');
   console.log('PASS: locally selected Minty face is restored in another tab');
 
   await savedPage.locator('#fcn-stadium').selectOption('harbour-park');await ready(savedPage,'harbour-park');
+  await savedPage.locator('#fcn-camera').selectOption('2.5');
   await savedPage.reload();await inject(savedPage);await savedPage.locator('#fcn25d-toggle').click();await ready(savedPage,'harbour-park');
   assert.equal(await savedPage.locator('#fcn-stadium').inputValue(),'harbour-park');
+  assert.equal(await savedPage.locator('#fcn-camera').inputValue(),'2.5');
+  preferences.cameraZoom=1;
   preferences.stadiumId='ironwood-lane';readDelay=900;
   await savedPage.reload();await inject(savedPage);await savedPage.locator('#fcn25d-toggle').click();
   await savedPage.locator('#fcn-stadium').selectOption('harbour-park');await ready(savedPage,'harbour-park');
+  await savedPage.locator('#fcn-camera').selectOption('2.5');
   await savedPage.waitForTimeout(950);
   assert.equal(await savedPage.locator('#fcn-stadium').inputValue(),'harbour-park');
-  readDelay=0;preferences.stadiumId='unknown-stadium';
+  assert.equal(await savedPage.locator('#fcn-camera').inputValue(),'2.5','Late preference read cannot undo the camera choice');
+  readDelay=0;preferences.stadiumId='unknown-stadium';preferences.cameraZoom='invalid';
   await savedPage.reload();await inject(savedPage);await savedPage.locator('#fcn25d-toggle').click();await ready(savedPage,'selhurst-park');
   assert.equal(await savedPage.locator('#fcn-stadium').inputValue(),'selhurst-park');
+  assert.equal(await savedPage.locator('#fcn-camera').inputValue(),'1.75','Invalid saved camera falls back to close view');
   await savedPage.locator('#fcn-stadium').selectOption('ironwood-lane');await ready(savedPage,'ironwood-lane');
   await savedPage.locator('#fcn-close').click();await savedPage.locator('#fcn25d-toggle').click();
   assert.equal(await savedPage.locator('#fcn-stadium').inputValue(),'ironwood-lane');
-  console.log('PASS: choice persistence, invalid saved choice, late-read race and close/reopen');
+  console.log('PASS: stadium/camera persistence, invalid saved choices, late-read races and close/reopen');
   // Missing packaged art must not stop the live pitch or motion renderer.
   preferences.stadiumId='selhurst-park';
   await context.route('**/assets/selhurst-park.jpg',r=>r.fulfill({status:404,body:'Missing fixture asset'}));

@@ -1,8 +1,11 @@
-# Validation — v1.10.0
+# Validation — v1.11.0
 
-Three browser fixture suites passed using Chromium 154 and Playwright 1.64.0. The integration suite fulfills a local MFL-shaped page at an MFL match URL and executes scripts in manifest order. No credentials or live match data were used. `tests/results.log` records this release's results; all runtime JavaScript syntax checks pass.
+Integration and flight browser suites passed for this release using Chromium 154 and Playwright 1.64.0. The unchanged scoreboard reader retains its previous passing standalone suite. The integration suite fulfills a local MFL-shaped page at an MFL match URL and executes scripts in manifest order. No credentials or live match data were used. `tests/results.log` records this release's results; all runtime JavaScript syntax checks pass.
 
 ## Passed checks
+
+- Close is the default. Actual rendered sprite height is 1.75× Full stadium, and Very close is 2.5×. Zoom preserves player transforms and nodes. Player/ball screen positions remain synchronized through camera changes during native CSS motion.
+- Ball-following shots keep the ball visible at all four pitch corners, with camera bounds inside the local image. A 2.5× airborne shot retains the sphere and ground shadow together. Camera preference persists across reloads; invalid values fall back to Close and late reads cannot overwrite a newer user choice.
 
 - Reliable toggle, opening/closing, keyboard controls, host replacement and SPA match navigation.
 - All eleven packaged backdrops load. Switches during real 600 ms CSS transitions retain player/ball nodes, intermediate rendered coordinates and synchronization. Per-theme pitch calibration applies to both entities and static pitch geometry. Tiny grounds expose one physical display.
@@ -43,7 +46,7 @@ The integration runner generates ignored desktop/mobile PNGs. Tests do not send 
 1. Load unpacked following README; verify toggle, keyboard controls and locally loaded art.
 2. Compare players and ball against original MFL through passing, possession, restarts, flight, landing and goals. Use **Set ball shadow** if the native shadow is unlabelled.
 3. Confirm score and clock keep changing with 2.5D open. Use **Select scoreboard** if automatic detection misses the native row.
-4. Switch grounds during play and resize; geometry and motion must remain aligned. Reload to check preference persistence.
+4. Try all three Camera choices, including flight and play near each goal; the shot should follow the ball and the broadcast scoreboard should stay visible. Switch grounds during play and resize; geometry and motion must remain aligned. Reload to check preference persistence.
 5. Navigate to another match and away/back without refreshing; old players, selections and scores must clear.
 6. Choose Minty's original photo; verify heads/crowd/banner and reload persistence. Switch to another ground to confirm ordinary player heads return.
 7. If detection fails, capture Diagnostics and actual source SVG/header markup for an adapter correction. Do not fabricate match time or substitute guessed player motion.

@@ -1,11 +1,13 @@
+v1.11 integration
 PASS: packaged scripts create toggle (fixture injection; MV3 install blocked by administrator policy)
 PASS: scoreboard, clock, players, ball and two netted goals
 PASS: live goal/clock updates while open, native bar visibility and manual scoreboard selection
 PASS: stadium switches during motion preserve player/ball nodes and source timing
-PASS: rendered movement during native CSS transition, synchronized ball [{"player":0.00003085858209766834,"ball":0.00003085858209766834,"sync":0,"x":24.11126708984375},{"player":0.000025338250194215247,"ball":0.000025338250194215247,"sync":0,"x":27.44459915161133},{"player":0.000029555076334135238,"ball":0.000029555076334135238,"sync":0,"x":30.777933120727543},{"player":0.000017488523060496045,"ball":0.000017488523060496045,"sync":0,"x":34.11126708984376},{"player":0.00001595575226401486,"ball":0.00001595575226401486,"sync":0,"x":38.55126571655274},{"player":0.000022269990501953352,"ball":0.000022269990501953352,"sync":0,"x":41.89126586914063},{"player":0.000017592315169736247,"ball":0.000017592315169736247,"sync":0,"x":45.21793365478516},{"player":0.000004935014298937395,"ball":0.000004935014218072426,"sync":0,"x":49.66460037231445}]
+PASS: rendered movement during native CSS transition, synchronized ball [{"player":0.000034185096329300506,"ball":0.000034185096329300506,"sync":0,"screenSync":0,"x":25.223733901977543},{"player":0.000013417663905760229,"ball":0.000013417663905760229,"sync":0,"screenSync":0,"x":29.663732528686527},{"player":0.000020903080119847076,"ball":0.000020903080119847076,"sync":0,"screenSync":0,"x":35.223731994628906},{"player":0.000016546852246442306,"ball":0.000016546852246442306,"sync":0,"screenSync":0,"x":39.6703987121582},{"player":0.00002304868559758057,"ball":0.00002069348813496302,"sync":0,"screenSync":0,"x":44.11040115356445},{"player":0.000016393781080000748,"ball":0.000016393781080000748,"sync":0,"screenSync":0,"x":48.550399780273445},{"player":0.00003207621099958439,"ball":0.00003207621099958439,"sync":0,"screenSync":0,"x":51.88373184204102},{"player":0.000016976628796381752,"ball":0.000016976628796381752,"sync":0,"screenSync":0,"x":56.33706665039063}]
 PASS: all eleven packaged stadiums load with aligned motion and unchanged scores
 PASS: Minty local photo populates players, crowd/banner; other stadiums retain normal players
 PASS: full 22-player roster and node discovery
+PASS: 1.75×/2.5× on-screen magnification, unchanged actor coordinates, screen synchronization and ball follow at every pitch corner
 PASS: complete packaged stadium photograph loads
 PASS: responsive alignment and packaged stylesheet
 PASS: Set ball shadow UI selects an unlabelled pointer-disabled shadow and shows flight without ground drift
@@ -15,11 +17,22 @@ PASS: missing ball is hidden, never fabricated
 PASS: SPA match change and unavailable scoreboard reset
 PASS: navigation, host removal, keyboard toggle and Escape
 PASS: locally selected Minty face is restored in another tab
-PASS: choice persistence, invalid saved choice, late-read race and close/reopen
+PASS: stadium/camera persistence, invalid saved choices, late-read races and close/reopen
 PASS: missing stadium asset reports problem and preserves players, ball and scoreboard
 PASS: switching away from a missing asset recovers the photographic stadium
 PASS: unavailable preference storage does not block stadium switching or motion
 
+v1.11 flight
+PASS: nested transforms: ground shadow anchors ball to player; sphere follows native lift
+PASS: native flight and ground transitions sampled in one frame without interpolation lag
+PASS: airborne ball and player alignment across all eleven calibrated stadiums; 2.5× camera retains sphere and shadow
+PASS: landing returns sphere to its ground shadow immediately
+PASS: combined ball/shadow group uses sphere centre rather than combined bounding box
+PASS: explicitly selected unlabelled shadow supplies native flight cue
+PASS: explicit shadow hit test handles pointer-events:none without binding the pitch background
+PASS: source replacement clears stale shadow binding; missing ball is never fabricated
+
+Unchanged scoreboard reader: previous passing standalone run
 PASS: unnamed playback bar with controls and glued React text nodes
 PASS: native clock ticks and goals refresh through the bound source
 PASS: split score digits, split clock digits and CSS-only separator
@@ -29,12 +42,3 @@ PASS: hidden stale score copies are ignored
 PASS: source replacement and selected-scoreboard binding
 PASS: hidden manually selected scoreboard reconnects to visible responsive replacement
 PASS: unknown scores remain unknown; time is never fabricated
-
-PASS: nested transforms: ground shadow anchors ball to player; sphere follows native lift
-PASS: native flight and ground transitions sampled in one frame without interpolation lag
-PASS: airborne ball and player alignment across all eleven calibrated stadiums
-PASS: landing returns sphere to its ground shadow immediately
-PASS: combined ball/shadow group uses sphere centre rather than combined bounding box
-PASS: explicitly selected unlabelled shadow supplies native flight cue
-PASS: explicit shadow hit test handles pointer-events:none without binding the pitch background
-PASS: source replacement clears stale shadow binding; missing ball is never fabricated
