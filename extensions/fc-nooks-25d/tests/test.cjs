@@ -12,7 +12,7 @@ const fixture = fs.readFileSync(__dirname+'/fixture.html','utf8');
   await context.route('https://app.playmfl.com/**',r=> {
     const url=r.request().url();
     if(url.endsWith('/viewer.css'))return r.fulfill({body:fs.readFileSync(root+'/viewer.css','utf8'),contentType:'text/css'});
-    if(url.endsWith('/assets/harbour-park.jpg'))return r.fulfill({body:fs.readFileSync(root+'/assets/harbour-park.jpg'),contentType:'image/jpeg'});
+    if(url.endsWith('/assets/ironwood-lane.jpg'))return r.fulfill({body:fs.readFileSync(root+'/assets/ironwood-lane.jpg'),contentType:'image/jpeg'});
     return r.fulfill({body:fixture,contentType:'text/html'});
   });
   const page = await context.newPage();
@@ -81,12 +81,12 @@ const fixture = fs.readFileSync(__dirname+'/fixture.html','utf8');
   console.log('PASS: full 22-player roster and node discovery');
   await page.waitForFunction(()=>document.querySelector('#fcn25d-host').shadowRoot.querySelector('svg').dataset.assetState==='ready');
   console.log('PASS: complete packaged stadium photograph loads');
-  await page.screenshot({path:__dirname+'/harbour-park-desktop.png'});
+  await page.screenshot({path:__dirname+'/ironwood-lane-desktop.png'});
   const width=await page.locator('#fcn-stage > svg').evaluate(el=>el.getBoundingClientRect().width);
   assert.ok(width>1000,'Packaged shadow stylesheet must load');
   await page.setViewportSize({width:600,height:900}); await page.waitForTimeout(100);
   assert.ok((await alignment()).sync<.01);
-  await page.screenshot({path:__dirname+'/harbour-park-mobile.png'});
+  await page.screenshot({path:__dirname+'/ironwood-lane-mobile.png'});
   console.log('PASS: responsive alignment and packaged stylesheet');
   await page.evaluate(()=>{
     const root=document.querySelector('#mfl-pitch');root.setAttribute('viewBox','-10 -5 125 78');
@@ -135,7 +135,7 @@ const fixture = fs.readFileSync(__dirname+'/fixture.html','utf8');
   console.log('PASS: navigation, host removal, keyboard toggle and Escape');
   assert.deepEqual(errors,[]);
   // Missing packaged art must not stop the live pitch or motion renderer.
-  await context.route('**/assets/harbour-park.jpg',r=>r.fulfill({status:404,body:'Missing fixture asset'}));
+  await context.route('**/assets/ironwood-lane.jpg',r=>r.fulfill({status:404,body:'Missing fixture asset'}));
   const fallbackPage=await context.newPage();
   fallbackPage.on('pageerror',e=>errors.push(e.message));
   await fallbackPage.goto('https://app.playmfl.com/matches/missing-asset');

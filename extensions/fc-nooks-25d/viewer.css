@@ -2,11 +2,11 @@
 *{box-sizing:border-box} [hidden]{display:none!important}
 button{font:600 12px system-ui;color:#dcebee;background:#183440;border:1px solid #46636e;border-radius:6px;padding:9px 12px;cursor:pointer}
 button:hover{background:#24505e}button:focus-visible{outline:3px solid #78e3d2;outline-offset:3px}
-#fcn25d-toggle{position:fixed;bottom:20px;right:20px;z-index:2147483646;background:#122e3b;border-color:#68c9bf;padding:13px 18px;box-shadow:0 6px 24px #0008;letter-spacing:.4px}
+#fcn25d-toggle{position:fixed;bottom:20px;right:20px;z-index:2147483646;background:#122e3b;border-color:#b8766c;padding:13px 18px;box-shadow:0 6px 24px #0008;letter-spacing:.4px}
 #fcn25d-view{position:fixed;inset:0;z-index:2147483645;display:flex;flex-direction:column;overflow:auto;background:#0d1419;font-family:Inter,system-ui,sans-serif;color:#e4f2f4}
 header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:8px 18px;border-bottom:1px solid #ffffff12;background:linear-gradient(#070d12,#141d24);min-height:57px}
-.eyebrow{font:700 8px system-ui;letter-spacing:2px;color:#87cac1}h1{font-size:14px;font-weight:500;letter-spacing:-.3px;margin:2px 0 0}.tools{display:flex;gap:6px}
-.broadcast{position:absolute;top:10px;left:50%;transform:translateX(-50%);display:grid;grid-template-columns:minmax(60px,1fr) 55px minmax(60px,1fr) auto;align-items:center;text-align:center;gap:10px;border:1px solid #ffffff25;border-radius:4px;background:linear-gradient(90deg,#102d37,#11232a 40%,#271f3a);padding:8px 14px;max-width:40%;font-size:11px;min-height:35px}
+.eyebrow{font:700 8px system-ui;letter-spacing:2px;color:#d4b49c}h1{font-size:14px;font-weight:500;letter-spacing:-.3px;margin:2px 0 0}.tools{display:flex;gap:6px}
+.broadcast{position:absolute;top:10px;left:50%;transform:translateX(-50%);display:grid;grid-template-columns:minmax(60px,1fr) 55px minmax(60px,1fr) auto;align-items:center;text-align:center;gap:10px;border:1px solid #ffffff25;border-radius:4px;background:linear-gradient(90deg,#38222a,#211f26 40%,#352028);padding:8px 14px;max-width:40%;font-size:11px;min-height:35px}
 .broadcast span{overflow-wrap:anywhere}.broadcast strong{font-size:17px;font-variant-numeric:tabular-nums}.broadcast small{font-size:10px;letter-spacing:.5px;color:#bfd0cd;font-variant-numeric:tabular-nums}
 #fcn-stage{width:min(100%,calc(177.68vh - 142px),1920px);margin:auto;flex:1;display:grid;align-content:center;min-height:240px}#fcn-stage>svg{display:block;width:100%;height:auto;max-height:calc(100vh - 82px)}
 .fcn-player{transition:none!important;animation:none!important}

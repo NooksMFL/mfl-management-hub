@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "FC Nooks Match View 2.5D",
-  "description": "Photographic Harbour Park stadium overlay, following MFL rendered positions without added motion lag.",
-  "version": "1.7.0",
+  "description": "Photographic Ironwood Lane stadium overlay, following MFL rendered positions without added motion lag.",
+  "version": "1.8.0",
   "content_scripts": [
     {
       "matches": [
@@ -22,7 +22,7 @@
     {
       "resources": [
         "viewer.css",
-        "assets/harbour-park.jpg"
+        "assets/ironwood-lane.jpg"
       ],
       "matches": [
         "https://app.playmfl.com/*"

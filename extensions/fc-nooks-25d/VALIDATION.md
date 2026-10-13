@@ -1,4 +1,4 @@
-# Validation — v1.7.0
+# Validation — v1.8.0
 
 Executed in Chromium 154, with Playwright 1.64.0, against a locally fulfilled MFL-shaped page at an MFL match URL. No credentials or live match data were used. JavaScript syntax checks pass for all five runtime modules.
 
@@ -39,7 +39,7 @@ npx playwright install chromium
 node test.cjs
 ```
 
-If a system Chromium exists at `/usr/bin/chromium`, the runner uses it; otherwise it uses the Playwright browser. To choose another Chromium binary, set `CHROMIUM_PATH` to that binary's full path. The runner creates `harbour-park-desktop.png` and `harbour-park-mobile.png`. Test dependencies are not required to load or use the extension.
+If a system Chromium exists at `/usr/bin/chromium`, the runner uses it; otherwise it uses the Playwright browser. To choose another Chromium binary, set `CHROMIUM_PATH` to that binary's full path. The runner creates `ironwood-lane-desktop.png` and `ironwood-lane-mobile.png`. Test dependencies are not required to load or use the extension.
 
 ## Live acceptance check
 

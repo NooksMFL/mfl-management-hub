@@ -10,7 +10,7 @@
   const styles=document.createElement('link'); styles.rel='stylesheet'; styles.href=chrome.runtime.getURL('viewer.css');
   const toggle=document.createElement('button'); toggle.id='fcn25d-toggle'; toggle.type='button'; toggle.textContent='FC Nooks · 2.5D'; toggle.setAttribute('aria-expanded','false');
   const view=document.createElement('section'); view.id='fcn25d-view'; view.hidden=true; view.setAttribute('role','dialog'); view.setAttribute('aria-label','FC Nooks stadium match view');
-  view.innerHTML='<header><div><span class="eyebrow">FC NOOKS / HARBOUR PARK</span><h1>Under the lights</h1></div><div class="tools"><button id="fcn-select" type="button">Select ball</button><button id="fcn-diagnostics" type="button">Diagnostics</button><button id="fcn-close" type="button" aria-label="Close stadium view">Close ✕</button></div></header><div class="broadcast" aria-live="polite"><span id="fcn-home">HOME</span><strong id="fcn-score">—</strong><span id="fcn-away">AWAY</span><small id="fcn-clock">AWAITING MFL</small></div><div id="fcn-stage"></div><footer><span id="fcn-status">Waiting for MFL pitch</span><span>VIEW ONLY · Alt+Shift+M</span></footer><pre id="fcn-diagnostic-output" hidden></pre>';
+  view.innerHTML='<header><div><span class="eyebrow">FC NOOKS / IRONWOOD LANE</span><h1>Under the lights</h1></div><div class="tools"><button id="fcn-select" type="button">Select ball</button><button id="fcn-diagnostics" type="button">Diagnostics</button><button id="fcn-close" type="button" aria-label="Close stadium view">Close ✕</button></div></header><div class="broadcast" aria-live="polite"><span id="fcn-home">HOME</span><strong id="fcn-score">—</strong><span id="fcn-away">AWAY</span><small id="fcn-clock">AWAITING MFL</small></div><div id="fcn-stage"></div><footer><span id="fcn-status">Waiting for MFL pitch</span><span>VIEW ONLY · Alt+Shift+M</span></footer><pre id="fcn-diagnostic-output" hidden></pre>';
   view.querySelector('#fcn-stage').append(scene.svg); shadow.append(styles,toggle,view);
   const status=view.querySelector('#fcn-status'), output=view.querySelector('pre');
   const board={ home:view.querySelector('#fcn-home'), away:view.querySelector('#fcn-away'), score:view.querySelector('#fcn-score'), clock:view.querySelector('#fcn-clock') };
@@ -65,7 +65,7 @@
   });
   view.querySelector('#fcn-diagnostics').addEventListener('click',()=>{
     output.hidden=!output.hidden;
-    output.textContent=JSON.stringify({version:'1.7.0',source:tracker.root?.getAttribute('viewBox'),players:lastSnapshot?.players.length,ballTracked:!!lastSnapshot?.ball,candidates:tracker.balls.map(el=>({tag:el.tagName,id:el.id})),bounds:lastSnapshot?.bounds,scoreboard:api.readScoreboard()},null,2);
+    output.textContent=JSON.stringify({version:'1.8.0',source:tracker.root?.getAttribute('viewBox'),players:lastSnapshot?.players.length,ballTracked:!!lastSnapshot?.ball,candidates:tracker.balls.map(el=>({tag:el.tagName,id:el.id})),bounds:lastSnapshot?.bounds,scoreboard:api.readScoreboard()},null,2);
   });
   toggle.addEventListener('click',()=>setOpen(!open));
   view.querySelector('#fcn-close').addEventListener('click',()=>setOpen(false));

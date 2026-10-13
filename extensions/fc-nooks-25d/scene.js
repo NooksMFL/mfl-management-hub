@@ -12,7 +12,7 @@
   const theme = Object.freeze({
     width:1672, height:941, farLeft:346, farRight:1326, farY:433,
     nearLeft:42, nearRight:1630, nearY:730,
-    asset:'assets/harbour-park.jpg',
+    asset:'assets/ironwood-lane.jpg',
     screens:[{x:748,y:176,w:179,h:45},{x:147,y:212,w:119,h:49},{x:1407,y:212,w:116,h:49}]
   });
   const ratio=(theme.farRight-theme.farLeft)/(theme.nearRight-theme.nearLeft);
@@ -26,18 +26,18 @@
   const path = points => points.map(([x,y],i)=>`${i?'L':'M'}${x.toFixed(3)},${y.toFixed(3)}`).join(' ');
   const fieldPath = points => path(points.map(([u,v])=>api.project(u,v)));
   function buildScene() {
-    const scene=api.svg('svg',{viewBox:`0 0 ${theme.width} ${theme.height}`,role:'img','aria-label':'Harbour Park: a coastal football stadium under floodlights',preserveAspectRatio:'xMidYMid meet','data-asset-state':'loading'});
+    const scene=api.svg('svg',{viewBox:`0 0 ${theme.width} ${theme.height}`,role:'img','aria-label':'Ironwood Lane: a traditional red-brick football ground under floodlights',preserveAspectRatio:'xMidYMid meet','data-asset-state':'loading'});
     // A complete local bitmap supplies photographic crowd/architecture detail.
     // A small inline bowl and turf remain if an installation omits the asset.
     scene.innerHTML=`<defs>
-      <linearGradient id="fcn-fallback-sky" x2="0" y2="1"><stop stop-color="#162a3a"/><stop offset="1" stop-color="#bd9381"/></linearGradient>
+      <linearGradient id="fcn-fallback-sky" x2="0" y2="1"><stop stop-color="#162a3a"/><stop offset="1" stop-color="#314358"/></linearGradient>
       <radialGradient id="fcn-fallback-grass"><stop stop-color="#578845"/><stop offset="1" stop-color="#356735"/></radialGradient>
-      <pattern id="fcn-fallback-crowd" width="13" height="11" patternUnits="userSpaceOnUse"><rect width="13" height="11" fill="#1b3442"/><circle cx="3" cy="3" r="1.6" fill="#c2a88a"/><path d="M0 9q0-5 3-5t3 5" fill="#587f8f"/><circle cx="10" cy="6" r="1.5" fill="#d0c5ac"/></pattern>
+      <pattern id="fcn-fallback-crowd" width="13" height="11" patternUnits="userSpaceOnUse"><rect width="13" height="11" fill="#37242c"/><circle cx="3" cy="3" r="1.6" fill="#c2a88a"/><path d="M0 9q0-5 3-5t3 5" fill="#8b4857"/><circle cx="10" cy="6" r="1.5" fill="#d0c5ac"/></pattern>
       <pattern id="fcn-net" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 0H5V5" fill="none" stroke="#e6eee6" stroke-width=".6" opacity=".65"/></pattern>
     </defs>
     <rect width="1672" height="941" fill="url(#fcn-fallback-sky)"/>
     <path d="M20 166H1652L1672 941H0Z M330 420L1342 420L1640 740H32Z" fill="url(#fcn-fallback-crowd)" fill-rule="evenodd" stroke="#375261" stroke-width="3"/>
-    <path d="M25 153L1647 153L1600 213H72Z" fill="#244557" stroke="#8298a3"/>
+    <path d="M25 153L1647 153L1600 213H72Z" fill="#482936" stroke="#8298a3"/>
     <path d="M50 315H1622" stroke="#90ad9e" stroke-width="9"/>`;
     const photo=api.svg('image',{x:0,y:0,width:theme.width,height:theme.height,preserveAspectRatio:'none','data-backdrop':'true'});
     scene.append(photo);
@@ -84,7 +84,7 @@
       const {x,y,w,h}=screen;
       const g=api.svg('g');
       g.append(api.svg('rect',{x,y,width:w,height:h,fill:'#050d13'}));
-      const label=api.svg('text',{x:x+w/2,y:y+9,fill:'#81bfb8','font-size':5.4,'letter-spacing':1.7});label.textContent='HARBOUR PARK';g.append(label);
+      const label=api.svg('text',{x:x+w/2,y:y+9,fill:'#d7b093','font-size':5.4,'letter-spacing':1.7});label.textContent='IRONWOOD LANE';g.append(label);
       g.append(api.svg('text',{x:x+w/2,y:y+29,fill:'#f1f4e7','font-size':18,'font-weight':700,'data-stadium-score':'true'}));
       g.append(api.svg('text',{x:x+7,y:y+27,fill:'#c0d4d1','font-size':5.6,'text-anchor':'start','data-stadium-home':'true'}));
       g.append(api.svg('text',{x:x+w-7,y:y+27,fill:'#c0d4d1','font-size':5.6,'text-anchor':'end','data-stadium-away':'true'}));

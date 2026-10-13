@@ -38,3 +38,10 @@ The 16.5-second 1920 × 910 reference confirms a photographic stadium background
 Live pitch lines, actors, ball, goal nets and the three score displays remain separate SVG layers, calibrated to the plate. One projective mapping covers the field rectangle; it is applied immediately to both moving entities and all static markings. Human figures are reduced to broadcast scale. Top controls and scoreboard occupy a compact bar so the stadium fills the viewer.
 
 `tracking.js` and `scoreboard.js` are byte-for-byte unchanged from the tested v1.6 files. The rendered-CTM extraction foundation, one-frame sampling and no-added-smoothing policy are retained. Missing art reports a clear error and retains a local inline pitch, players, ball and scores. A photo of Ricky's stadium is not copied into the extension.
+
+
+## v1.8: Ironwood Lane stadium replacement
+
+Replaced the coastal Harbour Park plate with a genuinely different architectural theme: a traditional red-brick ground with claret seating, a gabled press box, brick corner towers, dark cantilever canopies, tall floodlight gantries and an industrial-town evening skyline. A photographic image edit preserved the exact 1672 × 941 camera framing, grass opening and blank-screen locations. The shared pitch projection and screen calibration remain unchanged.
+
+`tracking.js`, `scoreboard.js` and `renderer.js` are byte-for-byte unchanged from v1.7. Changes are the locally packaged stadium image, asset references, stadium branding and the UI colour palette. No motion smoothing or animation clocks were added. The previous v1.7 ZIP remains in the repository for rollback.
