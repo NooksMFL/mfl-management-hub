@@ -14,3 +14,7 @@ Focused cleanup after the v18 feature pass.
 - Position/Age typography increased.
 
 All v18.1 shared-cache and Agency reuse fixes remain included.
+
+## Chrome / Edge stadium match viewer
+
+The FC Nooks 2.5D extension overlays an original photographic Harbour Park stadium on MFL Pro matches. See [extensions](extensions/README.md) for the ready-to-load v1.7 ZIP, installation instructions, source and validation notes.

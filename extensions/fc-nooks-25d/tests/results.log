@@ -1,0 +1,12 @@
+PASS: packaged scripts create toggle (fixture injection; MV3 install blocked by administrator policy)
+PASS: scoreboard, clock, players, ball and two netted goals
+PASS: rendered movement during native CSS transition, synchronized ball [{"player":0.00001936375746200427,"ball":0.00001936375746200427,"sync":0,"x":25.224466323852543},{"player":0.000026349381436174466,"ball":0.000026349381517741432,"sync":0,"x":29.66446685791016},{"player":0.000020450862046724052,"ball":0.000020450861960433916,"sync":0,"x":32.99780082702637},{"player":0.00004187120391464367,"ball":0.00004187120391464367,"sync":0,"x":36.331134796142585},{"player":0.00001706865114643332,"ball":0.00001706865114643332,"sync":0,"x":39.66446685791016},{"player":0.00003591316221589218,"ball":0.00003591316228758801,"sync":0,"x":42.997798919677734},{"player":0.00000751384757317482,"ball":0.000007513847463747196,"sync":0,"x":47.44446563720703},{"player":0.000023919824953819312,"ball":0.000023919824953819312,"sync":0,"x":50.77780151367188}]
+PASS: full 22-player roster and node discovery
+PASS: complete packaged stadium photograph loads
+PASS: responsive alignment and packaged stylesheet
+PASS: padded viewBox with explicit pitch bounds
+PASS: manual ball selection and source SVG replacement recovery
+PASS: missing ball is hidden, never fabricated
+PASS: SPA match change and unavailable scoreboard reset
+PASS: navigation, host removal, keyboard toggle and Escape
+PASS: missing stadium asset reports problem and preserves players, ball and scoreboard

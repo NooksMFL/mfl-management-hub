@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "FC Nooks Match View 2.5D",
+  "description": "Photographic Harbour Park stadium overlay, following MFL rendered positions without added motion lag.",
+  "version": "1.7.0",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://app.playmfl.com/*"
+      ],
+      "js": [
+        "tracking.js",
+        "scoreboard.js",
+        "scene.js",
+        "renderer.js",
+        "viewer.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "viewer.css",
+        "assets/harbour-park.jpg"
+      ],
+      "matches": [
+        "https://app.playmfl.com/*"
+      ]
+    }
+  ]
+}

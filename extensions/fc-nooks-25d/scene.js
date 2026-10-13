@@ -1,0 +1,112 @@
+(() => {
+  'use strict';
+  const api = globalThis.FCN25D;
+  const NS = 'http://www.w3.org/2000/svg';
+  api.svg = (tag, attrs = {}) => {
+    const el = document.createElementNS(NS,tag);
+    for (const [key,value] of Object.entries(attrs)) el.setAttribute(key,value);
+    return el;
+  };
+  // Architectural plate calibration. All lines, actors and nets share this
+  // projective mapping; never compensate for alignment with independent CSS.
+  const theme = Object.freeze({
+    width:1672, height:941, farLeft:346, farRight:1326, farY:433,
+    nearLeft:42, nearRight:1630, nearY:730,
+    asset:'assets/harbour-park.jpg',
+    screens:[{x:748,y:176,w:179,h:45},{x:147,y:212,w:119,h:49},{x:1407,y:212,w:116,h:49}]
+  });
+  const ratio=(theme.farRight-theme.farLeft)/(theme.nearRight-theme.nearLeft);
+  const denominator = v => 1-v+ratio*v;
+  api.project = (u,v) => {
+    const d=denominator(v);
+    return [(theme.farLeft*(1-v)+ratio*theme.nearLeft*v+(theme.farRight-theme.farLeft)*u)/d,
+      (theme.farY*(1-v)+ratio*theme.nearY*v)/d];
+  };
+  api.theme = theme;
+  const path = points => points.map(([x,y],i)=>`${i?'L':'M'}${x.toFixed(3)},${y.toFixed(3)}`).join(' ');
+  const fieldPath = points => path(points.map(([u,v])=>api.project(u,v)));
+  function buildScene() {
+    const scene=api.svg('svg',{viewBox:`0 0 ${theme.width} ${theme.height}`,role:'img','aria-label':'Harbour Park: a coastal football stadium under floodlights',preserveAspectRatio:'xMidYMid meet','data-asset-state':'loading'});
+    // A complete local bitmap supplies photographic crowd/architecture detail.
+    // A small inline bowl and turf remain if an installation omits the asset.
+    scene.innerHTML=`<defs>
+      <linearGradient id="fcn-fallback-sky" x2="0" y2="1"><stop stop-color="#162a3a"/><stop offset="1" stop-color="#bd9381"/></linearGradient>
+      <radialGradient id="fcn-fallback-grass"><stop stop-color="#578845"/><stop offset="1" stop-color="#356735"/></radialGradient>
+      <pattern id="fcn-fallback-crowd" width="13" height="11" patternUnits="userSpaceOnUse"><rect width="13" height="11" fill="#1b3442"/><circle cx="3" cy="3" r="1.6" fill="#c2a88a"/><path d="M0 9q0-5 3-5t3 5" fill="#587f8f"/><circle cx="10" cy="6" r="1.5" fill="#d0c5ac"/></pattern>
+      <pattern id="fcn-net" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 0H5V5" fill="none" stroke="#e6eee6" stroke-width=".6" opacity=".65"/></pattern>
+    </defs>
+    <rect width="1672" height="941" fill="url(#fcn-fallback-sky)"/>
+    <path d="M20 166H1652L1672 941H0Z M330 420L1342 420L1640 740H32Z" fill="url(#fcn-fallback-crowd)" fill-rule="evenodd" stroke="#375261" stroke-width="3"/>
+    <path d="M25 153L1647 153L1600 213H72Z" fill="#244557" stroke="#8298a3"/>
+    <path d="M50 315H1622" stroke="#90ad9e" stroke-width="9"/>`;
+    const photo=api.svg('image',{x:0,y:0,width:theme.width,height:theme.height,preserveAspectRatio:'none','data-backdrop':'true'});
+    scene.append(photo);
+    const grass=api.svg('path',{d:fieldPath([[0,0],[1,0],[1,1],[0,1]])+' Z',fill:'url(#fcn-fallback-grass)','data-fallback-grass':'true'});
+    scene.append(grass);
+    const notice=api.svg('text',{x:836,y:105,'text-anchor':'middle',fill:'#ffd58e','font-size':18,'font-family':'Arial',visibility:'hidden','data-asset-notice':'true'});
+    notice.textContent='Stadium image missing — reinstall the complete extension folder';
+    photo.addEventListener('load',()=>{scene.dataset.assetState='ready';grass.setAttribute('fill','none');notice.setAttribute('visibility','hidden');});
+    photo.addEventListener('error',()=>{scene.dataset.assetState='failed';notice.setAttribute('visibility','visible');});
+    photo.setAttribute('href',chrome.runtime.getURL(theme.asset));
+
+    const markings=api.svg('g',{fill:'none',stroke:'#f1f2df','stroke-width':1.6,opacity:.86,'data-pitch-markings':'true'});
+    const line=points=>markings.append(api.svg('path',{d:fieldPath(points)}));
+    line([[0,0],[1,0],[1,1],[0,1],[0,0]]);line([[.5,0],[.5,1]]);
+    for (const side of [0,1]) {
+      const s=side?-1:1;
+      line([[side,(34-20.16)/68],[side+s*16.5/105,(34-20.16)/68],[side+s*16.5/105,(34+20.16)/68],[side,(34+20.16)/68]]);
+      line([[side,(34-9.16)/68],[side+s*5.5/105,(34-9.16)/68],[side+s*5.5/105,(34+9.16)/68],[side,(34+9.16)/68]]);
+      line(Array.from({length:37},(_,i)=>{const a=-.925+i*1.85/36;return [side+s*(11+9.15*Math.cos(a))/105,.5+9.15*Math.sin(a)/68];}));
+      const [x,y]=api.project(side+s*11/105,.5);markings.append(api.svg('circle',{cx:x,cy:y,r:1.6,fill:'#f1f2df',stroke:'none'}));
+    }
+    line(Array.from({length:81},(_,i)=>[.5+9.15/105*Math.cos(i*Math.PI/40),.5+9.15/68*Math.sin(i*Math.PI/40)]));
+    const [cx,cy]=api.project(.5,.5);markings.append(api.svg('circle',{cx,cy,r:1.8,fill:'#f1f2df',stroke:'none'}));
+    // Corner arcs and slender corner flags complete the real pitch silhouette.
+    for (const u of [0,1]) for (const v of [0,1]) {
+      const points=Array.from({length:13},(_,i)=>{const a=i*Math.PI/24;return [u+(u?-1:1)*Math.cos(a)/105,v+(v?-1:1)*Math.sin(a)/68];});
+      line(points);
+      const [x,y]=api.project(u,v);markings.append(api.svg('path',{d:`M${x} ${y}v-12m0 0l6 2-6 2`,stroke:'#d8e9ce','stroke-width':1.1}));
+    }
+    scene.append(markings);
+    const goals=api.svg('g',{'data-goals':'true'});
+    for (const side of [0,1]) {
+      const a=api.project(side,.5-3.66/68),b=api.project(side,.5+3.66/68),direction=side?1:-1;
+      const depth=22*direction,height=22;
+      const backA=[a[0]+depth,a[1]-5],backB=[b[0]+depth,b[1]-5];
+      const topA=[a[0],a[1]-height],topB=[b[0],b[1]-height],rearA=[backA[0],backA[1]-height],rearB=[backB[0],backB[1]-height];
+      for (const points of [[a,b,backB,backA],[topA,topB,rearB,rearA],[backA,backB,rearB,rearA]]) goals.append(api.svg('path',{d:path(points)+' Z',fill:'url(#fcn-net)',stroke:'#dce6dc','stroke-width':.8}));
+      goals.append(api.svg('path',{d:path([a,topA,topB,b]),fill:'none',stroke:'#f1f4e8','stroke-width':2.2,'stroke-linejoin':'round'}));
+    }
+    scene.append(goals);
+    // Live SVG displays precisely cover the three blank screens in the plate.
+    const displays=api.svg('g',{'data-stadium-displays':'true','font-family':'Arial','text-anchor':'middle'});
+    for (const screen of theme.screens) {
+      const {x,y,w,h}=screen;
+      const g=api.svg('g');
+      g.append(api.svg('rect',{x,y,width:w,height:h,fill:'#050d13'}));
+      const label=api.svg('text',{x:x+w/2,y:y+9,fill:'#81bfb8','font-size':5.4,'letter-spacing':1.7});label.textContent='HARBOUR PARK';g.append(label);
+      g.append(api.svg('text',{x:x+w/2,y:y+29,fill:'#f1f4e7','font-size':18,'font-weight':700,'data-stadium-score':'true'}));
+      g.append(api.svg('text',{x:x+7,y:y+27,fill:'#c0d4d1','font-size':5.6,'text-anchor':'start','data-stadium-home':'true'}));
+      g.append(api.svg('text',{x:x+w-7,y:y+27,fill:'#c0d4d1','font-size':5.6,'text-anchor':'end','data-stadium-away':'true'}));
+      g.append(api.svg('text',{x:x+w/2,y:y+h-5,fill:'#c6d8cf','font-size':6,'data-stadium-clock':'true'}));
+      displays.append(g);
+    }
+    scene.append(displays);
+    const actors=api.svg('g',{'data-actors':'true'}),ball=api.svg('g',{'data-ball':'true',visibility:'hidden'});
+    ball.innerHTML='<ellipse cy="1" rx="3.5" ry="1.3" fill="#14351b" opacity=".5"/><circle cy="-2" r="2.8" fill="#fffee9" stroke="#30423d" stroke-width=".6"/><path d="M-.7 -3.5L1 -3.5L1.7 -2L0 -.9L-1.3 -2Z" fill="#2a333b"/>';
+    scene.append(actors,ball,notice);
+    return {
+      svg:scene,actors,ball,
+      scale:v=>.62/denominator(v),
+      updateScore(data) {
+        scene.querySelectorAll('[data-stadium-score]').forEach(el=>{if(el.textContent!==data.score)el.textContent=data.score;});
+        scene.querySelectorAll('[data-stadium-clock]').forEach(el=>{if(el.textContent!==data.clock)el.textContent=data.clock;});
+        for(const side of ['home','away']) {
+          const name=data[side].length>8?data[side].slice(0,7)+'…':data[side];
+          scene.querySelectorAll(`[data-stadium-${side}]`).forEach(el=>{if(el.textContent!==name)el.textContent=name;});
+        }
+      }
+    };
+  }
+  api.buildScene=buildScene;
+})();
