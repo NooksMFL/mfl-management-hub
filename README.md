@@ -17,4 +17,4 @@ All v18.1 shared-cache and Agency reuse fixes remain included.
 
 ## Chrome / Edge stadium match viewer
 
-The FC Nooks 2.5D extension overlays an original photographic Ironwood Lane stadium on MFL Pro matches. See [extensions](extensions/README.md) for the ready-to-load v1.8 ZIP, installation instructions, source and validation notes.
+The FC Nooks 2.5D extension offers Selhurst Park-inspired, Ironwood Lane and Harbour Park stadium overlays for MFL Pro matches. See [extensions](extensions/README.md) for the ready-to-load v1.9 ZIP, installation instructions, source and validation notes.

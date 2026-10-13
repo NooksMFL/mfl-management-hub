@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "FC Nooks Match View 2.5D",
-  "description": "Photographic Ironwood Lane stadium overlay, following MFL rendered positions without added motion lag.",
-  "version": "1.8.0",
+  "description": "Switch between Selhurst Park-inspired, Ironwood Lane and Harbour Park stadiums while following MFL rendered motion.",
+  "version": "1.9.0",
   "content_scripts": [
     {
       "matches": [
@@ -11,6 +11,7 @@
       "js": [
         "tracking.js",
         "scoreboard.js",
+        "stadiums.js",
         "scene.js",
         "renderer.js",
         "viewer.js"
@@ -22,11 +23,16 @@
     {
       "resources": [
         "viewer.css",
-        "assets/ironwood-lane.jpg"
+        "assets/selhurst-park.jpg",
+        "assets/ironwood-lane.jpg",
+        "assets/harbour-park.jpg"
       ],
       "matches": [
         "https://app.playmfl.com/*"
       ]
     }
+  ],
+  "permissions": [
+    "storage"
   ]
 }

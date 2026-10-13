@@ -9,10 +9,33 @@ const fixture = fs.readFileSync(__dirname+'/fixture.html','utf8');
     args:['--no-sandbox']
   });
   const context=await browser.newContext({viewport:{width:1600,height:1050}});
+  const preferences={};let readDelay=0;
+  await context.exposeBinding('__fcnPreferenceRead',async()=>{
+    const saved={...preferences};if(readDelay)await new Promise(r=>setTimeout(r,readDelay));return saved;
+  });
+  await context.exposeBinding('__fcnPreferenceWrite',(_,values)=>Object.assign(preferences,values));
+  async function inject(target,withStorage=true){
+    await target.evaluate(enabled=>{
+      globalThis.chrome=globalThis.chrome || {};
+      chrome.runtime={getURL:name=>'https://app.playmfl.com/__fixture__/'+name};
+      if(enabled)chrome.storage={local:{
+        get:(_,callback)=>window.__fcnPreferenceRead().then(callback),
+        set:(values,callback)=>window.__fcnPreferenceWrite(values).then(()=>callback?.())
+      }};
+    },withStorage);
+    for(const name of JSON.parse(fs.readFileSync(root+'/manifest.json','utf8')).content_scripts[0].js)await target.addScriptTag({content:fs.readFileSync(root+'/'+name,'utf8')});
+  }
+  async function ready(target,id){
+    await target.waitForFunction(expected=>{
+      const svg=document.querySelector('#fcn25d-host').shadowRoot.querySelector('svg');
+      return svg.dataset.stadium===expected && svg.dataset.assetState==='ready';
+    },id);
+  }
   await context.route('https://app.playmfl.com/**',r=> {
     const url=r.request().url();
     if(url.endsWith('/viewer.css'))return r.fulfill({body:fs.readFileSync(root+'/viewer.css','utf8'),contentType:'text/css'});
-    if(url.endsWith('/assets/ironwood-lane.jpg'))return r.fulfill({body:fs.readFileSync(root+'/assets/ironwood-lane.jpg'),contentType:'image/jpeg'});
+    const asset=url.match(/\/assets\/(selhurst-park|ironwood-lane|harbour-park)\.jpg$/);
+    if(asset)return r.fulfill({body:fs.readFileSync(root+'/assets/'+asset[1]+'.jpg'),contentType:'image/jpeg'});
     return r.fulfill({body:fixture,contentType:'text/html'});
   });
   const page = await context.newPage();
@@ -20,12 +43,14 @@ const fixture = fs.readFileSync(__dirname+'/fixture.html','utf8');
   await page.goto('https://app.playmfl.com/matches/fixture-one');
   // Machine policy blocks unpacked extensions. Exercise packaged source in a
   // real browser, with only runtime.getURL mocked; do not claim MV3 load passed.
-  await page.evaluate(()=>{globalThis.chrome=globalThis.chrome || {};chrome.runtime={getURL:name=>'https://app.playmfl.com/__fixture__/'+name};});
-  for(const name of JSON.parse(fs.readFileSync(root+'/manifest.json','utf8')).content_scripts[0].js) await page.addScriptTag({content:fs.readFileSync(root+'/'+name,'utf8')});
+  await inject(page);
   await page.locator('#fcn25d-toggle').waitFor({timeout:10000});
   console.log('PASS: packaged scripts create toggle (fixture injection; MV3 install blocked by administrator policy)');
   await page.locator('#fcn25d-toggle').click();
   await page.waitForTimeout(300);
+  assert.equal(await page.locator('#fcn-stadium').inputValue(),'selhurst-park');
+  assert.deepEqual(await page.locator('#fcn-stadium option').allTextContents(),['Selhurst Park','Ironwood Lane','Harbour Park']);
+  await ready(page,'selhurst-park');
   assert.equal(await page.locator('#fcn-score').textContent(),'2 – 1');
   assert.equal(await page.locator('#fcn-clock').textContent(),'29:42');
   assert.equal(await page.locator('[data-stadium-score]').count(),3);
@@ -60,13 +85,32 @@ const fixture = fs.readFileSync(__dirname+'/fixture.html','utf8');
     document.querySelector('#match-v2-puck').style.transform='translate(61px,42px)';
   });
   const samples=[];
-  for(let i=0;i<8;i++){await page.waitForTimeout(50);samples.push(await alignment());}
+  await page.evaluate(()=>{
+    const sh=document.querySelector('#fcn25d-host').shadowRoot;
+    window.__retainedPlayer=sh.querySelector('[data-player="match-v2-p1"]');
+    window.__retainedBall=sh.querySelector('[data-ball]');
+  });
+  for(let i=0;i<8;i++){
+    await page.locator('#fcn-stadium').selectOption(['ironwood-lane','harbour-park','selhurst-park'][i%3]);
+    await page.waitForTimeout(45);samples.push(await alignment());
+  }
+  assert.ok(await page.evaluate(()=>{
+    const sh=document.querySelector('#fcn25d-host').shadowRoot;
+    return window.__retainedPlayer===sh.querySelector('[data-player="match-v2-p1"]') && window.__retainedBall===sh.querySelector('[data-ball]');
+  }),'Switching must keep player and ball DOM nodes');
+  console.log('PASS: stadium switches during motion preserve player/ball nodes and source timing');
   assert.ok(samples.some(s=>s.x>24 && s.x<60),'Must sample rendered transition, not jump to target');
   assert.ok(samples.every(s=>s.sync<.05),'Player and ball must stay in sync');
   assert.ok(samples.every(s=>s.player<20 && s.ball<20),'Tracking must stay within roughly one rendered frame');
   console.log('PASS: rendered movement during native CSS transition, synchronized ball',JSON.stringify(samples));
   await page.waitForTimeout(300);
   assert.ok((await alignment()).player<.01);
+  for(const id of ['ironwood-lane','harbour-park','selhurst-park']){
+    await page.locator('#fcn-stadium').selectOption(id);await ready(page,id);
+    assert.ok((await alignment()).sync<.01);
+    assert.deepEqual(await page.locator('[data-stadium-score]').allTextContents(),['2 – 1','2 – 1','2 – 1']);
+  }
+  console.log('PASS: all three packaged stadiums load with aligned motion and unchanged scores');
   await page.evaluate(()=>{
     const parent=document.querySelector('#match-v2-p1').parentElement;
     const positions=[[4,31],[18,8],[18,23],[18,42],[18,56],[35,15],[35,33],[35,52],[49,8],[49,57]];
@@ -81,12 +125,12 @@ const fixture = fs.readFileSync(__dirname+'/fixture.html','utf8');
   console.log('PASS: full 22-player roster and node discovery');
   await page.waitForFunction(()=>document.querySelector('#fcn25d-host').shadowRoot.querySelector('svg').dataset.assetState==='ready');
   console.log('PASS: complete packaged stadium photograph loads');
-  await page.screenshot({path:__dirname+'/ironwood-lane-desktop.png'});
+  await page.screenshot({path:__dirname+'/selhurst-park-desktop.png'});
   const width=await page.locator('#fcn-stage > svg').evaluate(el=>el.getBoundingClientRect().width);
   assert.ok(width>1000,'Packaged shadow stylesheet must load');
   await page.setViewportSize({width:600,height:900}); await page.waitForTimeout(100);
   assert.ok((await alignment()).sync<.01);
-  await page.screenshot({path:__dirname+'/ironwood-lane-mobile.png'});
+  await page.screenshot({path:__dirname+'/selhurst-park-mobile.png'});
   console.log('PASS: responsive alignment and packaged stylesheet');
   await page.evaluate(()=>{
     const root=document.querySelector('#mfl-pitch');root.setAttribute('viewBox','-10 -5 125 78');
@@ -134,13 +178,35 @@ const fixture = fs.readFileSync(__dirname+'/fixture.html','utf8');
   assert.ok(await page.locator('#fcn25d-view').isHidden());
   console.log('PASS: navigation, host removal, keyboard toggle and Escape');
   assert.deepEqual(errors,[]);
+  // Preference survives tab reload and delayed storage cannot undo user input.
+  const savedPage=await context.newPage();
+  savedPage.on('pageerror',e=>errors.push(e.message));
+  preferences.stadiumId='ironwood-lane';
+  await savedPage.goto('https://app.playmfl.com/matches/preferences');await inject(savedPage);
+  await savedPage.locator('#fcn25d-toggle').click();await ready(savedPage,'ironwood-lane');
+  assert.equal(await savedPage.locator('#fcn-stadium').inputValue(),'ironwood-lane');
+  await savedPage.locator('#fcn-stadium').selectOption('harbour-park');await ready(savedPage,'harbour-park');
+  await savedPage.reload();await inject(savedPage);await savedPage.locator('#fcn25d-toggle').click();await ready(savedPage,'harbour-park');
+  assert.equal(await savedPage.locator('#fcn-stadium').inputValue(),'harbour-park');
+  preferences.stadiumId='ironwood-lane';readDelay=900;
+  await savedPage.reload();await inject(savedPage);await savedPage.locator('#fcn25d-toggle').click();
+  await savedPage.locator('#fcn-stadium').selectOption('harbour-park');await ready(savedPage,'harbour-park');
+  await savedPage.waitForTimeout(950);
+  assert.equal(await savedPage.locator('#fcn-stadium').inputValue(),'harbour-park');
+  readDelay=0;preferences.stadiumId='unknown-stadium';
+  await savedPage.reload();await inject(savedPage);await savedPage.locator('#fcn25d-toggle').click();await ready(savedPage,'selhurst-park');
+  assert.equal(await savedPage.locator('#fcn-stadium').inputValue(),'selhurst-park');
+  await savedPage.locator('#fcn-stadium').selectOption('ironwood-lane');await ready(savedPage,'ironwood-lane');
+  await savedPage.locator('#fcn-close').click();await savedPage.locator('#fcn25d-toggle').click();
+  assert.equal(await savedPage.locator('#fcn-stadium').inputValue(),'ironwood-lane');
+  console.log('PASS: choice persistence, invalid saved choice, late-read race and close/reopen');
   // Missing packaged art must not stop the live pitch or motion renderer.
-  await context.route('**/assets/ironwood-lane.jpg',r=>r.fulfill({status:404,body:'Missing fixture asset'}));
+  preferences.stadiumId='selhurst-park';
+  await context.route('**/assets/selhurst-park.jpg',r=>r.fulfill({status:404,body:'Missing fixture asset'}));
   const fallbackPage=await context.newPage();
   fallbackPage.on('pageerror',e=>errors.push(e.message));
   await fallbackPage.goto('https://app.playmfl.com/matches/missing-asset');
-  await fallbackPage.evaluate(()=>{globalThis.chrome=globalThis.chrome || {};chrome.runtime={getURL:name=>'https://app.playmfl.com/__fixture__/'+name};});
-  for(const name of JSON.parse(fs.readFileSync(root+'/manifest.json','utf8')).content_scripts[0].js)await fallbackPage.addScriptTag({content:fs.readFileSync(root+'/'+name,'utf8')});
+  await inject(fallbackPage);
   await fallbackPage.locator('#fcn25d-toggle').click();
   await fallbackPage.waitForFunction(()=>document.querySelector('#fcn25d-host').shadowRoot.querySelector('svg').dataset.assetState==='failed');
   await fallbackPage.waitForTimeout(100);
@@ -151,6 +217,17 @@ const fixture = fs.readFileSync(__dirname+'/fixture.html','utf8');
   assert.equal(await fallbackPage.locator('#fcn-score').textContent(),'2 – 1');
   assert.deepEqual(errors,[]);
   console.log('PASS: missing stadium asset reports problem and preserves players, ball and scoreboard');
+  await fallbackPage.locator('#fcn-stadium').selectOption('ironwood-lane');await ready(fallbackPage,'ironwood-lane');
+  assert.equal(await fallbackPage.locator('[data-ball]').getAttribute('visibility'),'visible');
+  console.log('PASS: switching away from a missing asset recovers the photographic stadium');
+  const noStoragePage=await context.newPage();
+  noStoragePage.on('pageerror',e=>errors.push(e.message));
+  await noStoragePage.goto('https://app.playmfl.com/matches/no-storage');await inject(noStoragePage,false);
+  await noStoragePage.locator('#fcn25d-toggle').click();
+  await noStoragePage.locator('#fcn-stadium').selectOption('harbour-park');await ready(noStoragePage,'harbour-park');
+  assert.equal(await noStoragePage.locator('[data-ball]').getAttribute('visibility'),'visible');
+  assert.deepEqual(errors,[]);
+  console.log('PASS: unavailable preference storage does not block stadium switching or motion');
   await context.close();
   await browser.close();
 })().catch(e=>{console.error(e);process.exit(1);});

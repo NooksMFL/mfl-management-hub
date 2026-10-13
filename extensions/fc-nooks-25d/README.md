@@ -1,6 +1,6 @@
-# FC Nooks Match View 2.5D — v1.8.0
+# FC Nooks Match View 2.5D — v1.9.0
 
-Ironwood Lane is an original, floodlit broadcast stadium overlay for MFL Pro. The stadium architecture, crowd, floodlights and dugouts use an original photographic backdrop packaged in `assets/ironwood-lane.jpg`. Live pitch markings, players, goals, nets and score displays are SVG constructed by packaged code. There are no remote image/CDN URLs, fonts, analytics, API requests or build steps in the extension. Keep the complete folder, including `assets`, when loading the extension.
+Choose between Selhurst Park, Ironwood Lane and Harbour Park for the MFL Pro stadium overlay. Architecture, crowds, floodlights and dugouts use photographic backdrops packaged locally in `assets/`. Selhurst Park is a generated visual interpretation of the Crystal Palace ground, with approximate architectural detail. Live pitch markings, players, goals, nets and score displays are SVG constructed by packaged code. There are no remote image/CDN URLs, fonts, analytics, API requests or build steps in the extension. Keep the complete folder, including `assets`, when loading the extension.
 
 ## Install in Chrome or Edge
 
@@ -14,17 +14,24 @@ Close with the Close button, the floating toggle, Escape, or Alt+Shift+M. The ov
 
 When updating files, click **Reload** on the extension card and reload the MFL tab. Only one version should be enabled.
 
+## Change stadium
+
+Use the **Stadium** menu in the top toolbar to select **Selhurst Park**, **Ironwood Lane** or **Harbour Park**. Selhurst Park is the default. The selected stadium is saved in the extension's local storage and restored across tab reloads and browser sessions on the same profile.
+
+Switching changes the backdrop, stadium labels and screen alignment while retaining the player/ball nodes, rendered coordinates, scores and animation loop. Previous art remains visible until the new image loads. Missing-image notices retain the live pitch and allow switching to another installed stadium. If preference storage is unavailable, switching still works for the current session; Diagnostics reports the preference error.
+
 ## Structure
 
 - `tracking.js`: discovers MFL pitch/player/ball nodes, reads rendered screen CTMs, normalizes both entities against the same source bounds and recovers from replaced SVG nodes.
 - `scoreboard.js`: reads original MFL score/clock text, excludes extension content and reports unavailable values instead of inventing or retaining a previous match score.
-- `scene.js`: photographic backdrop calibration, live pitch markings, goals, displays, shared perspective projection, and inline image-failure fallback.
-- `assets/ironwood-lane.jpg`: original local stadium art. Roof, crowds, dugouts and pitch texture are retained image pixels, not thousands of per-frame DOM elements.
+- `stadiums.js`: stadium names, packaged assets, per-stadium screen calibration and default choice.
+- `scene.js`: shared pitch calibration, live markings, goals, displays, nonblocking backdrop changes and inline image-failure fallback.
+- `assets/*.jpg`: locally packaged Selhurst Park, Ironwood Lane and Harbour Park art. Roof, crowds, dugouts and pitch texture are retained image pixels, not thousands of per-frame DOM elements.
 - `renderer.js`: directly places player/ball sprites from one source snapshot. No extra smoothing, transitions, extrapolation or motion clock.
 - `viewer.js`: shadow DOM interface, toggle, one requestAnimationFrame loop, ball selection, diagnostics and SPA lifecycle.
 - `viewer.css`: isolated extension UI styling; listed as a packaged accessible resource so the shadow stylesheet can load.
 
-Swap a stadium theme by replacing `buildScene()` while preserving its return contract (`svg`, `actors`, `ball`, `scale`, `updateScore`) and the shared `project(u,v)` function used for every pitch feature and moving entity. Do not add CSS transitions to actors or read raw inline translation targets.
+Register a theme in `stadiums.js` using an image that matches the shared pitch camera. For other camera geometry, update scene calibration while preserving its return contract (`svg`, `actors`, `ball`, `scale`, `setStadium`, `stadiumId`, `updateScore`) and the shared `project(u,v)` function used for every pitch feature and moving entity. Do not add CSS transitions to actors or read raw inline translation targets.
 
 ## Ball selection and diagnostics
 

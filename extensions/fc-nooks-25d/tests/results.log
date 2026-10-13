@@ -1,6 +1,8 @@
 PASS: packaged scripts create toggle (fixture injection; MV3 install blocked by administrator policy)
 PASS: scoreboard, clock, players, ball and two netted goals
-PASS: rendered movement during native CSS transition, synchronized ball [{"player":0.00002938049845660419,"ball":0.00002938049845660419,"sync":0,"x":25.22386741638184},{"player":0.000025010867586046102,"ball":0.000025010867746410886,"sync":0,"x":28.550533294677738},{"player":0.00003822017801371327,"ball":0.00003822017801371327,"sync":0,"x":31.88386726379395},{"player":0.00003105173659588561,"ball":0.00003105173659588561,"sync":0,"x":36.33053207397461},{"player":0.000026906186130620075,"ball":0.000026906186130620075,"sync":0,"x":39.66386795043946},{"player":0.000007586676653696502,"ball":0.000007586676653696502,"sync":0,"x":42.99720001220704},{"player":0.000030501703312557178,"ball":0.000022793950165493852,"sync":0,"x":46.33053207397461},{"player":0.000028695773580880457,"ball":0.000028695773440683284,"sync":0,"x":50.77719879150391}]
+PASS: stadium switches during motion preserve player/ball nodes and source timing
+PASS: rendered movement during native CSS transition, synchronized ball [{"player":0.00003567101069679831,"ball":0.00003567101069679831,"sync":0,"x":26.33819961547852},{"player":0.000015150280405657238,"ball":0.000015150280405657238,"sync":0,"x":30.778200149536136},{"player":0.00002433694519701024,"ball":0.00002433694519701024,"sync":0,"x":34.11153411865235},{"player":0.000028252851783088466,"ball":0.000028252851783088466,"sync":0,"x":38.55820083618164},{"player":0.000027698332805212294,"ball":0.000027698332805212294,"sync":0,"x":41.88486480712891},{"player":0.0000343457767575054,"ball":0.0000343457767575054,"sync":0,"x":45.21820068359376},{"player":0.00003321443072692748,"ball":0.00003321443072692748,"sync":0,"x":48.55820083618165},{"player":0.000025871008851364093,"ball":0.000025871008851364093,"sync":0,"x":53.004867553710945}]
+PASS: all three packaged stadiums load with aligned motion and unchanged scores
 PASS: full 22-player roster and node discovery
 PASS: complete packaged stadium photograph loads
 PASS: responsive alignment and packaged stylesheet
@@ -9,4 +11,7 @@ PASS: manual ball selection and source SVG replacement recovery
 PASS: missing ball is hidden, never fabricated
 PASS: SPA match change and unavailable scoreboard reset
 PASS: navigation, host removal, keyboard toggle and Escape
+PASS: choice persistence, invalid saved choice, late-read race and close/reopen
 PASS: missing stadium asset reports problem and preserves players, ball and scoreboard
+PASS: switching away from a missing asset recovers the photographic stadium
+PASS: unavailable preference storage does not block stadium switching or motion

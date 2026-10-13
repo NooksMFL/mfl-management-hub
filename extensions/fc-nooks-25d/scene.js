@@ -12,7 +12,6 @@
   const theme = Object.freeze({
     width:1672, height:941, farLeft:346, farRight:1326, farY:433,
     nearLeft:42, nearRight:1630, nearY:730,
-    asset:'assets/ironwood-lane.jpg',
     screens:[{x:748,y:176,w:179,h:45},{x:147,y:212,w:119,h:49},{x:1407,y:212,w:116,h:49}]
   });
   const ratio=(theme.farRight-theme.farLeft)/(theme.nearRight-theme.nearLeft);
@@ -39,15 +38,12 @@
     <path d="M20 166H1652L1672 941H0Z M330 420L1342 420L1640 740H32Z" fill="url(#fcn-fallback-crowd)" fill-rule="evenodd" stroke="#375261" stroke-width="3"/>
     <path d="M25 153L1647 153L1600 213H72Z" fill="#482936" stroke="#8298a3"/>
     <path d="M50 315H1622" stroke="#90ad9e" stroke-width="9"/>`;
-    const photo=api.svg('image',{x:0,y:0,width:theme.width,height:theme.height,preserveAspectRatio:'none','data-backdrop':'true'});
-    scene.append(photo);
+    const backdrop=api.svg('g',{'data-backdrop-layer':'true'});
+    scene.append(backdrop);
     const grass=api.svg('path',{d:fieldPath([[0,0],[1,0],[1,1],[0,1]])+' Z',fill:'url(#fcn-fallback-grass)','data-fallback-grass':'true'});
     scene.append(grass);
     const notice=api.svg('text',{x:836,y:105,'text-anchor':'middle',fill:'#ffd58e','font-size':18,'font-family':'Arial',visibility:'hidden','data-asset-notice':'true'});
     notice.textContent='Stadium image missing — reinstall the complete extension folder';
-    photo.addEventListener('load',()=>{scene.dataset.assetState='ready';grass.setAttribute('fill','none');notice.setAttribute('visibility','hidden');});
-    photo.addEventListener('error',()=>{scene.dataset.assetState='failed';notice.setAttribute('visibility','visible');});
-    photo.setAttribute('href',chrome.runtime.getURL(theme.asset));
 
     const markings=api.svg('g',{fill:'none',stroke:'#f1f2df','stroke-width':1.6,opacity:.86,'data-pitch-markings':'true'});
     const line=points=>markings.append(api.svg('path',{d:fieldPath(points)}));
@@ -80,11 +76,11 @@
     scene.append(goals);
     // Live SVG displays precisely cover the three blank screens in the plate.
     const displays=api.svg('g',{'data-stadium-displays':'true','font-family':'Arial','text-anchor':'middle'});
-    for (const screen of theme.screens) {
+    for (const [index,screen] of theme.screens.entries()) {
       const {x,y,w,h}=screen;
-      const g=api.svg('g');
+      const g=api.svg('g',{'data-stadium-screen':index});
       g.append(api.svg('rect',{x,y,width:w,height:h,fill:'#050d13'}));
-      const label=api.svg('text',{x:x+w/2,y:y+9,fill:'#d7b093','font-size':5.4,'letter-spacing':1.7});label.textContent='IRONWOOD LANE';g.append(label);
+      const label=api.svg('text',{x:x+w/2,y:y+9,fill:'#d7b093','font-size':5.4,'letter-spacing':1.7,'data-stadium-label':'true'});g.append(label);
       g.append(api.svg('text',{x:x+w/2,y:y+29,fill:'#f1f4e7','font-size':18,'font-weight':700,'data-stadium-score':'true'}));
       g.append(api.svg('text',{x:x+7,y:y+27,fill:'#c0d4d1','font-size':5.6,'text-anchor':'start','data-stadium-home':'true'}));
       g.append(api.svg('text',{x:x+w-7,y:y+27,fill:'#c0d4d1','font-size':5.6,'text-anchor':'end','data-stadium-away':'true'}));
@@ -95,8 +91,44 @@
     const actors=api.svg('g',{'data-actors':'true'}),ball=api.svg('g',{'data-ball':'true',visibility:'hidden'});
     ball.innerHTML='<ellipse cy="1" rx="3.5" ry="1.3" fill="#14351b" opacity=".5"/><circle cy="-2" r="2.8" fill="#fffee9" stroke="#30423d" stroke-width=".6"/><path d="M-.7 -3.5L1 -3.5L1.7 -2L0 -.9L-1.3 -2Z" fill="#2a333b"/>';
     scene.append(actors,ball,notice);
+    let stadiumId=null,revision=0,currentPhoto=null,pendingPhoto=null;
+    function setStadium(id) {
+      if (!api.isStadium(id)) return false;
+      if (id===stadiumId) return true;
+      const stadium=api.stadiums[id],request=++revision;
+      stadiumId=id;scene.dataset.stadium=id;scene.dataset.assetState='loading';
+      scene.setAttribute('aria-label',stadium.description);
+      scene.querySelectorAll('[data-stadium-label]').forEach(el=>{el.textContent=stadium.label;});
+      scene.querySelectorAll('[data-stadium-screen]').forEach((el,index)=>{
+        const base=theme.screens[index],target=stadium.screens?.[index] || base;
+        const sx=target.w/base.w,sy=target.h/base.h;
+        el.setAttribute('transform',`matrix(${sx} 0 0 ${sy} ${target.x-base.x*sx} ${target.y-base.y*sy})`);
+      });
+      notice.setAttribute('visibility','hidden');
+      // Keep the prior plate visible until the new one is decoded. No player,
+      // ball, source node, scoreboard or animation frame is reset by a switch.
+      pendingPhoto?.remove();
+      const photo=api.svg('image',{x:0,y:0,width:theme.width,height:theme.height,preserveAspectRatio:'none','data-backdrop':'true'});
+      pendingPhoto=photo;
+      photo.addEventListener('load',()=>{
+        if(request!==revision)return;
+        currentPhoto?.remove();currentPhoto=photo;pendingPhoto=null;
+        scene.dataset.assetState='ready';grass.setAttribute('fill','none');notice.setAttribute('visibility','hidden');
+      });
+      photo.addEventListener('error',()=>{
+        if(request!==revision)return;
+        photo.remove();currentPhoto?.remove();currentPhoto=null;pendingPhoto=null;
+        scene.dataset.assetState='failed';grass.setAttribute('fill','url(#fcn-fallback-grass)');notice.setAttribute('visibility','visible');
+      });
+      backdrop.append(photo);
+      photo.setAttribute('href',chrome.runtime.getURL(stadium.asset));
+      return true;
+    }
+    setStadium(api.defaultStadium);
     return {
       svg:scene,actors,ball,
+      setStadium,
+      get stadiumId(){return stadiumId;},
       scale:v=>.62/denominator(v),
       updateScore(data) {
         scene.querySelectorAll('[data-stadium-score]').forEach(el=>{if(el.textContent!==data.score)el.textContent=data.score;});

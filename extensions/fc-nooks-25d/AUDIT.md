@@ -45,3 +45,12 @@ Live pitch lines, actors, ball, goal nets and the three score displays remain se
 Replaced the coastal Harbour Park plate with a genuinely different architectural theme: a traditional red-brick ground with claret seating, a gabled press box, brick corner towers, dark cantilever canopies, tall floodlight gantries and an industrial-town evening skyline. A photographic image edit preserved the exact 1672 × 941 camera framing, grass opening and blank-screen locations. The shared pitch projection and screen calibration remain unchanged.
 
 `tracking.js`, `scoreboard.js` and `renderer.js` are byte-for-byte unchanged from v1.7. Changes are the locally packaged stadium image, asset references, stadium branding and the UI colour palette. No motion smoothing or animation clocks were added. The previous v1.7 ZIP remains in the repository for rollback.
+
+
+## v1.9: Selhurst Park and persistent stadium selector
+
+Added a generated Selhurst Park-inspired red-and-blue scene and restored the packaged Harbour Park image alongside Ironwood Lane. A `stadiums.js` registry supplies names, asset paths and screen calibration. Selhurst Park's geometry is an artistic interpretation with approximate architectural detail. All three plates retain the calibrated camera and field opening.
+
+The toolbar Stadium menu switches locally packaged backdrops and labels without recreating player/ball nodes, clearing tracker caches or changing the animation clock. New art decodes behind the existing scene; stale image events are ignored by a request revision. Missing art retains an inline pitch and supports selecting another stadium. Preference storage uses `chrome.storage.local`, with the Manifest V3 `storage` permission. A delayed read cannot overwrite a later user choice, and invalid saved values fall back to Selhurst Park.
+
+`tracking.js`, `scoreboard.js` and `renderer.js` are byte-for-byte unchanged from v1.8. Shared field projection is unchanged. Browser fixture coverage now includes switching during motion, all three local images, storage persistence, invalid preferences, delayed reads, storage unavailability and failed-image recovery.
