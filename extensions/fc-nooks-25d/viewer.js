@@ -4,6 +4,7 @@
   if (api.started) return;
   api.started = true;
   const tracker = new api.Tracker(), scene = api.buildScene(), renderer = new api.Renderer(scene);
+  const info=new api.PlayerInfo();let nameError='';
   const scoreboard=api.scoreboard, camera=new api.ViewportCamera(scene);
   const host = document.createElement('div'); host.dataset.fcn25d=''; host.id='fcn25d-host';
   // Shadow DOM shields the extension from MFL styles and vice versa.
@@ -93,7 +94,7 @@
       // Score parsing errors must never clear player tracks or stop motion.
     }
   }
-  function reset() { tracker.reset(); scoreboard.reset(); renderer.clear(); camera.reset(); lastSnapshot=null; lastStatus=-Infinity; scoreData=api.emptyScoreboard();updateBoard(scoreData); }
+  function reset() { tracker.reset(); scoreboard.reset();info.reset(); renderer.clear(); camera.reset(); lastSnapshot=null; lastStatus=-Infinity; scoreData=api.emptyScoreboard();updateBoard(scoreData); }
   function available() { return /\/matches\/[^/]+/.test(location.pathname) || !!document.querySelector('svg [id^="match-v2-p"]'); }
   function stopPicking() { picking=false; clearTimeout(pickTimer);pickNotice.hidden=true;document.removeEventListener('click',pick,true); }
   function setOpen(value) {
@@ -109,8 +110,10 @@
     try {
       const now=performance.now();
       // Read both ball and players BEFORE any overlay writes.
-      const snapshot=tracker.sample(now); lastSnapshot=snapshot;
-      renderer.render(snapshot);camera.update(snapshot);
+      let snapshot=tracker.sample(now);
+      try {snapshot=info.enrich(snapshot,tracker,now);nameError='';}
+      catch(error){nameError=String(error.message || error).slice(0,160);info.reset();}
+      lastSnapshot=snapshot;camera.update(snapshot);renderer.render(snapshot,now);
       if (now-lastStatus>600) { status.textContent=`${snapshot.players.length} players · ${snapshot.diagnostic}${scoreData.found?'':' · Select scoreboard if scores are missing'}${scene.svg.dataset.assetState==='failed'?' · stadium image missing':''}`; lastStatus=now; }
       failures=0;
     } catch (error) {
@@ -147,7 +150,7 @@
   pickNotice.querySelector('button').addEventListener('click',()=>{stopPicking();setOpen(true);});
   view.querySelector('#fcn-diagnostics').addEventListener('click',()=>{
     output.hidden=!output.hidden;
-    output.textContent=JSON.stringify({version:'1.12.0',camera:camera.diagnostics(),stadium:scene.stadiumId,stadiumImage:scene.svg.dataset.assetState,preferenceError,source:tracker.root?.getAttribute('viewBox'),players:lastSnapshot?.players.length,ball:lastSnapshot?.ball,candidates:tracker.balls.map(el=>({tag:el.tagName,id:el.id})),shadows:tracker.shadows.map(el=>({tag:el.tagName,id:el.id})),bounds:lastSnapshot?.bounds,scoreboard:scoreboard.diagnostics(),scoreError},null,2);
+    output.textContent=JSON.stringify({version:'1.13.0',possession:lastSnapshot?.possession,playerNames:lastSnapshot?.players.map(p=>({id:p.id,surname:p.surname,source:p.nameSource})),nameError,camera:camera.diagnostics(),stadium:scene.stadiumId,stadiumImage:scene.svg.dataset.assetState,preferenceError,source:tracker.root?.getAttribute('viewBox'),players:lastSnapshot?.players.length,ball:lastSnapshot?.ball,candidates:tracker.balls.map(el=>({tag:el.tagName,id:el.id})),shadows:tracker.shadows.map(el=>({tag:el.tagName,id:el.id})),bounds:lastSnapshot?.bounds,scoreboard:scoreboard.diagnostics(),scoreError},null,2);
   });
   toggle.addEventListener('click',()=>setOpen(!open));
   view.querySelector('#fcn-close').addEventListener('click',()=>setOpen(false));

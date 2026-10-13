@@ -1,10 +1,10 @@
-# FC Nooks Match View 2.5D — v1.12.0
+# FC Nooks Match View 2.5D — v1.13.0
 
 Chrome / Edge Manifest V3 extension for MFL Pro matches. Eleven photographic stadium backdrops are packaged locally, with live SVG pitch markings, players, ball, netted goals and scoreboards. The original rendered-CTM player movement foundation is preserved: one frame samples native players and ball, with no extra motion smoothing.
 
 ## Install or update on Windows
 
-1. Extract `FC-Nooks-2.5D-Extension-v1.12.zip`; keep the extracted `fc-nooks-25d` folder in a permanent location.
+1. Extract `FC-Nooks-2.5D-Extension-v1.13.zip`; keep the extracted `fc-nooks-25d` folder in a permanent location.
 2. Disable/remove older FC Nooks extensions so only one version draws the overlay.
 3. Open `chrome://extensions` or `edge://extensions` and enable **Developer mode**.
 4. Choose **Load unpacked** and select the extracted folder containing `manifest.json`. Keep the entire `assets` folder.
@@ -42,6 +42,16 @@ Close shots follow the ball when play leaves the central region of the picture. 
 
 The broadcast score/clock stays above the cropped scene. Close shots show a portion of the pitch; goals, roof and stadium screens come into view as the camera follows play. Select Full stadium to see the entire ground at once.
 
+## Player figures and possession surname
+
+Player figures have athletic proportions, shaded team-colour kits, necks, hair, jointed arms/legs, socks and boots. Their running pose advances from distance actually travelled in the rendered native SVG; stopped players stand still. The ground anchor is unchanged, with no added movement interpolation, positional smoothing or separate animation clock. These remain lightweight stylised SVG figures rather than scanned player likenesses.
+
+Only the player in possession gets a surname badge **above** the figure. The native name MFL shows **below** the carrier is read and associated with that player in the same rendered coordinate space. Explicit native possession markers/IDs take precedence. If no possession cue exists, a nearby grounded ball can identify the carrier only when the nearest player is unambiguous; loose, contested and airborne balls do not use that fallback.
+
+Names can also come from native surname/name attributes, visible SVG labels, accessible titles/linked labels or lineup entries with an exact matching player identity. Unavailable names stay hidden; jersey initials are not substituted. Compound surnames such as van Dijk and de la Cruz are preserved when identifiable. The badge keeps a readable screen size across camera choices and resizing.
+
+Metadata errors hide the badge and retry without resetting motion, the ball or scores. Diagnostics includes `possession`, `playerNames` and `nameError`. Actual MFL name markup is not available in the test environment; the native below-player label pattern supplied by the user is covered by fixtures, but live match verification is still needed.
+
 ## Minty's face
 
 Select **Minty Stadium**, then **Choose Minty face**, and choose his original PNG/JPG/WebP photo under 1 MB. It appears on player heads, repeated across the crowd and on the large stand banner. Team-colour shirts and players' foot positions remain intact. Face effects appear only in Minty Stadium.
@@ -71,6 +81,8 @@ Without a usable shadow, native rendered ball growth/scaling can provide an appr
 ## Architecture
 
 - `tracking.js`: native SVG discovery, rendered screen CTMs, shared bounds, shadow/flight extraction and replaced-node recovery.
+- `players.js`: native name/identity enrichment and possession cues; does not alter sampled coordinates.
+- `sprites.js`: inline player glyphs and distance-driven limb poses; never interpolates actor positions.
 - `scoreboard.js`: score/clock parsing and source binding, independent of actor rendering.
 - `stadiums.js`: theme names, local assets, per-theme pitch/screen calibration and default choice.
 - `scene.js`: camera, live markings/goals/displays, Minty decoration and image-failure fallback.
@@ -86,7 +98,7 @@ No API credentials, runtime dependencies or build step are needed to load the ex
 
 ## Validation and limitations
 
-See `AUDIT.md` and `VALIDATION.md`. Real Chromium fixture suites exercise rendered motion, score updates, eleven local images, flight, photo storage, navigation and failure recovery. Actual authenticated MFL Pro matches and installed Chrome/Edge operation remain unverified: the development browser blocks unpacked extensions through administrator policy.
+See `AUDIT.md` and `VALIDATION.md`. Real Chromium fixture suites exercise rendered motion, surname/possession cues, screen-size labels, limb poses, score updates, eleven local images, flight, photo storage, navigation and failure recovery. Actual authenticated MFL Pro matches and installed Chrome/Edge operation remain unverified: the development browser blocks unpacked extensions through administrator policy.
 
 MFL selectors come from the supplied extension, not a supported integration contract. Players still need `match-v2-p<number>` IDs and a circle. Source bounds prefer an explicit pitch marker or identifiable field geometry, otherwise the viewBox / 105 × 68 fallback. Automatic unmarked geometry detection recognises a 105 × 68 local surface/outline or a semantically named pitch shape; unknown markup requires an adapter update using Diagnostics. The first visible matching SVG is used when multiple pitches exist. Actual MFL ball/shadow markup has not been inspected; manual selection supplies a fallback. A source DOM capture may be needed if MFL changes these conventions.
 

@@ -63,6 +63,26 @@ const fixture = fs.readFileSync(__dirname+'/fixture.html','utf8');
   assert.equal(await page.locator('[data-ball]').getAttribute('visibility'),'visible');
   assert.equal(await page.locator('[data-goals] path').count(),8);
   console.log('PASS: scoreboard, clock, players, ball and two netted goals');
+  await page.evaluate(()=>{
+    const name=document.createElementNS('http://www.w3.org/2000/svg','text');
+    name.setAttribute('x','1');name.setAttribute('y','5');name.setAttribute('font-size','1');name.setAttribute('text-anchor','middle');name.textContent='Oscar Hansen';
+    document.querySelector('#match-v2-p1').append(name);
+  });
+  await page.waitForFunction(()=>document.querySelector('#fcn25d-host').shadowRoot.querySelector('[data-possession-label] text').textContent==='Hansen');
+  assert.equal(await page.locator('[data-possession-label][visibility="visible"]').count(),1);
+  assert.equal(await page.locator('[data-possession-label]').getAttribute('data-source'),'native possession name label');
+  await page.evaluate(()=>{
+    window.__nameReader=FCN25D.PlayerInfo.prototype.enrich;FCN25D.PlayerInfo.prototype.enrich=()=>{throw new Error('Fixture metadata failure');};
+    document.querySelector('#match-v2-p1').style.transform='translate(21px,20px)';document.querySelector('#match-v2-puck').style.transform='translate(22px,22px)';
+  });
+  await page.waitForTimeout(180);
+  assert.equal(await page.locator('[data-player]').count(),2);assert.equal(await page.locator('[data-ball]').getAttribute('visibility'),'visible');
+  assert.equal(await page.locator('[data-possession-label]').getAttribute('visibility'),'hidden');
+  assert.equal(await page.locator('#fcn-score').textContent(),'2 – 1');
+  await page.evaluate(()=>{FCN25D.PlayerInfo.prototype.enrich=window.__nameReader;});
+  await page.waitForFunction(()=>document.querySelector('#fcn25d-host').shadowRoot.querySelector('[data-possession-label]').getAttribute('visibility')==='visible');
+  console.log('PASS: integrated surname badge recovers from metadata errors while movement, ball and scores continue');
+
   // Score extraction remains active while the overlay covers the source pitch.
   await page.evaluate(()=>{document.querySelector('header').innerHTML='<div class="playback-row"><span>Extended Highlights</span><span>1x</span><span>37:23</span><span>IP</span><span>0</span><span>-</span><span>0</span><span>AVL</span></div>';});
   await page.waitForFunction(()=>document.querySelector('#fcn25d-host').shadowRoot.querySelector('#fcn-clock').textContent==='37:23');

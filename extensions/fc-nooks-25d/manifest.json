@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "FC Nooks Match View 2.5D",
-  "description": "Calibrated native pitch bounds, closer ball-following camera, eleven local stadiums and synchronized MFL motion and scores.",
-  "version": "1.12.0",
+  "description": "Natural player sprites, ball-carrier surname labels, close camera and eleven locally packaged stadiums for MFL matches.",
+  "version": "1.13.0",
   "content_scripts": [
     {
       "matches": [
@@ -10,10 +10,12 @@
       ],
       "js": [
         "tracking.js",
+        "players.js",
         "scoreboard.js",
         "stadiums.js",
         "scene.js",
         "camera.js",
+        "sprites.js",
         "renderer.js",
         "viewer.js"
       ],

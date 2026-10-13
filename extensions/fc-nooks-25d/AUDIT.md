@@ -89,3 +89,14 @@ Bounds now prefer explicit markers, then an identifiable rendered pitch surface/
 The original `svgPosition()` function, player-circle anchors, ball/flight arithmetic and one-frame sampling remain intact. `renderer.js`, `scene.js`, `camera.js`, `scoreboard.js` and all stadium images are unchanged. The scoreboard never fabricates a ball position to make a score look correct. Diagnostics now includes the chosen boundary and raw ball/shadow anchors to distinguish remaining markup/anchor problems from a source animation reset.
 
 Tests cover both goal lines, positions behind and in front of both goals, nested translation, rendered native transitions, all eleven themes and three camera presets, airborne goal balls, hidden/defs copies and disconnected boundaries. Exact authenticated MFL geometry and the user's specific screenshot remain to be confirmed by replaying that goal with this release.
+
+
+## v1.13: natural player figures and a carrier surname
+
+The user asks for more lifelike sprites and a surname above the carrier, and confirms that original MFL displays the name below the player in possession. The new `players.js` adapter enriches the existing native snapshot with verified names and possession evidence without changing player/ball coordinates. A single identifiable native below-player name supplies possession directly; explicit markers or owner IDs take precedence. Exact native identity joins support lineup metadata. A conservative grounded-ball proximity fallback never invents names and is suppressed for loose, contested or airborne balls.
+
+`sprites.js` replaces the old rigid figures with shaped, shaded SVG bodies and jointed limbs. Gait phase follows actual rendered distance, within the existing frame callback; it does not predict targets or animate ground anchors. Standing and source teleports reset the pose. Team colours, jersey labels and Minty portrait hooks remain supported.
+
+`renderer.js` retains direct `project(u,v)` ground placement and its complete ball/flight rendering block unchanged, adding one top-level screen-size surname badge above the carrier. `viewer.js` isolates name-reader failures so metadata errors cannot reset movement or score extraction. Camera updates now occur before overlay rendering in the same frame, after all native reads, so label size uses the current viewport.
+
+`tracking.js`, `camera.js`, `scene.js`, `scoreboard.js`, the stadium registry and all eleven stadium assets are byte-for-byte unchanged from v1.12. Browser checks cover native names below the carrier, explicit possession/identity transitions, unavailable names, compounds, aerial/contested possession, consistent badge size, rendered-distance gait, pausing, source replacement and metadata-error recovery. Existing integration, ball-flight and goal-alignment checks pass. Live MFL name markup remains uninspected; this is fixture evidence rather than a verified production adapter contract.

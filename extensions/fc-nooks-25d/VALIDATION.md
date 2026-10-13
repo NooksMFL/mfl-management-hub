@@ -1,8 +1,13 @@
-# Validation — v1.12.0
+# Validation — v1.13.0
 
-Integration, flight and goal-alignment browser suites passed for this release using Chromium 154 and Playwright 1.64.0. The unchanged scoreboard reader retains its previous passing standalone suite. The integration suite fulfills a local MFL-shaped page at an MFL match URL and executes scripts in manifest order. No credentials or live match data were used. `tests/results.log` records this release's results; all runtime JavaScript syntax checks pass.
+Integration, player-name/sprite, flight and goal-alignment browser suites passed for this release using Chromium 154 and Playwright 1.64.0. The unchanged scoreboard reader retains its previous passing standalone suite. The integration suite fulfills a local MFL-shaped page at an MFL match URL and executes scripts in manifest order. No credentials or live match data were used. `tests/results.log` records this release's results; all runtime JavaScript syntax checks pass.
 
 ## Passed checks
+
+- A single native name below a player identifies possession directly, including when the ball is farther away; the overlay badge appears above the corresponding figure. Names inside player groups and separate SVG text are covered. Integration exercises this cue through the complete viewer.
+- Surname attributes, full accessible names and exact lineup identities; compound surnames and missing-name hiding. Explicit possession markers/owner identities switch the badge; grounded-ball fallback suppresses loose balls, contests and aerial passes.
+- Badge bounding height remains 21 screen pixels (20-pixel body plus stroke) at 1×, 1.75× and 2.5× and after resizing. Limbs follow actual native rendered travel, foot/ball anchors stay synchronized and stopped players return to a standing pose. Source replacement clears stale names.
+- Injected name-reader errors hide only the surname badge while players, ball and score remain visible; restoring extraction recovers the label.
 
 - New goal fixture reproduces a failure in v1.11: with a native `viewBox="-2 -2 109 72"` around an unmarked 105 × 68 field, native x=0 appears inside the overlay pitch. The corrected adapter uses the actual field and maps x=0/x=105 to the left/right goal mouths, including balls behind the nets.
 - Correct goal-mouth placement across all eleven themes and three camera distances; translated fields, intermediate rendered movement and airborne balls behind both goals remain accurate. Hidden/defs shapes are excluded and replaced boundaries reconnect. A goal score update never overrides the native ball position.
@@ -25,7 +30,7 @@ In the recorded motion run, all eight transition samples have player/ball projec
 
 Unpacked installation is blocked by this machine's browser administrator policy: `Loading of unpacked extensions is disabled by the administrator.` Tests mock `chrome.runtime.getURL` to locally fulfilled resources and `chrome.storage.local` to shared fixture state. They do not validate installed extension isolated-world execution, resource policy, actual Chrome/Edge installation or native extension storage permissions.
 
-No authenticated MFL Pro match was available. Actual live player motion, score/clock markup and ball/shadow structure remain unverified. The user confirms that the original ball is inside the goal in their screenshot; its exact native SVG bounds/anchors were unavailable, so the demonstrated padding defect is not claimed as the proven cause of that specific frame. Discovery uses source conventions from the supplied extension, with manual score/ball/shadow selection as fallbacks. Rendered scaling without a shadow gives only an approximate visual-height cue; that fallback is not the basis of the primary flight tests.
+No authenticated MFL Pro match was available. Actual live player motion, score/clock markup, name/possession markup and ball/shadow structure remain unverified. The user confirms that the original ball is inside the goal in their screenshot; its exact native SVG bounds/anchors were unavailable, so the demonstrated padding defect is not claimed as the proven cause of that specific frame. Discovery uses source conventions from the supplied extension, with manual score/ball/shadow selection as fallbacks. Rendered scaling without a shadow gives only an approximate visual-height cue; that fallback is not the basis of the primary flight tests.
 
 The pasted Minty avatar had no downloadable source file. No reconstructed face ships in this ZIP. Choose the original photo once using Minty's local photo chooser to activate face effects.
 
@@ -38,6 +43,7 @@ npm ci
 node scoreboard.cjs
 node flight.cjs
 node goals.cjs
+node players.cjs
 node test.cjs
 ```
 
@@ -53,4 +59,5 @@ The integration runner generates ignored desktop/mobile PNGs. Tests do not send 
 4. Try all three Camera choices, including flight and play near each goal; the shot should follow the ball and the broadcast scoreboard should stay visible. Switch grounds during play and resize; geometry and motion must remain aligned. Reload to check preference persistence.
 5. Navigate to another match and away/back without refreshing; old players, selections and scores must clear.
 6. Choose Minty's original photo; verify heads/crowd/banner and reload persistence. Switch to another ground to confirm ordinary player heads return.
-7. If detection fails, capture Diagnostics and actual source SVG/header markup for an adapter correction. Do not fabricate match time or substitute guessed player motion.
+7. Confirm the native surname shown below the carrier appears above the same player in 2.5D and switches on possession changes. Pause play to check figures stand still; test missing names and aerial passes.
+8. If detection fails, capture Diagnostics and actual source SVG/header markup for an adapter correction. Do not fabricate match time or substitute guessed player motion.

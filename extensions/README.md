@@ -1,6 +1,6 @@
 # FC Nooks 2.5D match extension
 
-[Download the ready-to-load v1.12 ZIP](./FC-Nooks-2.5D-Extension-v1.12.zip?raw=true)
+[Download the ready-to-load v1.13 ZIP](./FC-Nooks-2.5D-Extension-v1.13.zip?raw=true)
 
 1. Download and extract the ZIP on Windows.
 2. Disable the older FC Nooks extension.
@@ -8,7 +8,7 @@
 4. Click **Load unpacked** and select the extracted `fc-nooks-25d` folder containing `manifest.json`.
 5. Reload MFL, open a Pro match and click **FC Nooks · 2.5D**.
 
-**New in v1.12:** pitch bounds are calibrated from rendered field geometry so SVG margins do not move the ball/players inward from goal lines. Diagnostics includes raw ball/shadow anchors. The closer camera introduced in v1.11 retains a default 1.75× close camera and a 2.5× option, with ball-following framing. Use **Camera** to adjust distance or return to Full stadium. The fixed broadcast scoreboard stays visible; zoom and pan apply to the complete scene without changing actor coordinates.
+**New in v1.13:** more natural player figures with shaped bodies, shaded kits, boots and movement-driven arm/leg poses. A single surname badge appears above the player in possession, using MFL's native name beneath that player where available. Name extraction is separate from motion and cannot stop player/ball rendering. The goal-line calibration, ball flight, close camera and scoreboard fixes are retained. Use **Camera** for Full stadium, Close · 1.75× or Very close · 2.5×.
 
 Seven real-ground-inspired themes—Wembley, San Siro, Camp Nou, Craven Cottage, The Dripping Pan, Bracken Moor and Sandygate—plus Minty Stadium join Selhurst Park, Ironwood Lane and Harbour Park. All eleven backdrops are packaged locally; named stadiums are approximate artistic interpretations.
 

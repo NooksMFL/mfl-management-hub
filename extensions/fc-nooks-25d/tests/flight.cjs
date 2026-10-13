@@ -9,7 +9,7 @@ const root=path.resolve(__dirname,'..');
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.setContent('<style>body{margin:0}#source{width:900px;height:600px}.motion{transition:transform 600ms linear}</style><svg id="source" viewBox="0 0 105 68"><g transform="translate(2 3) scale(1.2)"><g class="motion" id="ground" style="transform:translate(30px,30px)"><g id="match-v2-p1"><circle r="1.5" fill="red"/></g><g id="ball-shadow"><ellipse rx="1" ry=".4"/></g><g id="match-v2-puck" class="motion" style="transform:translate(0px,-6px)"><circle r=".6" fill="white"/></g></g></g></svg>');
   await page.evaluate(()=>{globalThis.chrome={runtime:{getURL:name=>'about:blank'}};});
-  for(const file of ['tracking.js','stadiums.js','scene.js','camera.js','renderer.js'])await page.addScriptTag({content:fs.readFileSync(root+'/'+file,'utf8')});
+  for(const file of ['tracking.js','stadiums.js','scene.js','camera.js','sprites.js','renderer.js'])await page.addScriptTag({content:fs.readFileSync(root+'/'+file,'utf8')});
   await page.evaluate(()=>{window.tracker=new FCN25D.Tracker();window.scene=FCN25D.buildScene();document.body.append(scene.svg);window.renderer=new FCN25D.Renderer(scene);window.camera=new FCN25D.ViewportCamera(scene);});
   async function capture(){return page.evaluate(()=>{
     const snapshot=tracker.sample();renderer.render(snapshot);camera.update(snapshot);

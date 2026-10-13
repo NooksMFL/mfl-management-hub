@@ -1,9 +1,26 @@
-v1.12 integration
+v1.13.0 — local Chromium fixtures, not an authenticated MFL or installed MV3 test.
+
+v1.13 player/surname browser checks
+
+PASS: only ball carrier receives native surname; surname attributes and full accessible names supported
+PASS: label switches to receiving player and respects native possession markers/identity
+PASS: no proximity label on loose balls, contested possession or aerial passes
+PASS: lineup names require matching player identity; missing names and jersey initials are never invented
+PASS: visible native surname labels and readable 21-pixel badge across camera views and resizing
+PASS: native SVG name below the player identifies the carrier directly; overlay badge appears above
+PASS: gait follows actual rendered travel, ground anchors remain synchronized and stopped players stand still
+PASS: source replacement/reset clears stale names and possession labels
+
+
+
+v1.13 complete viewer browser checks
+
 PASS: packaged scripts create toggle (fixture injection; MV3 install blocked by administrator policy)
 PASS: scoreboard, clock, players, ball and two netted goals
+PASS: integrated surname badge recovers from metadata errors while movement, ball and scores continue
 PASS: live goal/clock updates while open, native bar visibility and manual scoreboard selection
 PASS: stadium switches during motion preserve player/ball nodes and source timing
-PASS: rendered movement during native CSS transition, synchronized ball [{"player":0.000031751241903838704,"ball":0.000031751241903838704,"sync":0,"screenSync":0,"x":25.224733352661136},{"player":0.00002724459503647386,"ball":0.00002724459503647386,"sync":0,"screenSync":0,"x":31.891399383544925},{"player":0.000014593797150860314,"ball":0.000014593797150860314,"sync":0,"screenSync":0,"x":39.66473388671876},{"player":0.000019286506618750692,"ball":0.000019286506618750692,"sync":0,"screenSync":0,"x":46.338066101074226},{"player":0.000006474105201511113,"ball":0.000006474105201511113,"sync":0,"screenSync":0,"x":50.778068542480476},{"player":0.000029942967362070285,"ball":0.000029942967362070285,"sync":0,"screenSync":0,"x":56.33140182495117},{"player":0.00003874948785070208,"ball":0.00003874948785070208,"sync":0,"screenSync":0,"x":59.66473388671876},{"player":0.000009287414216972118,"ball":0.000009287414216972118,"sync":0,"screenSync":0,"x":63.00000000000001}]
+PASS: rendered movement during native CSS transition, synchronized ball [{"player":0.000024165941181702398,"ball":0.00002416594117292773,"sync":0,"screenSync":0,"x":29.31875991821289},{"player":0.0000257767357718945,"ball":0.0000257767357718945,"sync":0,"screenSync":0,"x":33.666618347167976},{"player":0.000015686565101713943,"ball":0.00001568656506465045,"sync":0,"screenSync":0,"x":39.096553802490234},{"player":0.00001250133561030678,"ball":0.00001250133561030678,"sync":0,"screenSync":0,"x":43.44441223144532},{"player":0.00001959176506700688,"ball":0.00001959176506700688,"sync":0,"screenSync":0,"x":47.785751342773445},{"player":0.000025000754632637667,"ball":0.000025000754679452887,"sync":0,"screenSync":0,"x":53.22220611572266},{"player":0.00001589621533375701,"ball":0.00001589621533375701,"sync":0,"screenSync":0,"x":57.57006454467774},{"player":0.000020628958318036552,"ball":0.000020628958572240362,"sync":0,"screenSync":0,"x":60.829330444335945}]
 PASS: all eleven packaged stadiums load with aligned motion and unchanged scores
 PASS: Minty local photo populates players, crowd/banner; other stadiums retain normal players
 PASS: full 22-player roster and node discovery
@@ -22,7 +39,10 @@ PASS: missing stadium asset reports problem and preserves players, ball and scor
 PASS: switching away from a missing asset recovers the photographic stadium
 PASS: unavailable preference storage does not block stadium switching or motion
 
-v1.12 flight
+
+
+v1.13 flight browser checks
+
 PASS: nested transforms: ground shadow anchors ball to player; sphere follows native lift
 PASS: native flight and ground transitions sampled in one frame without interpolation lag
 PASS: airborne ball and player alignment across all eleven calibrated stadiums; 2.5× camera retains sphere and shadow
@@ -32,7 +52,10 @@ PASS: explicitly selected unlabelled shadow supplies native flight cue
 PASS: explicit shadow hit test handles pointer-events:none without binding the pitch background
 PASS: source replacement clears stale shadow binding; missing ball is never fabricated
 
-v1.12 goal alignment
+
+
+v1.13 goal alignment browser checks
+
 PASS: unmarked pitch geometry overrides SVG padding; both goal lines, behind-goal and in-field positions map correctly
 PASS: translated source pitch and offset viewBox retain real goal-line coordinates
 PASS: corrected pitch calibration preserves intermediate rendered motion
@@ -41,7 +64,10 @@ PASS: changing score never fabricates a ball position or snaps a reset ball into
 PASS: airborne ball behind either goal retains correct ground position, flight height and diagnostic source anchors
 PASS: unmarked outline detection ignores hidden/defs copies and reconnects after boundary replacement
 
-Unchanged scoreboard reader: previous passing standalone run
+
+
+Previous standalone scoreboard checks; reader unchanged
+
 PASS: unnamed playback bar with controls and glued React text nodes
 PASS: native clock ticks and goals refresh through the bound source
 PASS: split score digits, split clock digits and CSS-only separator

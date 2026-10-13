@@ -9,7 +9,7 @@ const root=path.resolve(__dirname,'..');
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.setContent('<style>body{margin:0}#native{width:900px;height:600px}.puck{transition:transform 600ms linear}</style><header>29:42 IP 0-0 AVL</header><svg id="native" viewBox="-2 -2 109 72"><rect x="-2" y="-2" width="109" height="72" fill="#253b31"/><g id="field"><rect id="playing-field" width="105" height="68" fill="#378347"/><path d="M0 0H105V68H0Z" fill="none" stroke="white"/><g id="match-v2-p1" transform="translate(0 34)"><circle r="1.2"/></g><g id="match-v2-puck" class="puck" style="transform:translate(0px,34px)"><circle r=".6" fill="white"/></g></g></svg>');
   await page.evaluate(()=>{globalThis.chrome={runtime:{getURL:name=>'about:blank'}};});
-  for(const file of ['tracking.js','scoreboard.js','stadiums.js','scene.js','camera.js','renderer.js'])await page.addScriptTag({content:fs.readFileSync(root+'/'+file,'utf8')});
+  for(const file of ['tracking.js','scoreboard.js','stadiums.js','scene.js','camera.js','sprites.js','renderer.js'])await page.addScriptTag({content:fs.readFileSync(root+'/'+file,'utf8')});
   await page.evaluate(()=>{window.tracker=new FCN25D.Tracker();window.scene=FCN25D.buildScene();window.renderer=new FCN25D.Renderer(scene);window.camera=new FCN25D.ViewportCamera(scene);document.body.append(scene.svg);});
   async function sample(x){return page.evaluate(x=>{
     const ball=document.querySelector('#match-v2-puck');ball.style.transition='none';ball.style.transform=`translate(${x}px,34px)`;

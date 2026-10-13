@@ -17,4 +17,4 @@ All v18.1 shared-cache and Agency reuse fixes remain included.
 
 ## Chrome / Edge stadium match viewer
 
-The FC Nooks 2.5D extension offers eleven locally packaged stadium themes, native score/clock updates and rendered ball-flight tracking for MFL Pro matches. See [extensions](extensions/README.md) for the ready-to-load v1.12 ZIP, installation instructions, source and validation notes.
+The FC Nooks 2.5D extension offers eleven locally packaged stadium themes, native score/clock updates and rendered ball-flight tracking for MFL Pro matches. See [extensions](extensions/README.md) for the ready-to-load v1.13 ZIP, installation instructions, source and validation notes.
