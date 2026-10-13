@@ -1,8 +1,11 @@
-# Validation — v1.11.0
+# Validation — v1.12.0
 
-Integration and flight browser suites passed for this release using Chromium 154 and Playwright 1.64.0. The unchanged scoreboard reader retains its previous passing standalone suite. The integration suite fulfills a local MFL-shaped page at an MFL match URL and executes scripts in manifest order. No credentials or live match data were used. `tests/results.log` records this release's results; all runtime JavaScript syntax checks pass.
+Integration, flight and goal-alignment browser suites passed for this release using Chromium 154 and Playwright 1.64.0. The unchanged scoreboard reader retains its previous passing standalone suite. The integration suite fulfills a local MFL-shaped page at an MFL match URL and executes scripts in manifest order. No credentials or live match data were used. `tests/results.log` records this release's results; all runtime JavaScript syntax checks pass.
 
 ## Passed checks
+
+- New goal fixture reproduces a failure in v1.11: with a native `viewBox="-2 -2 109 72"` around an unmarked 105 × 68 field, native x=0 appears inside the overlay pitch. The corrected adapter uses the actual field and maps x=0/x=105 to the left/right goal mouths, including balls behind the nets.
+- Correct goal-mouth placement across all eleven themes and three camera distances; translated fields, intermediate rendered movement and airborne balls behind both goals remain accurate. Hidden/defs shapes are excluded and replaced boundaries reconnect. A goal score update never overrides the native ball position.
 
 - Close is the default. Actual rendered sprite height is 1.75× Full stadium, and Very close is 2.5×. Zoom preserves player transforms and nodes. Player/ball screen positions remain synchronized through camera changes during native CSS motion.
 - Ball-following shots keep the ball visible at all four pitch corners, with camera bounds inside the local image. A 2.5× airborne shot retains the sphere and ground shadow together. Camera preference persists across reloads; invalid values fall back to Close and late reads cannot overwrite a newer user choice.
@@ -22,7 +25,7 @@ In the recorded motion run, all eight transition samples have player/ball projec
 
 Unpacked installation is blocked by this machine's browser administrator policy: `Loading of unpacked extensions is disabled by the administrator.` Tests mock `chrome.runtime.getURL` to locally fulfilled resources and `chrome.storage.local` to shared fixture state. They do not validate installed extension isolated-world execution, resource policy, actual Chrome/Edge installation or native extension storage permissions.
 
-No authenticated MFL Pro match was available. Actual live player motion, score/clock markup and ball/shadow structure remain unverified. Discovery uses source conventions from the supplied extension, with manual score/ball/shadow selection as fallbacks. Rendered scaling without a shadow gives only an approximate visual-height cue; that fallback is not the basis of the primary flight tests.
+No authenticated MFL Pro match was available. Actual live player motion, score/clock markup and ball/shadow structure remain unverified. The user confirms that the original ball is inside the goal in their screenshot; its exact native SVG bounds/anchors were unavailable, so the demonstrated padding defect is not claimed as the proven cause of that specific frame. Discovery uses source conventions from the supplied extension, with manual score/ball/shadow selection as fallbacks. Rendered scaling without a shadow gives only an approximate visual-height cue; that fallback is not the basis of the primary flight tests.
 
 The pasted Minty avatar had no downloadable source file. No reconstructed face ships in this ZIP. Choose the original photo once using Minty's local photo chooser to activate face effects.
 
@@ -34,6 +37,7 @@ From `extensions/fc-nooks-25d/tests`:
 npm ci
 node scoreboard.cjs
 node flight.cjs
+node goals.cjs
 node test.cjs
 ```
 
@@ -43,7 +47,7 @@ The integration runner generates ignored desktop/mobile PNGs. Tests do not send 
 
 ## Live acceptance checks
 
-1. Load unpacked following README; verify toggle, keyboard controls and locally loaded art.
+1. Replay the reported goal after updating. Compare the same paused moment with original MFL and check Diagnostics `bounds` and `ball.source` if a discrepancy remains. Load unpacked following README; verify toggle, keyboard controls and locally loaded art.
 2. Compare players and ball against original MFL through passing, possession, restarts, flight, landing and goals. Use **Set ball shadow** if the native shadow is unlabelled.
 3. Confirm score and clock keep changing with 2.5D open. Use **Select scoreboard** if automatic detection misses the native row.
 4. Try all three Camera choices, including flight and play near each goal; the shot should follow the ball and the broadcast scoreboard should stay visible. Switch grounds during play and resize; geometry and motion must remain aligned. Reload to check preference persistence.

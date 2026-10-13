@@ -1,10 +1,10 @@
-# FC Nooks Match View 2.5D — v1.11.0
+# FC Nooks Match View 2.5D — v1.12.0
 
 Chrome / Edge Manifest V3 extension for MFL Pro matches. Eleven photographic stadium backdrops are packaged locally, with live SVG pitch markings, players, ball, netted goals and scoreboards. The original rendered-CTM player movement foundation is preserved: one frame samples native players and ball, with no extra motion smoothing.
 
 ## Install or update on Windows
 
-1. Extract `FC-Nooks-2.5D-Extension-v1.11.zip`; keep the extracted `fc-nooks-25d` folder in a permanent location.
+1. Extract `FC-Nooks-2.5D-Extension-v1.12.zip`; keep the extracted `fc-nooks-25d` folder in a permanent location.
 2. Disable/remove older FC Nooks extensions so only one version draws the overlay.
 3. Open `chrome://extensions` or `edge://extensions` and enable **Developer mode**.
 4. Choose **Load unpacked** and select the extracted folder containing `manifest.json`. Keep the entire `assets` folder.
@@ -54,6 +54,12 @@ The reader supports compact playback rows, separate React text nodes, split scor
 
 The native top score bar stays exposed when detected near the top. If scores are missing or the wrong scoreboard is selected, choose **Select scoreboard** and click the actual score/clock row in the original MFL view. Escape or Cancel abandons selection. Unknown values show `—` / unavailable time and never retain another match's score. All visible stadium displays receive the same values.
 
+## Pitch and goal-line alignment
+
+Source SVG borders and advertising margins are outside the playing field. The tracker now prefers explicit pitch bounds, otherwise an identifiable rendered field rectangle/outline, before falling back to the full viewBox. Discovery excludes player/ball shapes, hidden copies and definitions. Both players and ball normalize against the same detected field; a native ball on either goal line therefore lands on the overlay's corresponding goal mouth. Balls just behind a goal retain their actual position.
+
+**Diagnostics** shows `bounds.source` and the detected geometry element, plus the ball/shadow element names and their native `visualPosition` / `groundPosition`. If a goal remains misaligned, pause the same moment in MFL and provide these diagnostics. Unrecognised geometry still uses the viewBox fallback; actual MFL markup has not been inspected in this environment. A scoreboard change never moves the ball artificially.
+
 ## Ball flight
 
 The native shadow's rendered centre supplies the ground coordinate. The ball's rendered separation above it supplies visual elevation. Both are read through the same SVG matrices as players, in one animation frame. Landing removes lift immediately; there is no inferred flight duration or extra smoothing.
@@ -82,6 +88,6 @@ No API credentials, runtime dependencies or build step are needed to load the ex
 
 See `AUDIT.md` and `VALIDATION.md`. Real Chromium fixture suites exercise rendered motion, score updates, eleven local images, flight, photo storage, navigation and failure recovery. Actual authenticated MFL Pro matches and installed Chrome/Edge operation remain unverified: the development browser blocks unpacked extensions through administrator policy.
 
-MFL selectors come from the supplied extension, not a supported integration contract. Players still need `match-v2-p<number>` IDs and a circle. Source bounds prefer an explicit pitch marker, otherwise the viewBox / 105 × 68 fallback. The first visible matching SVG is used when multiple pitches exist. Actual MFL ball/shadow markup has not been inspected; manual selection supplies a fallback. A source DOM capture may be needed if MFL changes these conventions.
+MFL selectors come from the supplied extension, not a supported integration contract. Players still need `match-v2-p<number>` IDs and a circle. Source bounds prefer an explicit pitch marker or identifiable field geometry, otherwise the viewBox / 105 × 68 fallback. Automatic unmarked geometry detection recognises a 105 × 68 local surface/outline or a semantically named pitch shape; unknown markup requires an adapter update using Diagnostics. The first visible matching SVG is used when multiple pitches exist. Actual MFL ball/shadow markup has not been inspected; manual selection supplies a fallback. A source DOM capture may be needed if MFL changes these conventions.
 
 This is a fake 2.5D overlay. Fine depth occlusion is approximate; the ball draws above player sprites for readability. Live user-browser checks remain necessary before calling it fully stable on MFL.

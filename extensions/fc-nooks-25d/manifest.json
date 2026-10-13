@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "FC Nooks Match View 2.5D",
-  "description": "Closer ball-following camera, eleven local stadium themes and synchronized MFL players, ball flight and live scores.",
-  "version": "1.11.0",
+  "description": "Calibrated native pitch bounds, closer ball-following camera, eleven local stadiums and synchronized MFL motion and scores.",
+  "version": "1.12.0",
   "content_scripts": [
     {
       "matches": [

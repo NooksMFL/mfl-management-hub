@@ -147,7 +147,7 @@
   pickNotice.querySelector('button').addEventListener('click',()=>{stopPicking();setOpen(true);});
   view.querySelector('#fcn-diagnostics').addEventListener('click',()=>{
     output.hidden=!output.hidden;
-    output.textContent=JSON.stringify({version:'1.11.0',camera:camera.diagnostics(),stadium:scene.stadiumId,stadiumImage:scene.svg.dataset.assetState,preferenceError,source:tracker.root?.getAttribute('viewBox'),players:lastSnapshot?.players.length,ball:lastSnapshot?.ball,candidates:tracker.balls.map(el=>({tag:el.tagName,id:el.id})),shadows:tracker.shadows.map(el=>({tag:el.tagName,id:el.id})),bounds:lastSnapshot?.bounds,scoreboard:scoreboard.diagnostics(),scoreError},null,2);
+    output.textContent=JSON.stringify({version:'1.12.0',camera:camera.diagnostics(),stadium:scene.stadiumId,stadiumImage:scene.svg.dataset.assetState,preferenceError,source:tracker.root?.getAttribute('viewBox'),players:lastSnapshot?.players.length,ball:lastSnapshot?.ball,candidates:tracker.balls.map(el=>({tag:el.tagName,id:el.id})),shadows:tracker.shadows.map(el=>({tag:el.tagName,id:el.id})),bounds:lastSnapshot?.bounds,scoreboard:scoreboard.diagnostics(),scoreError},null,2);
   });
   toggle.addEventListener('click',()=>setOpen(!open));
   view.querySelector('#fcn-close').addEventListener('click',()=>setOpen(false));

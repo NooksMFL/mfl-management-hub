@@ -27,7 +27,7 @@
   };
   class Tracker {
     constructor() { this.reset(); }
-    reset() { this.root = null; this.objects = []; this.balls = []; this.shadows=[];this.sizes=new WeakMap();this.selected = null;this.selectedShadow=null; this.nextScan = 0; }
+    reset() { this.root = null; this.boundary=null;this.objects = []; this.balls = []; this.shadows=[];this.sizes=new WeakMap();this.selected = null;this.selectedShadow=null; this.nextScan = 0; }
     select(el) {
       if (!this.root || !this.root.contains(el) || inPlayer(el)) return false;
       // Select the clicked graphic rather than a parent containing the entire pitch.
@@ -59,6 +59,7 @@
       this.balls = root ? [...root.querySelectorAll('[id],[class],[href],[aria-label],[data-testid]')]
         .filter(el => isBall(el) && !inPlayer(el) && ![...this.ancestors(el, root)].some(isBall)) : [];
       this.shadows=root?[...root.querySelectorAll('[id],[class],[data-testid]')].filter(el=>/puck|football|(?:^|[^a-z])ball(?:$|[^a-z])/i.test(signature(el)) && /shadow|shade/i.test(signature(el)) && !inPlayer(el)):[];
+      this.boundary=this.findBoundary();
       this.nextScan = now + 750;
     }
     *ancestors(el, root) { for (let p = el.parentElement; p && p !== root; p = p.parentElement) yield p; }
@@ -78,7 +79,7 @@
         if(graphic && el.contains(shadow))visual=this.centre(graphic) || visual;
         const ground=this.centre(shadow);
         if(ground && Math.abs(visual[0]-ground[0])<bounds.w*.12 && visual[1]<=ground[1]+bounds.h*.03)
-          return {position:ground,heightU:Math.max(0,ground[1]-visual[1])/bounds.w,offsetU:(visual[0]-ground[0])/bounds.w,visualScale:1,flightMode:'rendered ball/shadow separation'};
+          return {position:ground,visualPosition:visual,shadowElement:shadow,heightU:Math.max(0,ground[1]-visual[1])/bounds.w,offsetU:(visual[0]-ground[0])/bounds.w,visualScale:1,flightMode:'rendered ball/shadow separation'};
       }
       // Follow native rendered scale, never the inline future transition target.
       // Divide out static SVG asset scaling and parent zoom before interpreting
@@ -96,17 +97,46 @@
       const minimum=Math.min(width,this.sizes.get(el) || width);
       if(width>0){this.sizes.set(el,minimum);scale=Math.max(scale,width/Math.max(.001,minimum));}
       scale=Number.isFinite(scale)?Math.min(3,Math.max(1,scale)):1;
-      return {position:visual,heightU:(scale-1)*.018,offsetU:0,visualScale:scale,flightMode:scale>1.025?'rendered ball size/scale cue':'no visible elevation cue'};
+      return {position:visual,visualPosition:visual,heightU:(scale-1)*.018,offsetU:0,visualScale:scale,flightMode:scale>1.025?'rendered ball size/scale cue':'no visible elevation cue'};
+    }
+    findBoundary() {
+      if(!this.root)return null;
+      const explicit=this.root.querySelector('[data-testid="pitch-bounds"], rect[data-pitch-bounds]');
+      if(explicit)return {element:explicit,source:'pitch marker'};
+      let best=null,bestRank=-Infinity;
+      // A viewBox can include goal/advertising margins. Discover the playing
+      // surface itself, without guessing its limits from player positions.
+      for(const el of [...this.root.querySelectorAll('rect,path,polygon')].slice(0,400)) {
+        if(el.closest('defs,clipPath,mask,pattern,symbol') || inPlayer(el) || isBall(el) || [...this.ancestors(el,this.root)].some(isBall))continue;
+        try {
+          const b=el.getBBox();
+          const canonical=Math.abs(b.width-105)<.2 && Math.abs(b.height-68)<.2;
+          const named=/pitch|playing.field|field.bound|field.outline/i.test(signature(el));
+          if(!canonical && !(named && b.width>30 && b.height>20 && Math.abs(b.width/b.height-105/68)<.08))continue;
+          if(!visible(el) || !el.getClientRects().length)continue;
+          let hidden=false;
+          for(const parent of this.ancestors(el,this.root))if(!visible(parent)){hidden=true;break;}
+          if(hidden)continue;
+          const rank=(canonical?1000:100)+(named?20:0)+(el.tagName==='rect'?10:0);
+          if(rank>bestRank){best={element:el,source:'rendered pitch geometry'};bestRank=rank;}
+        } catch(_) { /* an unrendered or replaced shape is not a boundary */ }
+      }
+      return best;
     }
     bounds() {
-      // Explicit pitch markers, if supplied by MFL, take precedence over a padded viewBox.
-      const pitch = this.root?.querySelector('[data-testid="pitch-bounds"], rect[data-pitch-bounds]');
-      if (pitch) {
-        try {
-          const b = pitch.getBBox(), a = svgPosition(pitch, this.root, b.x, b.y), z = svgPosition(pitch, this.root, b.x + b.width, b.y + b.height);
-          if (a && z && z[0] > a[0] && z[1] > a[1]) return { x: a[0], y: a[1], w: z[0]-a[0], h: z[1]-a[1], source: 'pitch marker' };
-        } catch (_) { /* use original viewBox fallback */ }
-      }
+      const explicit=this.root?.querySelector('[data-testid="pitch-bounds"], rect[data-pitch-bounds]');
+      if(explicit && this.boundary?.element!==explicit)this.boundary={element:explicit,source:'pitch marker'};
+      if(this.boundary && !this.root?.contains(this.boundary.element))this.boundary=this.findBoundary();
+      const pitch=this.boundary?.element;
+      if(pitch)try {
+        const b=pitch.getBBox();
+        const corners=[[b.x,b.y],[b.x+b.width,b.y],[b.x+b.width,b.y+b.height],[b.x,b.y+b.height]].map(([x,y])=>svgPosition(pitch,this.root,x,y));
+        if(corners.every(Boolean)) {
+          const xs=corners.map(p=>p[0]),ys=corners.map(p=>p[1]);
+          const x=Math.min(...xs),y=Math.min(...ys),w=Math.max(...xs)-x,h=Math.max(...ys)-y;
+          if(w>0 && h>0)return {x,y,w,h,source:this.boundary.source,element:`${pitch.tagName}${pitch.id?'#'+pitch.id:''}`};
+        }
+      } catch(_) { /* use original viewBox fallback until geometry reconnects */ }
       const b = this.root?.viewBox?.baseVal;
       return b?.width > 30 && b.height > 20 && b.width < 1000 && b.height < 1000
         ? { x: b.x, y: b.y, w: b.width, h: b.height, source: 'SVG viewBox' }
@@ -132,7 +162,12 @@
           const visual=svgPosition(el, root, b.x+b.width/2, b.y+b.height/2);
           if(!visual)continue;
           const flight=this.flight(el,visual,bounds),p=normalize(flight.position);
-          if (p && p.u >= -0.03 && p.u <= 1.03 && p.v >= -0.05 && p.v <= 1.05) { ball = {...p,heightU:flight.heightU,offsetU:flight.offsetU,visualScale:flight.visualScale,flightMode:flight.flightMode}; break; }
+          if (p && p.u >= -0.03 && p.u <= 1.03 && p.v >= -0.05 && p.v <= 1.05) {
+            const shadow=flight.shadowElement;
+            ball={...p,heightU:flight.heightU,offsetU:flight.offsetU,visualScale:flight.visualScale,flightMode:flight.flightMode,
+              source:{ball:`${el.tagName}${el.id?'#'+el.id:''}`,shadow:shadow?`${shadow.tagName}${shadow.id?'#'+shadow.id:''}`:null,visualPosition:flight.visualPosition,groundPosition:flight.position}};
+            break;
+          }
         } catch (_) { /* a replaced SVG node is retried on the next scan */ }
       }
       return { players, ball, bounds, diagnostic: ball ? 'Ball tracked' : `Ball unavailable (${this.balls.length} candidates); use Select ball` };

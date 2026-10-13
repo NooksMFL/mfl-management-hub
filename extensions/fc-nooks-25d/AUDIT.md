@@ -76,3 +76,16 @@ The v1.10 view framed the complete 1672 × 941 stadium plate, so players occupie
 The controller changes only the root overlay SVG viewBox. Backdrop, markings, goals, actors, sphere and shadow therefore share exactly the same pan and zoom. A central region holds the shot steady until the rendered ball moves out of it; camera bounds stay inside the packaged image. Sphere/ground separation participates in framing. There is no interpolation of source positions, added actor lag, separate motion clock or guessed ball position.
 
 `tracking.js`, `renderer.js`, `scoreboard.js`, `scene.js` and all eleven images are byte-for-byte unchanged from v1.10. Camera updates consume the existing snapshot after rendering in the same requestAnimationFrame. Browser checks verify actual on-screen 1.75×/2.5× magnification, unchanged actor coordinates/node identity, screen-space player/ball alignment through camera changes, ball-following at all four pitch corners, airborne/ground visibility, persisted preferences and delayed-read protection.
+
+
+## v1.12: goal-line alignment and padded native SVGs
+
+The user supplied an overlay screenshot with the ball in front of the goal and confirmed that the original MFL view shows it inside the goal at that moment. This establishes a visual mismatch, but the screenshot does not reveal the underlying SVG coordinates or prove its exact cause.
+
+A reproducible defect exists in bounds selection: when the native viewBox includes a two-unit margin around an unmarked 105 × 68 playing field, the old adapter normalizes that margin as part of the pitch. A native ball at x=0 maps to u=2/109, nearly two metres inside the overlay. A ball just behind the goal can also map inside the field. The new goals fixture fails on v1.11 with this exact condition and passes after the correction.
+
+Bounds now prefer explicit markers, then an identifiable rendered pitch surface/outline, and only then the viewBox fallback. Canonical 105 × 68 shapes or semantically named pitch geometry are candidates; player/ball shapes, definitions and hidden copies are excluded. Discovery is cached in the existing source scan and reconnects after boundary replacement. Field geometry is transformed through the same rendered root coordinate space as actors. Both ball and players normalize against the corrected bounds.
+
+The original `svgPosition()` function, player-circle anchors, ball/flight arithmetic and one-frame sampling remain intact. `renderer.js`, `scene.js`, `camera.js`, `scoreboard.js` and all stadium images are unchanged. The scoreboard never fabricates a ball position to make a score look correct. Diagnostics now includes the chosen boundary and raw ball/shadow anchors to distinguish remaining markup/anchor problems from a source animation reset.
+
+Tests cover both goal lines, positions behind and in front of both goals, nested translation, rendered native transitions, all eleven themes and three camera presets, airborne goal balls, hidden/defs copies and disconnected boundaries. Exact authenticated MFL geometry and the user's specific screenshot remain to be confirmed by replaying that goal with this release.

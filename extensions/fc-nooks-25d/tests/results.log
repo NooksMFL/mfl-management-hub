@@ -1,9 +1,9 @@
-v1.11 integration
+v1.12 integration
 PASS: packaged scripts create toggle (fixture injection; MV3 install blocked by administrator policy)
 PASS: scoreboard, clock, players, ball and two netted goals
 PASS: live goal/clock updates while open, native bar visibility and manual scoreboard selection
 PASS: stadium switches during motion preserve player/ball nodes and source timing
-PASS: rendered movement during native CSS transition, synchronized ball [{"player":0.000034185096329300506,"ball":0.000034185096329300506,"sync":0,"screenSync":0,"x":25.223733901977543},{"player":0.000013417663905760229,"ball":0.000013417663905760229,"sync":0,"screenSync":0,"x":29.663732528686527},{"player":0.000020903080119847076,"ball":0.000020903080119847076,"sync":0,"screenSync":0,"x":35.223731994628906},{"player":0.000016546852246442306,"ball":0.000016546852246442306,"sync":0,"screenSync":0,"x":39.6703987121582},{"player":0.00002304868559758057,"ball":0.00002069348813496302,"sync":0,"screenSync":0,"x":44.11040115356445},{"player":0.000016393781080000748,"ball":0.000016393781080000748,"sync":0,"screenSync":0,"x":48.550399780273445},{"player":0.00003207621099958439,"ball":0.00003207621099958439,"sync":0,"screenSync":0,"x":51.88373184204102},{"player":0.000016976628796381752,"ball":0.000016976628796381752,"sync":0,"screenSync":0,"x":56.33706665039063}]
+PASS: rendered movement during native CSS transition, synchronized ball [{"player":0.000031751241903838704,"ball":0.000031751241903838704,"sync":0,"screenSync":0,"x":25.224733352661136},{"player":0.00002724459503647386,"ball":0.00002724459503647386,"sync":0,"screenSync":0,"x":31.891399383544925},{"player":0.000014593797150860314,"ball":0.000014593797150860314,"sync":0,"screenSync":0,"x":39.66473388671876},{"player":0.000019286506618750692,"ball":0.000019286506618750692,"sync":0,"screenSync":0,"x":46.338066101074226},{"player":0.000006474105201511113,"ball":0.000006474105201511113,"sync":0,"screenSync":0,"x":50.778068542480476},{"player":0.000029942967362070285,"ball":0.000029942967362070285,"sync":0,"screenSync":0,"x":56.33140182495117},{"player":0.00003874948785070208,"ball":0.00003874948785070208,"sync":0,"screenSync":0,"x":59.66473388671876},{"player":0.000009287414216972118,"ball":0.000009287414216972118,"sync":0,"screenSync":0,"x":63.00000000000001}]
 PASS: all eleven packaged stadiums load with aligned motion and unchanged scores
 PASS: Minty local photo populates players, crowd/banner; other stadiums retain normal players
 PASS: full 22-player roster and node discovery
@@ -22,7 +22,7 @@ PASS: missing stadium asset reports problem and preserves players, ball and scor
 PASS: switching away from a missing asset recovers the photographic stadium
 PASS: unavailable preference storage does not block stadium switching or motion
 
-v1.11 flight
+v1.12 flight
 PASS: nested transforms: ground shadow anchors ball to player; sphere follows native lift
 PASS: native flight and ground transitions sampled in one frame without interpolation lag
 PASS: airborne ball and player alignment across all eleven calibrated stadiums; 2.5× camera retains sphere and shadow
@@ -31,6 +31,15 @@ PASS: combined ball/shadow group uses sphere centre rather than combined boundin
 PASS: explicitly selected unlabelled shadow supplies native flight cue
 PASS: explicit shadow hit test handles pointer-events:none without binding the pitch background
 PASS: source replacement clears stale shadow binding; missing ball is never fabricated
+
+v1.12 goal alignment
+PASS: unmarked pitch geometry overrides SVG padding; both goal lines, behind-goal and in-field positions map correctly
+PASS: translated source pitch and offset viewBox retain real goal-line coordinates
+PASS: corrected pitch calibration preserves intermediate rendered motion
+PASS: native goal-line ball coincides with netted goal mouth in all eleven stadiums and three camera views
+PASS: changing score never fabricates a ball position or snaps a reset ball into the net
+PASS: airborne ball behind either goal retains correct ground position, flight height and diagnostic source anchors
+PASS: unmarked outline detection ignores hidden/defs copies and reconnects after boundary replacement
 
 Unchanged scoreboard reader: previous passing standalone run
 PASS: unnamed playback bar with controls and glued React text nodes
