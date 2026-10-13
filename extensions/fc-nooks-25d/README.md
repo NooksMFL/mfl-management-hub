@@ -1,50 +1,78 @@
-# FC Nooks Match View 2.5D — v1.9.0
+# FC Nooks Match View 2.5D — v1.10.0
 
-Choose between Selhurst Park, Ironwood Lane and Harbour Park for the MFL Pro stadium overlay. Architecture, crowds, floodlights and dugouts use photographic backdrops packaged locally in `assets/`. Selhurst Park is a generated visual interpretation of the Crystal Palace ground, with approximate architectural detail. Live pitch markings, players, goals, nets and score displays are SVG constructed by packaged code. There are no remote image/CDN URLs, fonts, analytics, API requests or build steps in the extension. Keep the complete folder, including `assets`, when loading the extension.
+Chrome / Edge Manifest V3 extension for MFL Pro matches. Eleven photographic stadium backdrops are packaged locally, with live SVG pitch markings, players, ball, netted goals and scoreboards. The original rendered-CTM player movement foundation is preserved: one frame samples native players and ball, with no extra motion smoothing.
 
-## Install in Chrome or Edge
+## Install or update on Windows
 
-1. Unzip the release. Keep the resulting `fc-nooks-25d` folder in a permanent location.
-2. Disable/remove the previous FC Nooks extension to avoid two versions drawing overlays.
+1. Extract `FC-Nooks-2.5D-Extension-v1.10.zip`; keep the extracted `fc-nooks-25d` folder in a permanent location.
+2. Disable/remove older FC Nooks extensions so only one version draws the overlay.
 3. Open `chrome://extensions` or `edge://extensions` and enable **Developer mode**.
-4. Choose **Load unpacked** and select the folder containing `manifest.json`.
-5. Reload the MFL tab, open a Pro match at `https://app.playmfl.com/`, and click **FC Nooks · 2.5D**.
+4. Choose **Load unpacked** and select the extracted folder containing `manifest.json`. Keep the entire `assets` folder.
+5. Reload your MFL tab, open a Pro match and click **FC Nooks · 2.5D**.
 
-Close with the Close button, the floating toggle, Escape, or Alt+Shift+M. The overlay is view-only: close it to use the original match controls. The underlying match stays mounted and continues animating; it is never hidden with `display:none` or moved out of its DOM.
+For an existing unpacked installation, replace its complete folder, click **Reload** on the extension card and reload MFL. Close with the Close button, floating toggle, Escape or Alt+Shift+M. Close the overlay to use original match controls. The underlying match remains mounted and its SVG is never hidden with `display:none`.
 
-When updating files, click **Reload** on the extension card and reload the MFL tab. Only one version should be enabled.
+## Stadiums
 
-## Change stadium
+Use **Stadium** in the toolbar. Your choice is saved locally and restored on reload.
 
-Use the **Stadium** menu in the top toolbar to select **Selhurst Park**, **Ironwood Lane** or **Harbour Park**. Selhurst Park is the default. The selected stadium is saved in the extension's local storage and restored across tab reloads and browser sessions on the same profile.
+| Theme | Visual character |
+| --- | --- |
+| Selhurst Park | Red-and-blue stands and a compact floodlit bowl; default |
+| Ironwood Lane | Original brick-and-claret ground and industrial evening skyline |
+| Harbour Park | Original coastal arena with teal seating |
+| Wembley | Huge bowl and illuminated arch |
+| San Siro | Three tiers, spiral towers and red roof trusses |
+| Camp Nou | Sweeping open bowl and Barcelona skyline at dusk |
+| Craven Cottage | Compact riverside setting and brick pavilion |
+| The Dripping Pan | Small low stand, grassy banks and Lewes backdrop |
+| Bracken Moor | Small blue-and-yellow terraces in a hillside setting |
+| Sandygate | Tiny low stand, open boundaries and stone walls |
+| Minty Stadium | Mint-and-white ground, custom face crowd, banner and player heads |
 
-Switching changes the backdrop, stadium labels and screen alignment while retaining the player/ball nodes, rendered coordinates, scores and animation loop. Previous art remains visible until the new image loads. Missing-image notices retain the live pitch and allow switching to another installed stadium. If preference storage is unavailable, switching still works for the current session; Diagnostics reports the preference error.
+Named real grounds are generated artistic interpretations with approximate architecture, not surveyed replicas or official assets. Small grounds have one small display. Each theme provides pitch/screen calibration shared by all static geometry and moving entities.
 
-## Structure
+Switches retain player/ball nodes, the source tracker and animation loop. Art loads locally; stale image callbacks are ignored. Missing art reports an error, retains the inline live pitch and permits switching to another theme.
 
-- `tracking.js`: discovers MFL pitch/player/ball nodes, reads rendered screen CTMs, normalizes both entities against the same source bounds and recovers from replaced SVG nodes.
-- `scoreboard.js`: reads original MFL score/clock text, excludes extension content and reports unavailable values instead of inventing or retaining a previous match score.
-- `stadiums.js`: stadium names, packaged assets, per-stadium screen calibration and default choice.
-- `scene.js`: shared pitch calibration, live markings, goals, displays, nonblocking backdrop changes and inline image-failure fallback.
-- `assets/*.jpg`: locally packaged Selhurst Park, Ironwood Lane and Harbour Park art. Roof, crowds, dugouts and pitch texture are retained image pixels, not thousands of per-frame DOM elements.
-- `renderer.js`: directly places player/ball sprites from one source snapshot. No extra smoothing, transitions, extrapolation or motion clock.
-- `viewer.js`: shadow DOM interface, toggle, one requestAnimationFrame loop, ball selection, diagnostics and SPA lifecycle.
-- `viewer.css`: isolated extension UI styling; listed as a packaged accessible resource so the shadow stylesheet can load.
+## Minty's face
 
-Register a theme in `stadiums.js` using an image that matches the shared pitch camera. For other camera geometry, update scene calibration while preserving its return contract (`svg`, `actors`, `ball`, `scale`, `setStadium`, `stadiumId`, `updateScore`) and the shared `project(u,v)` function used for every pitch feature and moving entity. Do not add CSS transitions to actors or read raw inline translation targets.
+Select **Minty Stadium**, then **Choose Minty face**, and choose his original PNG/JPG/WebP photo under 1 MB. It appears on player heads, repeated across the crowd and on the large stand banner. Team-colour shirts and players' foot positions remain intact. Face effects appear only in Minty Stadium.
 
-## Ball selection and diagnostics
+The exact avatar pasted into chat was not available as a downloadable source file. No reconstructed substitute face is bundled. Minty Stadium works immediately; face effects require choosing the original photo once. The photo is read and stored locally in this browser profile, with no upload or remote request. It persists across tab reloads; if storage is unavailable, it remains usable for the current tab.
 
-Automatic ball discovery retains support for MFL's `puck`, `football` and `ball` names. If no ball is detected, choose **Select ball** and click the actual ball graphic on the original SVG pitch. Selection expires after 15 seconds; Escape cancels it. Selection is cleared when the source SVG or match changes. A missing ball is hidden, never guessed from a player or the centre spot.
+## Scoreboard and clock
 
-**Diagnostics** displays the source viewBox, player count, ball candidates, coordinate bounds and extracted scoreboard. It contains no token or authenticated network data. The diagnostics are inside the extension; there is no page-global debugging API.
+The reader supports compact playback rows, separate React text nodes, split score/clock digits, abbreviated or full team names, stoppage time, HT and FT. It reads the bound source every 100 ms independently of player/ball rendering. It never generates a local match clock. Hidden stale rows are ignored; replaced or hidden selected rows reconnect automatically.
 
-## Validation and limits
+The native top score bar stays exposed when detected near the top. If scores are missing or the wrong scoreboard is selected, choose **Select scoreboard** and click the actual score/clock row in the original MFL view. Escape or Cancel abandons selection. Unknown values show `—` / unavailable time and never retain another match's score. All visible stadium displays receive the same values.
 
-See `AUDIT.md` for the original-code audit and `VALIDATION.md` for checks performed. Chromium fixture validation checks extension injection and real browser SVG/CSS animation, not an authenticated live MFL match. Chrome and Edge live-match verification remains necessary.
+## Ball flight
 
-MFL DOM selectors are inferred from the supplied version, not a supported public MFL integration contract. Player IDs must still follow `match-v2-p<number>` and contain a circle. Coordinates use an explicit pitch marker when present, otherwise the original SVG viewBox / 105 × 68 fallback. If MFL introduces padded viewBoxes or changes its markup, update the adapter using an actual match DOM capture; do not tune stadium-specific CSS offsets.
+The native shadow's rendered centre supplies the ground coordinate. The ball's rendered separation above it supplies visual elevation. Both are read through the same SVG matrices as players, in one animation frame. Landing removes lift immediately; there is no inferred flight duration or extra smoothing.
 
-Scoreboard extraction supports the supplied abbreviated header format and a full-name fallback, plus separate clock/timer elements. Unrecognised markup displays an em dash / unavailable clock. Match times are always extracted; no synthetic local match clock is run. Multiple simultaneous rendered match pitches select the first visible matching SVG; the standard workflow assumes one match pitch.
+For an unlabelled shadow, use **Set ball shadow**, then click its ground shadow in the original view. If the ball itself is missing, use **Select ball**. Selections clear when the source SVG or match changes. A missing ball is hidden, never guessed. Selection expires after 15 seconds; Escape cancels it.
 
-This is a lightweight fake 2.5D stadium, not a 3D engine. The supplied Ricky video (`screen-capture (6).mp4`) guided the photographic stadium approach: layered stands, hospitality ribbon, detailed roof, dense crowds, compact broadcast framing and slender player silhouettes. Ironwood Lane uses traditional red-brick architecture, claret seating and industrial-town night lighting. This matches the visual approach, not the exact stadium or its source assets. Fine player depth occlusion and ball height are not available from the supplied source; the ball draws above player sprites for readability.
+Without a usable shadow, native rendered ball growth/scaling can provide an approximate visual cue. Without either cue, the ball remains grounded. Height maps the source animation visually; it is not a physical measurement in metres. **Diagnostics** reports flight cue, normalized ground coordinates, height, ball/shadow candidates, score source, bounds, image state and preference errors.
+
+## Architecture
+
+- `tracking.js`: native SVG discovery, rendered screen CTMs, shared bounds, shadow/flight extraction and replaced-node recovery.
+- `scoreboard.js`: score/clock parsing and source binding, independent of actor rendering.
+- `stadiums.js`: theme names, local assets, per-theme pitch/screen calibration and default choice.
+- `scene.js`: camera, live markings/goals/displays, Minty decoration and image-failure fallback.
+- `renderer.js`: direct placement from one snapshot, with separate ground shadow and airborne sphere.
+- `viewer.js`: shadow DOM UI, stadium/photo preferences, one motion requestAnimationFrame, independent score polling and SPA lifecycle.
+- `viewer.css`: isolated UI styling.
+- `assets/*.jpg`: all eleven local backdrops; no remote image/CDN or font dependency.
+
+To add a theme, register it in `stadiums.js`, package its image and declare it in manifest resources. Optional `pitch` calibration defines `farLeft`, `farRight`, `farY`, `nearLeft`, `nearRight`, `nearY`; `screens` lists physical displays. Scene `project(u,v)`, `scale(v)` and `flightScale(v)` serve every pitch feature and actor. Never add independent CSS offsets, actor transitions, raw inline animation target reads or a second motion clock.
+
+No API credentials, runtime dependencies or build step are needed to load the extension. It does not modify the management hub app or send authenticated requests.
+
+## Validation and limitations
+
+See `AUDIT.md` and `VALIDATION.md`. Real Chromium fixture suites exercise rendered motion, score updates, eleven local images, flight, photo storage, navigation and failure recovery. Actual authenticated MFL Pro matches and installed Chrome/Edge operation remain unverified: the development browser blocks unpacked extensions through administrator policy.
+
+MFL selectors come from the supplied extension, not a supported integration contract. Players still need `match-v2-p<number>` IDs and a circle. Source bounds prefer an explicit pitch marker, otherwise the viewBox / 105 × 68 fallback. The first visible matching SVG is used when multiple pitches exist. Actual MFL ball/shadow markup has not been inspected; manual selection supplies a fallback. A source DOM capture may be needed if MFL changes these conventions.
+
+This is a fake 2.5D overlay. Fine depth occlusion is approximate; the ball draws above player sprites for readability. Live user-browser checks remain necessary before calling it fully stable on MFL.

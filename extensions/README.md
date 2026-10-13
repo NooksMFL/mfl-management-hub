@@ -1,19 +1,21 @@
 # FC Nooks 2.5D match extension
 
-Chrome / Edge Manifest V3 extension for `https://app.playmfl.com/*`.
+[Download the ready-to-load v1.10 ZIP](./FC-Nooks-2.5D-Extension-v1.10.zip?raw=true)
 
-[Download the ready-to-load v1.9 ZIP](./FC-Nooks-2.5D-Extension-v1.9.zip?raw=true)
-
-1. Download and unzip the archive on your PC.
-2. Disable the previous FC Nooks extension, if installed.
+1. Download and extract the ZIP on Windows.
+2. Disable the older FC Nooks extension.
 3. Open `chrome://extensions` or `edge://extensions` and enable **Developer mode**.
-4. Click **Load unpacked** and select the unzipped `fc-nooks-25d` folder containing `manifest.json`.
-5. Reload MFL, open a Pro match, and click **FC Nooks · 2.5D**.
+4. Click **Load unpacked** and select the extracted `fc-nooks-25d` folder containing `manifest.json`.
+5. Reload MFL, open a Pro match and click **FC Nooks · 2.5D**.
 
-Use the **Stadium** menu to switch between **Selhurst Park**, **Ironwood Lane** and **Harbour Park**. Selhurst Park is a generated visual interpretation with approximate architectural detail. Your choice is saved locally in the extension. Keep the complete extension folder, including all three images in `assets/`. The stadium crowd, roof, floodlights and dugouts are packaged locally; the extension does not fetch remote stadium images. Rendered SVG tracking synchronizes players and the ball without added smoothing. Close with the toggle, Close button, Escape or Alt+Shift+M.
+Seven new real-ground-inspired themes—Wembley, San Siro, Camp Nou, Craven Cottage, The Dripping Pan, Bracken Moor and Sandygate—plus Minty Stadium join Selhurst Park, Ironwood Lane and Harbour Park. All eleven backdrops are packaged locally; named stadiums are approximate artistic interpretations.
 
-[Editable source and full instructions](./fc-nooks-25d/README.md) · [Original code audit](./fc-nooks-25d/AUDIT.md) · [Validation and live-test checklist](./fc-nooks-25d/VALIDATION.md)
+Score extraction now handles compact/split playback-row markup, refreshes independently every 100 ms and offers **Select scoreboard**. Ball flight follows rendered ball/shadow separation, with **Set ball shadow** for unlabelled shadows. The rendered player movement foundation and single motion loop are preserved.
 
-Chromium fixture checks pass for animated movement, ball alignment, scoreboard/clock extraction, 22 players, resizing, SPA navigation and missing-image fallback. Real authenticated MFL matches and unpacked extension installation remain unverified because the development browser blocks unpacked installation through administrator policy.
+In **Minty Stadium**, use **Choose Minty face** once to select his original photo locally. It populates player heads, repeated crowd faces and the stand banner and is remembered on this browser. The chat avatar was unavailable as a downloadable source file, so no substitute portrait is bundled.
 
-The standalone ZIP contains the same runtime source, local image, documentation and tests as the source folder. Test dependencies are needed only to run the fixture, not to install the extension. This extension does not modify the Streamlit management hub.
+[Source and full instructions](./fc-nooks-25d/README.md) · [Original code audit](./fc-nooks-25d/AUDIT.md) · [Validation](./fc-nooks-25d/VALIDATION.md)
+
+Chromium fixture checks pass for motion, synchronized flight, score/clock updates, eleven stadiums, face storage, 22 players, resizing, navigation and recovery. Authenticated MFL and actual unpacked Chrome/Edge installation remain unverified: the development browser blocks installation through administrator policy.
+
+The ZIP includes runtime source, local images, documentation and tests. Test dependencies are needed only for development. Older ZIPs remain for rollback. This extension does not modify the Streamlit management hub.

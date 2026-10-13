@@ -1,4 +1,3 @@
 node_modules/
-harbour-park-*.png
-ironwood-lane-*.png
-selhurst-park-*.png
+*-desktop.png
+*-mobile.png

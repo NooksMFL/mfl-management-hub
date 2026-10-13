@@ -54,3 +54,16 @@ Added a generated Selhurst Park-inspired red-and-blue scene and restored the pac
 The toolbar Stadium menu switches locally packaged backdrops and labels without recreating player/ball nodes, clearing tracker caches or changing the animation clock. New art decodes behind the existing scene; stale image events are ignored by a request revision. Missing art retains an inline pitch and supports selecting another stadium. Preference storage uses `chrome.storage.local`, with the Manifest V3 `storage` permission. A delayed read cannot overwrite a later user choice, and invalid saved values fall back to Selhurst Park.
 
 `tracking.js`, `scoreboard.js` and `renderer.js` are byte-for-byte unchanged from v1.8. Shared field projection is unchanged. Browser fixture coverage now includes switching during motion, all three local images, storage persistence, invalid preferences, delayed reads, storage unavailability and failed-image recovery.
+
+
+## v1.10: scoreboard binding, native ball flight and eleven stadiums
+
+The user reports that MFL's original score bar works while the overlay scoreboard stalls. The old reader relied on named header/score wrappers and whitespace-separated team/score strings. Compact playback rows with glued React text, separately rendered digits or unnamed wrappers could fail extraction. Browser fixtures reproduce those format failures; exact authenticated MFL markup remains unavailable.
+
+The new reader binds a native source, preserves text-node boundaries, discovers compact unnamed rows, ignores hidden copies and independently polls every 100 ms. Native top score content stays exposed and manual selection supplies a fallback. Parsing errors cannot reset tracks or stop motion. Navigation and responsive source replacement reconnect the reader; unknown scores remain unknown.
+
+The ball previously had one bounding-box centre and was always drawn on the ground. The user confirms MFL shows flight through separation from a shadow. Tracking now reads shadow and sphere using the unchanged `svgPosition()` matrix function. Shadow centre anchors ground position; separation supplies visual lift. A combined ball/shadow group isolates its sphere. Manual shadow selection supports unlabelled markup. A rendered-size cue is a fallback, not a flight simulation. Player sampling and one requestAnimationFrame are retained without interpolation.
+
+Seven new real-ground-inspired local images cover large and tiny grounds. Minty Stadium is an eighth addition, making eleven themes. Per-theme registry calibration changes one scene camera shared by markings, goals and actors. Switches rebuild static geometry while retaining actor nodes and tracker state. Tiny grounds show one physical display only.
+
+Minty decoration uses a locally selected original photo for crowd faces, banner and player heads, persisted in extension storage. The inline chat avatar lacked a downloadable file; an inaccurate generated portrait was rejected and never packaged. The release requires selecting the original photo once. Face effects remain separate from source extraction and appear only in Minty Stadium.

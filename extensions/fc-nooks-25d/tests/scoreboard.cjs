@@ -1,0 +1,51 @@
+const {chromium}=require('playwright');
+const fs=require('fs');
+const path=require('path');
+const assert=require('node:assert/strict');
+const root=path.resolve(__dirname,'..');
+(async()=>{
+  const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH || (fs.existsSync('/usr/bin/chromium')?'/usr/bin/chromium':undefined),headless:true,args:['--no-sandbox']});
+  const page=await browser.newPage({viewport:{width:1600,height:1050}});
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.setContent('<style>body{margin:0;font:16px Arial}.row{display:flex;gap:0;padding:16px}span{display:inline-block}</style><main id="match"><div id="native"></div><svg viewBox="0 0 105 68" style="width:900px;height:600px"><g id="match-v2-p1"><circle r="1"/></g></svg></main>');
+  for(const file of ['tracking.js','scoreboard.js'])await page.addScriptTag({content:fs.readFileSync(root+'/'+file,'utf8')});
+  async function read(html){await page.locator('#native').evaluate((el,value)=>{el.innerHTML=value;},html);return page.evaluate(()=>{FCN25D.scoreboard.reset();return FCN25D.scoreboard.read();});}
+  let data=await read('<div class="row"><span>Extended Highlights</span><span>1x</span><span>37:23</span><span>IP</span><span>0-0</span><span>AVL</span></div>');
+  assert.equal(data.score,'0 – 0');assert.equal(data.clock,'37:23');assert.equal(data.home,'IP');
+  console.log('PASS: unnamed playback bar with controls and glued React text nodes');
+  await page.locator('#native').evaluate(el=>{el.querySelectorAll('span')[2].textContent='37:24';el.querySelectorAll('span')[4].textContent='1-0';});
+  data=await page.evaluate(()=>FCN25D.scoreboard.read());assert.equal(data.score,'1 – 0');assert.equal(data.clock,'37:24');
+  console.log('PASS: native clock ticks and goals refresh through the bound source');
+  data=await read('<div class="row"><span>45</span><span>:</span><span>00</span><span>IP</span><span>2</span><span>-</span><span>1</span><span>AVL</span></div>');
+  assert.equal(data.score,'2 – 1');assert.equal(data.clock,'45:00');
+  data=await read('<div class="row"><span>37:25</span><span>IP</span><span>2</span><span>1</span><span>AVL</span></div>');
+  assert.equal(data.score,'2 – 1');assert.equal(data.clock,'37:25');
+  console.log('PASS: split score digits, split clock digits and CSS-only separator');
+  data=await read('<div class="row">Extended Highlights 1x 37:26IP2-1AVL</div>');
+  assert.equal(data.score,'2 – 1');assert.equal(data.clock,'37:26');
+  console.log('PASS: compact clock/team/score text without whitespace');
+  data=await read('<div class="row"><span>90:00 + 3</span><span>Halesowen Town</span><span>3-2</span><span>Swindon United</span></div>');
+  assert.equal(data.home,'Halesowen Town');assert.equal(data.away,'Swindon United');assert.equal(data.clock,'90:00 + 3');
+  for(const state of ['HT','FT']){
+    data=await read(`<div class="row"><span>${state}</span><span>IP</span><span>3-2</span><span>AVL</span></div>`);assert.equal(data.clock,state);assert.equal(data.score,'3 – 2');
+  }
+  console.log('PASS: full team names, stoppage time, half time and full time');
+  data=await read('<div style="display:none" class="score">00:00 IP 0-0 AVL</div><div class="row"><span>37:27</span><span>IP</span><span>4-2</span><span>AVL</span></div>');
+  assert.equal(data.score,'4 – 2');assert.equal(data.clock,'37:27');
+  console.log('PASS: hidden stale score copies are ignored');
+  await page.evaluate(()=>{document.querySelector('#native .row').replaceWith(document.querySelector('#native .row').cloneNode(true));document.querySelector('#native .row span').textContent='37:28';});
+  data=await page.evaluate(()=>FCN25D.scoreboard.read());assert.equal(data.clock,'37:28');
+  const selected=await page.evaluate(()=>FCN25D.scoreboard.select(document.querySelector('#native .row span:nth-child(3)')));assert.ok(selected);
+  assert.equal(await page.evaluate(()=>FCN25D.scoreboard.diagnostics().mode),'selected');
+  await page.locator('#native .row span:nth-child(3)').evaluate(el=>el.textContent='5-2');
+  data=await page.evaluate(()=>FCN25D.scoreboard.read());assert.equal(data.score,'5 – 2');
+  console.log('PASS: source replacement and selected-scoreboard binding');
+  await page.evaluate(()=>{document.querySelector('#native .row').style.display='none';document.querySelector('#native').insertAdjacentHTML('beforeend','<div class="row">38:00 IP 6-2 AVL</div>');});
+  data=await page.evaluate(()=>FCN25D.scoreboard.read());assert.equal(data.clock,'38:00');assert.equal(data.score,'6 – 2');
+  console.log('PASS: hidden manually selected scoreboard reconnects to visible responsive replacement');
+  data=await read('<div class="row"><span>37:29</span><span>IP</span><span>score unavailable</span><span>AVL</span></div>');
+  assert.equal(data.found,false);assert.equal(data.score,'—');
+  assert.deepEqual(errors,[]);
+  console.log('PASS: unknown scores remain unknown; time is never fabricated');
+  await browser.close();
+})().catch(error=>{console.error(error);process.exit(1);});
