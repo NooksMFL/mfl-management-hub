@@ -836,7 +836,7 @@ if "wallet" not in st.session_state:
     st.session_state.wallet=saved_wallet.strip().lower() if valid_wallet(saved_wallet) else ""
 
 # ---------------- SIDEBAR ----------------
-nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Transfer Window","Transfer Bargains","Watchlist","Compare","Insights","Sync Centre"]
+nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Squad Builder","Transfer Window","Transfer Bargains","Watchlist","Compare","Insights","Sync Centre"]
 query_page=st.query_params.get("page","Home")
 if query_page not in nav_pages:
     query_page="Home"
@@ -1621,6 +1621,59 @@ elif page=="Club Development":
                              "pac":"PAC ↑","sho":"SHO ↑","pas":"PAS ↑","dri":"DRI ↑","defn":"DEF ↑","phy":"PHY ↑"}),
             use_container_width=True,hide_index=True,height=520
         )
+
+
+elif page=="Squad Builder":
+    import squad_builder as squads
+    st.markdown('<div class="suite-hero"><div class="suite-kicker">AGENCY SQUAD PLANNING</div><div class="suite-title">Squad Builder</div><div class="suite-copy">Turn your agency into balanced 25-player squads for Stone, Ice, Spark and Flint.</div></div>',unsafe_allow_html=True)
+    if not wallet:
+        st.info("Connect your wallet in the sidebar to build your squads.")
+        st.stop()
+    sixty_league=st.radio("Assign 60-rated players to",["Spark","Flint"],horizontal=True,
+        help="Your league ranges overlap at 60. Choose one league so a player is never assigned twice.")
+    st.caption("Stone: 73+ · Ice: 67–72 · " + ("Spark: 60–66 · Flint: below 60" if sixty_league=="Spark" else "Spark: 61–66 · Flint: 60 and below"))
+    st.caption("Each squad targets 3 goalkeepers, 8 defenders, 8 midfielders and 6 forwards. Strongest squads are built first using listed positions; versatile players fill a suitable role. Each player appears once. These are planning suggestions and do not change MFL club assignments.")
+    roster=shared.roster_rows(wallet)
+    if roster:
+        records=[{"player_id":r["player_id"],"player":r["player_name"],"position":r["position"],
+                  "current_ovr":r["overall"],"club":r["club"]} for r in roster]
+        st.caption(f"Using {len(records)} players from your shared wallet roster · refreshed {age_text(shared.freshness(wallet).get('roster'))}. Refresh in Sync Centre after transfers or rating changes.")
+    else:
+        cached=agency_frame(wallet)
+        records=cached.rename(columns={"player_name":"player"}).to_dict("records") if not cached.empty else []
+        if records:
+            st.warning("Using saved agency analysis. It may include players you have since sold or older ratings. Refresh your shared wallet in Sync Centre for current squad suggestions.")
+    if not records:
+        st.info("Load your wallet in Sync Centre or Agency Development, then return here. Squads generate automatically from the saved players.")
+        st.stop()
+    built,excluded=squads.build_squads(records,sixty_league)
+    complete=sum(not s["shortages"] for league_squads in built.values() for s in league_squads)
+    cols=st.columns(3)
+    cols[0].metric("Players available",len(records))
+    cols[1].metric("Complete squads",complete)
+    cols[2].metric("Need player data",len(excluded))
+    exports=[]
+    for tab,league in zip(st.tabs(list(squads.LEAGUES)),squads.LEAGUES):
+        with tab:
+            league_squads=built[league]
+            if not league_squads:
+                st.info(f"No players with a suitable rating and recognised position for {league}.")
+            for number,squad in enumerate(league_squads,1):
+                players=squad["players"]
+                average=sum(p["current_ovr"] for p in players)/len(players)
+                st.subheader(f"{league} squad {number} · {len(players)}/25 players · {average:.1f} average OVR")
+                if squad["shortages"]:
+                    st.warning("Incomplete squad — still needed: " + ", ".join(f"{count} {role.lower()}" for role,count in squad["shortages"].items()) + ".")
+                display=pd.DataFrame([{"Role":p["assigned_role"],"Player":p.get("player",f"Player {p['player_id']}"),
+                    "Player ID":p["player_id"],"Positions":p["position"],"OVR":p["current_ovr"],"Current club":p.get("club")} for p in players])
+                st.dataframe(display,hide_index=True,use_container_width=True)
+                exports.extend({"League":league,"Squad":number,**row} for row in display.to_dict("records"))
+    if exports:
+        st.download_button("Download all squads CSV",pd.DataFrame(exports).to_csv(index=False).encode("utf-8"),
+                           file_name="mfl_squads.csv",mime="text/csv")
+    if excluded:
+        with st.expander(f"Players needing rating or position data ({len(excluded)})"):
+            st.dataframe(pd.DataFrame(excluded).reindex(columns=["player_id","player","position","current_ovr","reason"]),hide_index=True,use_container_width=True)
 
 
 elif page=="Transfer Window":
