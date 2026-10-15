@@ -17,7 +17,7 @@ class SquadBuilderTests(unittest.TestCase):
 
     def test_two_complete_squads_with_no_duplicates(self):
         records=[]
-        for position,count in [("GK",4),("CB",16),("CM",18),("ST",12)]:
+        for position,count in [("GK",4),("LB",4),("CB",8),("RB",4),("CDM",4),("CM",6),("LW",4),("RW",4),("ST",12)]:
             start=len(records)
             records.extend(player(start+i,position,71 if i%2 else 68) for i in range(count))
         built,excluded=build_squads(records)
@@ -35,18 +35,27 @@ class SquadBuilderTests(unittest.TestCase):
 
     def test_versatile_player_preserves_specialist_slot(self):
         records=[player(0,"CB / CM",72)]
-        records += [player(i+1,"CB",70) for i in range(8)]
-        records += [player(i+9,"CM",70) for i in range(8)]
-        records += [player(i+17,"GK",70) for i in range(2)]
-        records += [player(i+19,"ST",70) for i in range(6)]
+        for pos,count in [("GK",2),("LB",2),("CB",4),("RB",2),("CDM",2),("CM",2),("LW",4),("ST",6)]:
+            start=len(records)
+            records.extend(player(start+i,pos) for i in range(count))
         squad=build_squads(records)[0]["Ice"][0]
         self.assertFalse(squad["shortages"])
-        self.assertEqual(next(p for p in squad["players"] if p["player_id"]==0)["assigned_role"],"Midfielder")
+        self.assertEqual(next(p for p in squad["players"] if p["player_id"]==0)["assigned_role"],"CM")
 
     def test_shortages_are_not_filled_out_of_position(self):
         built,_=build_squads([player(i,"CB") for i in range(25)])
-        self.assertEqual([len(s["players"]) for s in built["Ice"]],[8,8,8,1])
-        self.assertEqual(built["Ice"][0]["shortages"],{"Goalkeeper":2,"Midfielder":9,"Forward":6})
+        self.assertEqual([len(s["players"]) for s in built["Ice"]],[10,10,5])
+        self.assertEqual(built["Ice"][0]["shortages"],{"Goalkeeper":2,"LB":2,"RB":2,"CDM":2,"CM":3,"Winger":4})
+
+    def test_required_positions_take_priority_over_flexible_places(self):
+        built,_=build_squads([player(1,"LB",70),player(2,"CM",70),player(3,"ST",72)])
+        assigned={p["player_id"]:p["assigned_role"] for p in built["Ice"][0]["players"]}
+        self.assertEqual(assigned,{1:"LB",2:"CM",3:"Additional outfield"})
+
+    def test_position_aliases(self):
+        from squad_builder import position_groups
+        for position,role in [("LWB","LB"),("RWB","RB"),("DM","CDM"),("LM","Winger"),("RW","Winger")]:
+            self.assertIn(role,position_groups(position))
 
     def test_deduplicates_excludes_unknown_and_separates_leagues(self):
         built,excluded=build_squads([player(1,"GK",73),player(1,"GK",73),player(2,"???"),player(3,"CM",None),player(4,"ST",60)])

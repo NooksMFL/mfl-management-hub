@@ -1634,7 +1634,7 @@ elif page=="Squad Builder":
     sixty_league=st.radio("Assign 60-rated players to",["Spark","Flint"],horizontal=True,
         help="Your league ranges overlap at 60. Choose one league so a player is never assigned twice.")
     st.caption("Stone: 73+ · Ice: 67–72 · " + ("Spark: 60–66 · Flint: below 60" if sixty_league=="Spark" else "Spark: 61–66 · Flint: 60 and below"))
-    st.caption("Each squad targets 2 goalkeepers, 8 defenders, 9 midfielders and 6 forwards. Strongest squads are built first using listed positions; versatile players fill a suitable role. Goalkeepers can cross league rating bands: closest ratings are preferred, with one starter per squad before backups. Surplus keepers are left out. Each player appears once. These are planning suggestions and do not change MFL club assignments.")
+    st.caption("Each 25-player squad targets 2 goalkeepers, 2 LB, 4 CB, 2 RB, 2 CDM, 3 CM and 4 wingers, plus 6 additional outfield players. LB/LWB and RB/RWB count as full-back cover; LW/RW/LM/RM/LF/RF count as wingers. Required positions are filled before the flexible places. Strongest squads are built first using listed positions; versatile players fill a suitable role. Goalkeepers can cross league rating bands: closest ratings are preferred, with one starter per squad before backups. Surplus keepers are left out. Each player appears once. These are planning suggestions and do not change MFL club assignments.")
     roster=shared.roster_rows(wallet)
     if roster:
         records=[{"player_id":r["player_id"],"player":r["player_name"],"position":r["position"],

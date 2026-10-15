@@ -3,12 +3,17 @@ import math
 import re
 
 LEAGUES = ("Stone", "Ice", "Spark", "Flint")
-QUOTAS = {"Goalkeeper": 2, "Defender": 8, "Midfielder": 9, "Forward": 6}
+QUOTAS = {"Goalkeeper": 2, "LB": 2, "CB": 4, "RB": 2, "CDM": 2, "CM": 3, "Winger": 4, "Additional outfield": 6}
 POSITIONS = {
     "Goalkeeper": {"GK"},
-    "Defender": {"CB", "LB", "RB", "LWB", "RWB", "SW"},
-    "Midfielder": {"DM", "CDM", "CM", "LM", "RM", "AM", "CAM", "LDM", "RDM", "LCM", "RCM"},
-    "Forward": {"ST", "CF", "LW", "RW", "LF", "RF", "SS"},
+    "LB": {"LB", "LWB"},
+    "CB": {"CB", "SW"},
+    "RB": {"RB", "RWB"},
+    "CDM": {"DM", "CDM", "LDM", "RDM"},
+    "CM": {"CM", "LCM", "RCM"},
+    "Winger": {"LW", "RW", "LM", "RM", "LF", "RF"},
+    "Additional outfield": {"LB", "LWB", "CB", "SW", "RB", "RWB", "DM", "CDM", "LDM", "RDM",
+                            "CM", "LCM", "RCM", "LW", "RW", "LM", "RM", "LF", "RF", "ST", "CF", "SS", "AM", "CAM"},
 }
 
 
@@ -44,7 +49,7 @@ def has_current_club(value):
 def _assign(players, quotas=None):
     """Maximum-weight assignment to 25 role slots, with dummy empty slots.
 
-    Hungarian assignment prioritises filled slots, then total OVR. Unlike a
+    Hungarian assignment prioritises mandatory positions, then squad size and OVR. Unlike a
     greedy selection, a versatile player cannot displace the only specialist
     needed for another role.
     """
@@ -53,7 +58,7 @@ def _assign(players, quotas=None):
     costs = []
     for role in slots:
         costs.append([
-            -(100000 + min(p["current_ovr"], 1000)) if role in p["groups"] else 1000000
+            -((100000 if role == "Additional outfield" else 10000000) + min(p["current_ovr"], 1000)) if role in p["groups"] else 1000000
             for p in players
         ] + [0] * n)
     u, v, matched, way = [0] * (n+1), [0] * (m+1), [0] * (m+1), [0] * (m+1)
