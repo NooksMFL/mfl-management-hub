@@ -1625,6 +1625,8 @@ elif page=="Club Development":
 
 elif page=="Squad Builder":
     import squad_builder as squads
+    import squad_cards
+    st.markdown(squad_cards.STYLE,unsafe_allow_html=True)
     st.markdown('<div class="suite-hero"><div class="suite-kicker">AGENCY SQUAD PLANNING</div><div class="suite-title">Squad Builder</div><div class="suite-copy">Turn your agency into balanced 25-player squads for Stone, Ice, Spark and Flint.</div></div>',unsafe_allow_html=True)
     if not wallet:
         st.info("Connect your wallet in the sidebar to build your squads.")
@@ -1636,7 +1638,7 @@ elif page=="Squad Builder":
     roster=shared.roster_rows(wallet)
     if roster:
         records=[{"player_id":r["player_id"],"player":r["player_name"],"position":r["position"],
-                  "current_ovr":r["overall"],"club":r["club"]} for r in roster]
+                  "current_ovr":r["overall"],"club":r["club"],"age":r.get("age")} for r in roster]
         st.caption(f"Using {len(records)} players from your shared wallet roster · refreshed {age_text(shared.freshness(wallet).get('roster'))}. Refresh in Sync Centre after transfers or rating changes.")
     else:
         cached=agency_frame(wallet)
@@ -1667,8 +1669,10 @@ elif page=="Squad Builder":
                 if squad["shortages"]:
                     st.warning("Incomplete squad — still needed: " + ", ".join(f"{count} {role.lower()}" for role,count in squad["shortages"].items()) + ".")
                 display=pd.DataFrame([{"Role":p["assigned_role"],"Player":p.get("player",f"Player {p['player_id']}"),
-                    "Player ID":p["player_id"],"Positions":p["position"],"OVR":p["current_ovr"],"Current club":p.get("club")} for p in players])
-                st.dataframe(display,hide_index=True,use_container_width=True)
+                    "Player ID":p["player_id"],"Positions":p["position"],"Age":squad_cards.age_label(p.get("age")),"OVR":p["current_ovr"],"Current club":p.get("club")} for p in players])
+                st.markdown(squad_cards.roster_html(players),unsafe_allow_html=True)
+                with st.expander("View squad as a table"):
+                    st.dataframe(display,hide_index=True,use_container_width=True)
                 exports.extend({"League":league,"Squad":number,**row} for row in display.to_dict("records"))
     if exports:
         st.download_button("Download all squads CSV",pd.DataFrame(exports).to_csv(index=False).encode("utf-8"),
