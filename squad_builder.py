@@ -35,6 +35,12 @@ def position_groups(value):
     return {group for group, positions in POSITIONS.items() if tokens & positions}
 
 
+def has_current_club(value):
+    return isinstance(value, str) and value.strip().lower() not in {
+        "", "none", "null", "nan", "n/a", "no club", "retired", "-", "—"
+    }
+
+
 def _assign(players):
     """Maximum-weight assignment to 25 role slots, with dummy empty slots.
 
@@ -98,6 +104,9 @@ def build_squads(records, sixty_league="Spark"):
         if pid in seen:
             continue
         seen.add(pid)
+        if not has_current_club(row.get("club")):
+            excluded.append({**row, "reason": "Retired / no current club"})
+            continue
         league = league_for(row.get("current_ovr"), sixty_league)
         groups = position_groups(row.get("position"))
         if league is None or not groups:

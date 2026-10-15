@@ -1648,10 +1648,12 @@ elif page=="Squad Builder":
         st.stop()
     built,excluded=squads.build_squads(records,sixty_league)
     complete=sum(not s["shortages"] for league_squads in built.values() for s in league_squads)
+    retired=sum(r["reason"]=="Retired / no current club" for r in excluded)
     cols=st.columns(3)
-    cols[0].metric("Players available",len(records))
+    cols[0].metric("Players available",len(records)-len(excluded))
     cols[1].metric("Complete squads",complete)
-    cols[2].metric("Need player data",len(excluded))
+    cols[2].metric("Retired players excluded",retired)
+    st.caption("Players without a current club are treated as retired and excluded from every squad and formation.")
     exports=[]
     for tab,league in zip(st.tabs(list(squads.LEAGUES)),squads.LEAGUES):
         with tab:
@@ -1671,8 +1673,15 @@ elif page=="Squad Builder":
     if exports:
         st.download_button("Download all squads CSV",pd.DataFrame(exports).to_csv(index=False).encode("utf-8"),
                            file_name="mfl_squads.csv",mime="text/csv")
+        import formation_board
+        st.subheader("Formation planner")
+        options={f"{league} squad {number}": (league,number,squad) for league,league_squads in built.items()
+                 for number,squad in enumerate(league_squads,1)}
+        selected_squad=st.selectbox("Squad to arrange",list(options),key="formation_squad")
+        selected_league,selected_number,selected=options[selected_squad]
+        formation_board.render_board(selected["players"],f"mfl_formation_v1_{wallet}_{sixty_league}_{selected_league}_{selected_number}")
     if excluded:
-        with st.expander(f"Players needing rating or position data ({len(excluded)})"):
+        with st.expander(f"Excluded players ({len(excluded)})"):
             st.dataframe(pd.DataFrame(excluded).reindex(columns=["player_id","player","position","current_ovr","reason"]),hide_index=True,use_container_width=True)
 
 

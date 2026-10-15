@@ -4,7 +4,7 @@ from squad_builder import QUOTAS, build_squads, league_for
 
 
 def player(pid, position, rating=70):
-    return {"player_id": pid, "player": f"Player {pid}", "position": position, "current_ovr": rating}
+    return {"player_id": pid, "player": f"Player {pid}", "position": position, "current_ovr": rating, "club": "Test Club"}
 
 
 class SquadBuilderTests(unittest.TestCase):
@@ -59,6 +59,15 @@ class SquadBuilderTests(unittest.TestCase):
         built,excluded=build_squads([])
         self.assertTrue(all(not squads for squads in built.values()))
         self.assertFalse(excluded)
+
+    def test_retired_players_are_excluded_from_every_league(self):
+        records=[{**player(i,"GK",rating),"club":club} for i,(rating,club) in enumerate([
+            (75,None),(70,""),(63,"   "),(55,float("nan")),(70,"Retired"),(70,"No club")])]
+        records.append(player(99,"GK",70))
+        built,excluded=build_squads(records)
+        self.assertEqual(len(excluded),6)
+        self.assertTrue(all(p["reason"]=="Retired / no current club" for p in excluded))
+        self.assertEqual([p["player_id"] for s in built["Ice"] for p in s["players"]],[99])
 
 
 if __name__ == "__main__":
