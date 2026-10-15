@@ -37,7 +37,7 @@ class SquadBuilderPageTests(unittest.TestCase):
         with shared.db() as c:
             c.executemany(
                 "INSERT INTO roster(wallet,player_id,player_name,position,overall,club) VALUES(?,?,?,?,?,?)",
-                [(wallet,i,f"Player {i}",pos,60,"Test Club") for i,pos in enumerate(["GK"]*3+["CB"]*8+["CM"]*8+["ST"]*6)],
+                [(wallet,i,f"Player {i}",pos,60,"Test Club") for i,pos in enumerate(["GK"]*2+["CB"]*8+["CM"]*9+["ST"]*6)],
             )
             c.execute("INSERT INTO roster(wallet,player_id,player_name,position,overall) VALUES(?,?,?,?,?)",
                       (wallet,999,"Retired player","GK",60))

@@ -3,7 +3,7 @@ import math
 import re
 
 LEAGUES = ("Stone", "Ice", "Spark", "Flint")
-QUOTAS = {"Goalkeeper": 3, "Defender": 8, "Midfielder": 8, "Forward": 6}
+QUOTAS = {"Goalkeeper": 2, "Defender": 8, "Midfielder": 9, "Forward": 6}
 POSITIONS = {
     "Goalkeeper": {"GK"},
     "Defender": {"CB", "LB", "RB", "LWB", "RWB", "SW"},
@@ -41,14 +41,14 @@ def has_current_club(value):
     }
 
 
-def _assign(players):
+def _assign(players, quotas=None):
     """Maximum-weight assignment to 25 role slots, with dummy empty slots.
 
     Hungarian assignment prioritises filled slots, then total OVR. Unlike a
     greedy selection, a versatile player cannot displace the only specialist
     needed for another role.
     """
-    slots = [role for role, count in QUOTAS.items() for _ in range(count)]
+    slots = [role for role, count in (QUOTAS if quotas is None else quotas).items() for _ in range(count)]
     n, m = len(slots), len(players) + len(slots)
     costs = []
     for role in slots:
@@ -94,6 +94,7 @@ def _assign(players):
 def build_squads(records, sixty_league="Spark"):
     pools = {league: [] for league in LEAGUES}
     excluded, seen = [], set()
+    keepers = []
     for row in records:
         row = dict(row)
         try:
@@ -112,13 +113,17 @@ def build_squads(records, sixty_league="Spark"):
         if league is None or not groups:
             excluded.append({**row, "reason": "Missing rating" if league is None else "Unknown position"})
             continue
-        pools[league].append({**row, "player_id": pid, "current_ovr": float(row["current_ovr"]), "groups": groups})
+        candidate = {**row, "player_id": pid, "current_ovr": float(row["current_ovr"]), "groups": groups}
+        if "Goalkeeper" in groups:
+            keepers.append(candidate)
+        else:
+            pools[league].append(candidate)
     result = {}
     for league, pool in pools.items():
         pool.sort(key=lambda p: (-p["current_ovr"], p["player_id"]))
         squads = []
         while pool:
-            selected = _assign(pool)
+            selected = _assign(pool, {role: count for role, count in QUOTAS.items() if role != "Goalkeeper"})
             if not selected:
                 break
             counts = {role: sum(p["assigned_role"] == role for p in selected) for role in QUOTAS}
@@ -126,4 +131,26 @@ def build_squads(records, sixty_league="Spark"):
             used = {p["player_id"] for p in selected}
             pool = [p for p in pool if p["player_id"] not in used]
         result[league] = squads
+    # Fill a starting keeper for every squad before allocating backups. Keepers
+    # can cross rating bands; prefer the closest band, then the stronger player.
+    bands = {"Stone": (73, float("inf")), "Ice": (67, 72),
+             "Spark": (60 if sixty_league == "Spark" else 61, 66),
+             "Flint": (0, 59 if sixty_league == "Spark" else 60)}
+    for _ in range(2):
+        for league, squads in result.items():
+            low, high = bands[league]
+            for squad in squads:
+                if not keepers:
+                    continue
+                keeper = min(keepers, key=lambda p: (
+                    max(low-p["current_ovr"], 0, p["current_ovr"]-high),
+                    -p["current_ovr"], p["player_id"]))
+                squad["players"].insert(0, {**keeper, "assigned_role": "Goalkeeper"})
+                keepers.remove(keeper)
+    for squads in result.values():
+        for squad in squads:
+            squad["players"].sort(key=lambda p: (list(QUOTAS).index(p["assigned_role"]), -p["current_ovr"], p["player_id"]))
+            counts = {role: sum(p["assigned_role"] == role for p in squad["players"]) for role in QUOTAS}
+            squad["shortages"] = {role: count-counts[role] for role, count in QUOTAS.items() if counts[role] < count}
+    excluded.extend({**p, "reason": "Surplus goalkeeper — two per squad"} for p in keepers)
     return result, excluded
