@@ -1,6 +1,6 @@
 # Ten wild new MFL website themes
 
-Ten new concepts, numbered **07–16** so they stay distinct from the original six. These are interactive design previews using illustrative data; the current live theme is Manager 95; the other designs remain previews.
+Ten new concepts, numbered **07–16** so they stay distinct from the original six. These are interactive design previews using illustrative data; the current live theme is Manager Workspace; the other designs remain previews.
 
 [Open the PDF lookbook](MFL_Wild_Design_Lookbook.pdf) · [Download the offline gallery](MFL_Wild_Design_Gallery.zip)
 

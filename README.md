@@ -1,8 +1,8 @@
 # MFL Management Hub
 
-![MFL Management Hub Manager 95 logo](assets/mfl-management-hub.svg)
+![MFL Management Hub Manager Workspace logo](assets/mfl-management-hub.svg)
 
-The MFL Management Hub, styled as a Windows 95 football desktop: teal wallpaper, grey bevelled windows, blue title bars, readable sans-serif text and a working Start/taskbar navigation.
+The MFL Management Hub, with a Football Manager–inspired dark workspace: navy panels, violet accents, crisp typography, a manager sidebar and a green tactics pitch.
 
 ## Football page index
 
@@ -22,9 +22,9 @@ The MFL Management Hub, styled as a Windows 95 football desktop: teal wallpaper,
 | 888 | Sync Centre |
 | 999 | Design Studio |
 
-Choose an application in the sidebar, use the desktop taskbar or menu shortcuts, or enter a page number and press Enter. The header reports the current page and UK date. Connect a public wallet to load personal agency and club data; Home uses saved data and labels missing values explicitly.
+Choose an application in the sidebar, use the workspace shortcuts, or enter a page number and press Enter. The header reports the current page and UK date. Connect a public wallet to load personal agency and club data; Home uses saved data and labels missing values explicitly.
 
-Squads retain the positional minimums, flexible goalkeeper ratings, retired-player exclusions, portraits, ages and CSV exports. The 4-1-3-2 and 4-3-3 formation planners retain drag-and-drop and browser-saved lineups, with matching Manager 95 styling.
+Squads retain the positional minimums, flexible goalkeeper ratings, retired-player exclusions, portraits, ages and CSV exports. The 4-1-3-2 and 4-3-3 formation planners retain drag-and-drop and browser-saved lineups, with matching Manager Workspace styling.
 
 ## Run locally
 
@@ -53,4 +53,4 @@ Public wallet addresses are remembered on this browser and restored on the next 
 
 ## Ten new visual concepts
 
-Page 999 Design Studio now includes a **Ten new · Wild collection** selector, alongside the original six designs. [Browse the ten-theme gallery and PDF](design-concepts/WILD_COLLECTION.md). These are independent interactive previews; the live branding now uses Manager 95.
+Page 999 Design Studio now includes a **Ten new · Wild collection** selector, alongside the original six designs. [Browse the ten-theme gallery and PDF](design-concepts/WILD_COLLECTION.md). These are independent interactive previews; the live branding now uses Manager Workspace.
