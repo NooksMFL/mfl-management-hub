@@ -830,12 +830,9 @@ def valid_wallet(v):
     v=(v or "").strip()
     return len(v)>=10 and v.lower().startswith("0x") and all(c in "0123456789abcdefABCDEF" for c in v[2:])
 
+import wallet_connection
 _browser_last_wallet=get_local_storage("mfl_hub_last_wallet",component_key="mfl_hub_last_wallet_read")
-if "wallet" not in st.session_state:
-    saved_wallet=st.query_params.get("wallet","")
-    if not valid_wallet(saved_wallet) and valid_wallet(_browser_last_wallet):
-        saved_wallet=_browser_last_wallet
-    st.session_state.wallet=saved_wallet.strip().lower() if valid_wallet(saved_wallet) else ""
+wallet_connection.restore_wallet(st.session_state,st.query_params.get("wallet",""),_browser_last_wallet)
 
 # ---------------- SIDEBAR ----------------
 import mfl_text
@@ -860,6 +857,7 @@ with st.sidebar:
                   on_change=mfl_text.sync_navigation,label_visibility="collapsed")
 
     st.markdown('<div class="wallet-area"><div class="wallet-label">ACTIVE WALLET</div>',unsafe_allow_html=True)
+    wallet_connection.connect_widget()
     if st.session_state.wallet:
         st.markdown(f'<div class="wallet-short">{esc(short_wallet(st.session_state.wallet))}</div>',unsafe_allow_html=True)
         if st.button("Change wallet",use_container_width=True):
@@ -875,6 +873,7 @@ with st.sidebar:
         if st.button("Use wallet",type="primary",use_container_width=True,key="public_wallet_use"):
             if valid_wallet(nw):
                 st.session_state.wallet=nw.strip().lower()
+                st.session_state.wallet_forgotten=False
                 st.query_params["wallet"]=st.session_state.wallet
                 st.session_state.edit_wallet=False
                 st.rerun()
@@ -900,7 +899,6 @@ mfl_text.header(page,wallet)
 # this browser. Restore only when the server-side wallet cache is empty, so an
 # older browser snapshot never overwrites a live server cache.
 if wallet:
-    set_local_storage("mfl_hub_last_wallet",wallet,component_key=f"mfl_hub_last_wallet_write_{wallet[-8:]}")
     _backup_key=f"mfl_hub_wallet_{wallet[2:]}"
     _browser_backup=get_local_storage(_backup_key,component_key=f"mfl_hub_backup_read_{wallet[-8:]}")
     _restore_key=f"browser_restore_{wallet}"
