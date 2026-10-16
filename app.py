@@ -19,8 +19,8 @@ import browser_persistence as browser_store
 from streamlit_js_eval import get_local_storage, set_local_storage
 
 st.set_page_config(
-    page_title="MFL Management Hub",
-    page_icon="⚽",
+    page_title="MFL Text | Football Information Service",
+    page_icon="📺",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -799,22 +799,24 @@ def combined_players(wallet):
 
 def make_share_card(title,subtitle,lines,portrait=None):
     W,H=1200,675
-    im=Image.new("RGB",(W,H),(4,13,18)); d=ImageDraw.Draw(im)
+    im=Image.new("RGB",(W,H),(0,0,0)); d=ImageDraw.Draw(im)
     # background panels
-    d.rounded_rectangle((45,45,W-45,H-45),28,fill=(7,24,32),outline=(25,72,82),width=3)
-    d.rectangle((45,45,60,H-45),fill=(19,224,180))
+    d.rectangle((45,45,W-45,H-45),fill=(0,0,0),outline=(0,0,255),width=4)
+    d.rectangle((45,45,60,H-45),fill=(0,0,255))
     try:
-        font_big=ImageFont.truetype("DejaVuSans-Bold.ttf",58)
-        font_mid=ImageFont.truetype("DejaVuSans-Bold.ttf",30)
-        font_small=ImageFont.truetype("DejaVuSans.ttf",25)
+        from pathlib import Path
+        text_font=str(Path(mfl_text.__file__).with_name("design-concepts") / "assets" / "teletext.ttf")
+        font_big=ImageFont.truetype(text_font,72)
+        font_mid=ImageFont.truetype(text_font,38)
+        font_small=ImageFont.truetype(text_font,32)
     except:
         font_big=font_mid=font_small=None
-    d.text((95,90),title,fill=(244,250,248),font=font_big)
-    d.text((98,165),subtitle,fill=(19,224,180),font=font_mid)
+    d.text((95,90),title,fill=(255,255,0),font=font_big)
+    d.text((98,165),subtitle,fill=(0,255,255),font=font_mid)
     y=250
     for line in lines[:7]:
-        d.text((100,y),str(line),fill=(190,207,208),font=font_small); y+=52
-    d.text((100,H-95),"MFL MANAGEMENT HUB · SEASON 17",fill=(86,116,123),font=font_small)
+        d.text((100,y),str(line),fill=(255,255,255),font=font_small); y+=52
+    d.text((100,H-95),"MFL TEXT · SEASON 17",fill=(0,255,255),font=font_small)
     if portrait:
         try:
             r=requests.get(portrait,timeout=8); r.raise_for_status()
@@ -836,20 +838,26 @@ if "wallet" not in st.session_state:
     st.session_state.wallet=saved_wallet.strip().lower() if valid_wallet(saved_wallet) else ""
 
 # ---------------- SIDEBAR ----------------
+import mfl_text
+mfl_text.apply_theme()
 nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Squad Builder","Transfer Window","Transfer Bargains","Watchlist","Compare","Insights","Sync Centre","Design Studio"]
 query_page=st.query_params.get("page","Home")
 if query_page not in nav_pages:
     query_page="Home"
 
 with st.sidebar:
-    st.markdown("""<div class="public-brand">
-      <div class="public-brand-mfl"><span>MFL</span> HUB</div>
-      <div class="public-brand-sub">MANAGEMENT & DEVELOPMENT</div>
-      <div class="public-brand-line"></div>
-      <div class="public-brand-season">SEASON 17 · PUBLIC</div>
-    </div>""",unsafe_allow_html=True)
-
-    page=st.radio("Navigation",nav_pages,index=nav_pages.index(query_page),label_visibility="collapsed")
+    st.markdown('<div class="tt-sidebar-logo">MFL TEXT</div><div class="tt-sidebar-sub">FOOTBALL INDEX / SEASON 17</div>',unsafe_allow_html=True)
+    st.text_input("PAGE NUMBER / ENTER TO GO",key="tt_page_number",max_chars=3,
+                  placeholder="100",on_change=mfl_text.jump_to_page)
+    if st.session_state.get("tt_page_error"):
+        st.caption(st.session_state["tt_page_error"])
+    if "hub_nav" not in st.session_state:
+        st.session_state["hub_nav"]=query_page
+    elif st.query_params.get("page") and st.session_state["hub_nav"]!=query_page:
+        st.session_state["hub_nav"]=query_page
+    page=st.radio("Navigation",nav_pages,key="hub_nav",
+                  format_func=lambda name:f"{mfl_text.PAGES[name]} {name.upper()}",
+                  on_change=mfl_text.sync_navigation,label_visibility="collapsed")
 
     st.markdown('<div class="wallet-area"><div class="wallet-label">ACTIVE WALLET</div>',unsafe_allow_html=True)
     if st.session_state.wallet:
@@ -881,11 +889,12 @@ with st.sidebar:
             st.caption("✓ Wallet data saved for this browser")
     st.markdown("""<div class="season-box">
       <div class="season-top"><span>Season 17</span><span>PUBLIC</span></div>
-      <div class="connected"><i></i><span>MFL API ready</span></div>
+      <div class="connected"><i></i><span>PUBLIC FOOTBALL DATA</span></div>
     </div>
-    <div class="build">UI POLISH · v18.2.2</div>""",unsafe_allow_html=True)
+    <div class="build">MFL TEXT · INFORMATION SERVICE</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
+mfl_text.header(page,wallet)
 
 # Browser-backed persistence survives Streamlit container restarts/redeploys on
 # this browser. Restore only when the server-side wallet cache is empty, so an
@@ -907,195 +916,44 @@ if wallet:
 
 # ---------------- HOME ----------------
 if page=="Home":
+    st.subheader("YOUR FOOTBALL NETWORK, ON SCREEN")
     if not wallet:
-        st.markdown("""<div class="public-connect">
-          <div class="public-connect-kicker">CONNECT YOUR WALLET</div>
-          <div class="public-connect-title">Load your own agency and clubs</div>
-          <div class="public-connect-copy">Enter your public MFL wallet in the sidebar. This public build does not contain or default to another user's wallet.</div>
-        </div>""",unsafe_allow_html=True)
+        st.info("Connect your public wallet in the sidebar to see your agency, clubs and development. Page 302 opens the squad builder.")
+    roster=shared.roster_rows(wallet) if wallet else []
+    af=agency_frame(wallet) if wallet else pd.DataFrame()
+    cf=club.cached(wallet) if wallet else pd.DataFrame()
+    good=cf[cf["error"].isna()] if not cf.empty and "error" in cf else cf
+    gain=float(good["ovr_gain"].fillna(0).sum()) if not good.empty else 0
+    players=len(roster) if roster else len(af)
+    clubs=len(shared.clubs_rows(wallet)) if wallet else 0
+    kpis=st.columns(3)
+    kpis[0].metric("AGENCY PLAYERS",players if wallet else "—")
+    kpis[1].metric("OWNED CLUBS",clubs if wallet else "—")
+    kpis[2].metric("CACHED CLUB OVR GAIN",f"+{gain:g}" if not good.empty else "—")
+    left,right=st.columns([1.15,1])
+    with left:
+        st.subheader("FOOTBALL PAGE INDEX")
+        st.markdown(''.join(f'<a class="tt-index-row" href="{mfl_text.page_link(name,wallet)}" target="_self"><span>{esc(name.upper())}</span><b>{number}</b></a>'
+                           for name,number in mfl_text.PAGES.items() if name not in ("Home","Design Studio")),unsafe_allow_html=True)
+    with right:
+        st.subheader("LEAGUE PLANNING POOL")
+        import squad_builder as squads
+        records=[{"player_id":r["player_id"],"player":r["player_name"],"position":r["position"],"current_ovr":r["overall"],"club":r["club"]} for r in roster] if roster else (af.to_dict("records") if not af.empty else [])
+        if records:
+            planned,omitted=squads.build_squads(records)
+            lines=""
+            for league,groups in planned.items():
+                members=[p for g in groups for p in g["players"]]
+                avg=f'{sum(p["current_ovr"] for p in members)/len(members):.1f}' if members else "—"
+                lines+=f'<tr><td>{league.upper()}</td><td>{len(groups)}</td><td>{len(members)}</td><td>{avg}</td></tr>'
+            st.markdown('<table class="tt-table"><thead><tr><th>LEAGUE</th><th>SQUADS</th><th>PLAYERS</th><th>OVR</th></tr></thead><tbody>'+lines+'</tbody></table>',unsafe_allow_html=True)
+            ready=sum(not g["shortages"] for groups in planned.values() for g in groups)
+            st.markdown(f'<div class="tt-news"><p>{ready} COMPLETE SQUADS IN YOUR CURRENT PLANNING POOL.</p><p>PAGE 302: ARRANGE YOUR NEXT XI.</p></div>',unsafe_allow_html=True)
+        else:
+            st.info("No saved players yet. Connect a wallet, then use page 888 to load the shared roster.")
+        st.caption("Based on saved wallet data. Goalkeeper ratings may cross league bands. Refresh in Sync Centre after player changes.")
+    st.markdown('<div class="tt-pagebar"><span>NEXT: 201 AGENCY / 302 SQUADS / 888 SYNC</span></div>',unsafe_allow_html=True)
 
-    try:
-        c=agency.db();agency.init(c);agency.ensure_v2(c)
-        players=c.execute("SELECT COUNT(*) FROM ownership_v65 WHERE wallet=?",(wallet.lower(),)).fetchone()[0] if wallet else 0
-        improved=c.execute("SELECT COUNT(*) FROM ownership_v65 WHERE wallet=? AND current_ovr>start_ovr",(wallet.lower(),)).fetchone()[0] if wallet else 0
-        c.close()
-    except Exception:
-        players=0; improved=0
-
-    if wallet:
-        try:
-            mine=club.owned_clubs(wallet)
-        except Exception:
-            mine=[]
-        cached=club.cached(wallet)
-    else:
-        mine=[]
-        cached=pd.DataFrame()
-    good=cached[cached["error"].isna()] if (not cached.empty and "error" in cached.columns) else cached
-    total_ovr=float(good["ovr_gain"].fillna(0).sum()) if not good.empty else 0
-    total_attr=float(good["attr_gain"].fillna(0).sum()) if not good.empty else 0
-    total_start=float(good["start_ovr"].fillna(0).sum()) if not good.empty else 0
-    total_current=float(good["current_ovr"].fillna(0).sum()) if not good.empty else 0
-    synced=len(good)
-
-    st.markdown(f"""
-    <div class="home-shell">
-      <div class="home-hero-v15">
-        <div>
-          <div class="home-eyebrow-v15">YOUR SEASON 17 WORKSPACE</div>
-          <div class="home-title-v15">Track your MFL network.</div>
-          <div class="home-copy-v15">Competition tracking is public. Connect a wallet to unlock personal agency and club development views.</div>
-          <div class="home-meta-v15">
-            <span class="home-pill-v15"><b>{len(mine) if mine else "—"}</b> owned clubs</span>
-            <span class="home-pill-v15"><b>{players or "—"}</b> agency players</span>
-            <span class="home-pill-v15"><b>{synced}</b> club players synced</span>
-          </div>
-        </div>
-        <div class="network-card-v15">
-          <div class="network-label-v15">SEASON 17 NETWORK DEVELOPMENT</div>
-          <div class="network-big-v15">+{total_ovr:g}</div>
-          <div class="network-sub-v15">Total OVR gained across loaded club data</div>
-          <div class="network-rule-v15"></div>
-          <div class="network-row-v15"><span>Attribute gains</span><b>+{total_attr:g}</b></div>
-          <div class="network-row-v15"><span>Agency improved</span><b>{improved}</b></div>
-          <div class="network-row-v15"><span>Owned clubs</span><b>{len(mine) if mine else "—"}</b></div>
-        </div>
-      </div>
-
-      <div class="home-kpis-v15">
-        <div class="home-kpi-v15"><div class="hk-label">Owned clubs</div><div class="hk-value">{len(mine) if mine else "—"}</div><div class="hk-sub">Verified MFL_OWNER clubs</div></div>
-        <div class="home-kpi-v15"><div class="hk-label">Agency players</div><div class="hk-value blue">{players or "—"}</div><div class="hk-sub">Tracked in your current agency</div></div>
-        <div class="home-kpi-v15"><div class="hk-label">Club OVR gained</div><div class="hk-value mint">+{total_ovr:g}</div><div class="hk-sub">Loaded Season 17 progression</div></div>
-        <div class="home-kpi-v15"><div class="hk-label">Attribute gains</div><div class="hk-value violet">+{total_attr:g}</div><div class="hk-sub">Across synced club players</div></div>
-      </div>
-
-      <div class="home-section-v15"><h3>Workspaces</h3><span>CLICK TO OPEN</span></div>
-      <div class="workspace-grid-v15">
-        <a class="workspace-card-v15" href="?page=Grower%20or%20Shower" target="_self">
-          <div class="workspace-top-v15"><div class="workspace-icon-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#13e0b4" stroke-width="1.8"><path d="M6 4h12v3c0 3.8-2.4 6.7-6 7.8C8.4 13.7 6 10.8 6 7V4Z"/><path d="M9 15h6M10 15v3h4v-3M8 20h8"/></svg></div><div class="workspace-arrow-v15">→</div></div>
-          <div class="workspace-title-v15">Grower or Shower</div><div class="workspace-sub-v15">Competition leaderboard, player ratings and every recorded stat gain.</div><div class="workspace-accent-v15"></div>
-        </a>
-        <a class="workspace-card-v15 blue" href="?page=Agency%20Development" target="_self">
-          <div class="workspace-top-v15"><div class="workspace-icon-v15 blue"><svg viewBox="0 0 24 24" fill="none" stroke="#38afff" stroke-width="1.8"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M3.5 18c.3-3 2.1-4.7 4.5-4.7S12.2 15 12.5 18M11.5 18c.3-3 2.1-4.7 4.5-4.7s4.2 1.7 4.5 4.7"/></svg></div><div class="workspace-arrow-v15">→</div></div>
-          <div class="workspace-title-v15">Agency Development</div><div class="workspace-sub-v15">Top movers, new mints, priority players and ownership-spell progress.</div><div class="workspace-accent-v15"></div>
-        </a>
-        <a class="workspace-card-v15 violet" href="?page=Club%20Development" target="_self">
-          <div class="workspace-top-v15"><div class="workspace-icon-v15 violet"><svg viewBox="0 0 24 24" fill="none" stroke="#ad76ff" stroke-width="1.8"><path d="M4 19h16M6 19V9l6-4 6 4v10"/><path d="M9 19v-5h6v5"/></svg></div><div class="workspace-arrow-v15">→</div></div>
-          <div class="workspace-title-v15">Club Development</div><div class="workspace-sub-v15">Compare development across every owned club and drill into the players.</div><div class="workspace-accent-v15"></div>
-        </a>
-      </div>
-    """,unsafe_allow_html=True)
-
-    club_rows=""
-    progressor_rows=""
-    highlights_html=""
-    attr_html=""
-    developing_players=0
-
-    if not good.empty:
-        clubs_rank=(good.groupby("club").agg(
-            ovr=("ovr_gain","sum"),attrs=("attr_gain","sum"),players=("player_id","count")
-        ).reset_index().sort_values(["ovr","attrs"],ascending=False).head(5))
-
-        for i,r in enumerate(clubs_rank.to_dict("records"),1):
-            club_rows += (
-                f'<div class="home-list-row"><div class="home-list-rank">{i}</div>'
-                f'<div><div class="home-list-main">{esc(r["club"])}</div>'
-                f'<div class="home-list-sub">{int(r["players"])} players · +{float(r["attrs"]):g} attributes</div></div>'
-                f'<div class="home-list-value">+{float(r["ovr"]):g}</div></div>'
-            )
-
-        # Top Progressors = OVR gain first, then total attribute gain.
-        top_progressors=good.sort_values(["ovr_gain","attr_gain","current_ovr"],ascending=False).head(5)
-        for i,(_,r) in enumerate(top_progressors.iterrows(),1):
-            pid=int(r["player_id"])
-            portrait=f"https://d13e14gtps4iwl.cloudfront.net/players/v2/{pid}/photo.webp"
-            progressor_rows += (
-                f'<div class="progressor-v173">'
-                f'<div class="progress-rank-v173">{i}</div>'
-                f'<div class="progress-photo-v173"><img src="{portrait}" alt="{esc(r["player"])}"></div>'
-                f'<div><div class="progress-name-v173">{esc(r["player"])}</div><div class="progress-club-v173">{esc(r["club"])}</div></div>'
-                f'<div class="progress-gains-v173"><div class="progress-ovr-v173">+{float(r["ovr_gain"] or 0):g} OVR</div>'
-                f'<div class="progress-attr-v173">+{float(r["attr_gain"] or 0):g} attributes</div></div></div>'
-            )
-
-        attr_totals={
-            "PAC":float(good["pac"].fillna(0).sum()),
-            "SHO":float(good["sho"].fillna(0).sum()),
-            "PAS":float(good["pas"].fillna(0).sum()),
-            "DRI":float(good["dri"].fillna(0).sum()),
-            "DEF":float(good["defn"].fillna(0).sum()),
-            "PHY":float(good["phy"].fillna(0).sum()),
-        }
-        max_attr=max(max(attr_totals.values()),1)
-        for lab,val in attr_totals.items():
-            pct=max(3,(val/max_attr)*100) if val>0 else 0
-            attr_html += (
-                f'<div class="attr-row-v173"><div class="attr-name-v173">{lab}</div>'
-                f'<div class="attr-track-v173"><div class="attr-fill-v173" style="width:{pct:.1f}%"></div></div>'
-                f'<div class="attr-val-v173">+{val:g}</div></div>'
-            )
-
-        developing_players=int(((good["ovr_gain"].fillna(0)>0) | (good["attr_gain"].fillna(0)>0)).sum())
-        best_club=clubs_rank.iloc[0] if not clubs_rank.empty else None
-        best_player=top_progressors.iloc[0] if not top_progressors.empty else None
-        best_attr=max(attr_totals,key=attr_totals.get)
-
-        highlights_html = (
-            f'<div class="highlight-grid-v173">'
-            f'<div class="highlight-v173"><div class="highlight-kicker-v173">Most developed club</div>'
-            f'<div class="highlight-main-v173">{esc(best_club["club"]) if best_club is not None else "—"}</div>'
-            f'<div class="highlight-sub-v173">+{float(best_club["ovr"]):g} OVR · +{float(best_club["attrs"]):g} attributes</div></div>'
-            f'<div class="highlight-v173"><div class="highlight-kicker-v173">Top progressor</div>'
-            f'<div class="highlight-main-v173">{esc(best_player["player"]) if best_player is not None else "—"}</div>'
-            f'<div class="highlight-sub-v173">+{float(best_player["ovr_gain"]):g} OVR · +{float(best_player["attr_gain"]):g} attributes</div></div>'
-            f'<div class="highlight-v173"><div class="highlight-kicker-v173">Players developing</div>'
-            f'<div class="highlight-main-v173">{developing_players}</div>'
-            f'<div class="highlight-sub-v173">of {len(good)} synced players</div></div>'
-            f'<div class="highlight-v173"><div class="highlight-kicker-v173">Strongest attribute</div>'
-            f'<div class="highlight-main-v173">{best_attr}</div>'
-            f'<div class="highlight-sub-v173">+{attr_totals.get(best_attr,0):g} total gains</div></div>'
-            f'</div>'
-        )
-    else:
-        club_rows='<div style="color:#5a7279;font-size:.64rem;padding:34px 4px;text-align:center">Sync Club Development to populate this panel.</div>'
-        progressor_rows='<div style="color:#5a7279;font-size:.64rem;padding:34px 4px;text-align:center">Top progressors will appear after club sync.</div>'
-        attr_html='<div style="color:#5a7279;font-size:.64rem;padding:34px 4px;text-align:center">Attribute development will appear after club sync.</div>'
-        highlights_html='<div style="color:#5a7279;font-size:.64rem;padding:34px 4px;text-align:center">Network highlights will appear after club sync.</div>'
-
-    st.markdown(
-        '<div class="home-section-v15"><h3>Network intelligence</h3><span>SEASON 17</span></div>'
-        f'<div class="home-dashboard-v15">'
-        f'<div class="home-panel-v15"><div class="hp-head"><div class="hp-title">Development breakdown</div><div class="hp-meta">WHAT IS IMPROVING</div></div>'
-        f'<div class="dev-breakdown-v173">'
-        f'<div class="dev-metric-v173"><div class="dev-metric-lab-v173">OVR gained</div><div class="dev-metric-val-v173 mint">+{total_ovr:g}</div></div>'
-        f'<div class="dev-metric-v173"><div class="dev-metric-lab-v173">Attribute gains</div><div class="dev-metric-val-v173 violet">+{total_attr:g}</div></div>'
-        f'<div class="dev-metric-v173"><div class="dev-metric-lab-v173">Players developing</div><div class="dev-metric-val-v173 blue">{developing_players}</div></div>'
-        f'<div class="dev-metric-v173"><div class="dev-metric-lab-v173">Players synced</div><div class="dev-metric-val-v173">{synced}</div></div>'
-        f'</div><div class="attr-bars-v173">{attr_html}</div></div>'
-        f'<div class="home-panel-v15"><div class="hp-head"><div class="hp-title">Top 5 clubs</div><div class="hp-meta">OVR GAINED</div></div>{club_rows}</div>'
-        f'<div class="home-panel-v15"><div class="hp-head"><div class="hp-title">Top 5 Progressors</div><div class="hp-meta">OVR → ATTRIBUTES</div></div>'
-        f'<div class="progressor-list-v173">{progressor_rows}</div></div></div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown("""
-      <div class="home-bottom-v15">
-        <div class="home-panel-v15">
-          <div class="hp-head"><div class="hp-title">Quick actions</div><div class="hp-meta">CLICK TO OPEN</div></div>
-          <div class="quick-grid-v15">
-            <a class="quick-v15" href="?page=Grower%20or%20Shower" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#13e0b4" stroke-width="1.8"><path d="M6 4h12v3c0 3.8-2.4 6.7-6 7.8C8.4 13.7 6 10.8 6 7V4Z"/></svg></div><div class="quick-title-v15">Grower or Shower</div></div><div class="quick-arr-v15">→</div></a>
-            <a class="quick-v15" href="?page=Agency%20Development" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#38afff" stroke-width="1.8"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/></svg></div><div class="quick-title-v15">Agency Development</div></div><div class="quick-arr-v15">→</div></a>
-            <a class="quick-v15" href="?page=Club%20Development" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#ad76ff" stroke-width="1.8"><path d="M4 19h16M6 19V9l6-4 6 4v10"/></svg></div><div class="quick-title-v15">Club Development</div></div><div class="quick-arr-v15">→</div></a>
-            <a class="quick-v15" href="?page=Club%20Development" target="_self"><div class="quick-left-v15"><div class="quick-ico-v15"><svg viewBox="0 0 24 24" fill="none" stroke="#13e0b4" stroke-width="1.8"><path d="M20 7v5h-5"/><path d="M18.5 15A7 7 0 1 1 19 8l1 4"/></svg></div><div class="quick-title-v15">Sync latest data</div></div><div class="quick-arr-v15">→</div></a>
-          </div>
-        </div>
-        <div class="home-panel-v15">
-          <div class="hp-head"><div class="hp-title">Network highlights</div><div class="hp-meta">LIVE DEVELOPMENT</div></div>
-    """,unsafe_allow_html=True)
-    st.markdown(f'{highlights_html}</div></div>',unsafe_allow_html=True)
-
-# ---------------- GROWER ----------------
 elif page=="Grower or Shower":
     conn=grower.db();grower.init_db(conn)
     rows=grower.leaderboard(conn)

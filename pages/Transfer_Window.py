@@ -2,7 +2,10 @@ import streamlit as st
 import pandas as pd
 import transfer_window_backend as tw
 
-st.set_page_config(page_title="MFL Transfer Window",page_icon="🚨",layout="wide")
+st.set_page_config(page_title="MFL Text | Transfer Window",page_icon="📺",layout="wide")
+import mfl_text
+mfl_text.apply_theme()
+mfl_text.header("Transfer Window",st.session_state.get("wallet",""))
 WALLET="0x65cc0e72dd71ad80"
 
 st.title("🚨 Season 17 Transfer Window")

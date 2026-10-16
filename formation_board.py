@@ -4,6 +4,7 @@ from pathlib import Path
 
 import streamlit.components.v1 as components
 from squad_cards import age_label
+from mfl_text import font_url
 
 
 def board_html(players, storage_key):
@@ -12,7 +13,7 @@ def board_html(players, storage_key):
                 "age": age_label(p.get("age")), "club": str(p.get("club") or "—"),
                 "photo": f"https://d13e14gtps4iwl.cloudfront.net/players/v2/{int(p['player_id'])}/photo.webp"} for p in players]
     data = json.dumps({"players": payload, "storageKey": storage_key}, allow_nan=False).replace("<", "\\u003c")
-    return Path(__file__).with_name("formation_board.html").read_text().replace("/*BOARD_DATA*/", data)
+    return Path(__file__).with_name("formation_board.html").read_text().replace("/*BOARD_DATA*/", data).replace("TELETEXT_FONT_URL", font_url())
 
 
 def render_board(players, storage_key):

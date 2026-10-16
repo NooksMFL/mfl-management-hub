@@ -1,0 +1,67 @@
+@font-face{font-family:MFLText;src:url(TELETEXT_FONT_URL) format('truetype');font-display:swap}
+:root{--bg:#000;--panel:#000;--panel2:#000;--line:#0000ff;--text:#fff;--muted:#0ff;--mint:#0f0;--cyan:#0ff;--violet:#f0f;--primary-color:#ff0}
+html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="stMain"],[data-testid="stSidebar"]{background:#000!important;color:#fff!important}
+.stApp p,.stApp label,.stApp button,.stApp input,.stApp textarea,.stApp select,.stApp h1,.stApp h2,.stApp h3,.stApp h4,.stApp a,.stApp small,.stMarkdown div,.stMarkdown span,[data-testid="stMetricValue"],[data-testid="stMetricLabel"]{font-family:MFLText,monospace!important;text-shadow:none!important;letter-spacing:.02em!important}
+.stApp p,.stApp label,.stApp button,.stApp input,.stApp textarea{font-size:22px!important;line-height:1.15!important}
+.stApp h1,.stApp h2,.stApp h3,.stApp h4{color:#ff0!important;font-weight:400!important;line-height:1.05!important}
+.stApp h1{font-size:46px!important}.stApp h2{font-size:36px!important}.stApp h3{font-size:29px!important}
+[data-testid="stHeader"]{background:#000!important;border-bottom:1px solid #00f!important;backdrop-filter:none!important}
+[data-testid="stSidebar"]{border-right:3px solid #00f!important;min-width:270px!important}
+[data-testid="stSidebarContent"]{padding:16px!important}
+[data-testid="stSidebar"] [data-testid="stSidebarNav"]{display:none}
+.block-container{max-width:1450px!important;padding:1rem 1.8rem 3rem!important}
+.stMarkdown div[class]:not(.squad-face){background-image:none!important;box-shadow:none!important;border-radius:0!important}
+.stMarkdown [class*="card"],.stMarkdown [class*="hero"],.stMarkdown [class*="panel"],.stMarkdown [class*="connect"],.stMarkdown [class*="box"],.stMarkdown [class*="feature"],.stMarkdown [class*="tile"],.stMarkdown [class*="highlight"],.stMarkdown [class*="stat"]{background-color:#000!important;border-radius:0!important;box-shadow:none!important}
+.stMarkdown [class*="title"],.stMarkdown [class*="name"],.stMarkdown [class*="main"],.stMarkdown [class*="heading"]{color:#ff0!important;font-weight:400!important}
+.stMarkdown [class*="copy"],.stMarkdown [class*="sub"],.stMarkdown [class*="desc"],.stMarkdown [class*="label"],.stMarkdown [class*="club"],.stMarkdown [class*="meta"],.stMarkdown [class*="note"]{color:#0ff!important;font-size:19px!important;line-height:1.2!important}
+.stMarkdown [class*="kicker"],.stMarkdown [class*="eyebrow"]{color:#f0f!important;font-size:19px!important}
+.stMarkdown [class*="value"],.stMarkdown [class*="gain"],.stMarkdown [class*="ovr"],.stMarkdown [class*="big"],.stMarkdown [class*="delta"]{color:#0f0!important}
+.stMarkdown [class*="card"],.stMarkdown [class*="panel"],.stMarkdown [class*="hero"],.stMarkdown [class*="feature"],.stMarkdown [class*="tile"]{border-color:#00f!important}
+.stMarkdown [class*="hero"]{padding:18px 0!important;border-width:0 0 4px!important}
+.stMarkdown [class*="title"]{font-size:34px!important;line-height:1!important}
+.stMarkdown [class*="pill"],.stMarkdown [class*="badge"]{border-radius:0!important;background:#000!important;border-color:#0ff!important;color:#0ff!important;font-size:18px!important}
+.stMarkdown a{color:#ff0!important;text-decoration:none!important}.stMarkdown a:hover{text-decoration:underline!important}
+.stApp button{border-radius:0!important;box-shadow:none!important;background:#000!important;border:1px solid #0ff!important;color:#0ff!important;min-height:40px}
+.stApp button[kind="primary"]{background:#ff0!important;color:#000!important;border-color:#ff0!important}
+.stApp button:focus-visible,.stApp a:focus-visible,.stApp input:focus-visible{outline:3px solid #fff!important;outline-offset:3px}
+.stApp button:hover{background:#00f!important;color:#fff!important}
+[data-testid="stTextInput"] input,[data-testid="stNumberInput"] input,[data-testid="stTextArea"] textarea{background:#000!important;color:#ff0!important;border-radius:0!important}
+[data-baseweb="input"],[data-baseweb="select"]>div,[data-baseweb="textarea"]{background:#000!important;color:#ff0!important;border:1px solid #0ff!important;border-radius:0!important}
+[data-baseweb="select"] span{font-family:MFLText,monospace!important;font-size:21px!important}
+[data-testid="stMetric"]{background:#000!important;border:0!important;border-top:5px solid #00f!important;border-radius:0!important;padding:14px 0!important}
+[data-testid="stMetricValue"]{color:#0f0!important;font-size:49px!important;font-weight:400!important}
+[data-testid="stMetricLabel"] p{color:#0ff!important;font-size:20px!important}
+[data-testid="stCaptionContainer"] p{color:#aaa!important;font-size:18px!important}
+[data-testid="stExpander"]{background:#000!important;border:1px solid #00f!important;border-radius:0!important}
+[data-testid="stAlert"]{background:#000!important;border:1px solid #0ff!important;border-radius:0!important;color:#fff!important}
+[data-testid="stAlert"] p{color:#fff!important}
+[data-testid="stTabs"] [role="tab"]{background:#000!important;color:#0ff!important;border:0!important}
+[data-testid="stTabs"] [role="tab"][aria-selected="true"]{background:#00f!important;color:#ff0!important}
+[data-testid="stSidebar"] [role="radiogroup"]{gap:1px!important;padding:0!important}
+[data-testid="stSidebar"] [role="radiogroup"] label{border:0!important;border-radius:0!important;padding:7px 6px!important}
+[data-testid="stSidebar"] [role="radiogroup"] label p{font-size:21px!important;color:#0ff!important}
+[data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked){background:#00f!important;box-shadow:none!important}
+[data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) p{color:#ff0!important}
+.tt-sidebar-logo{font-size:49px!important;line-height:1!important;color:#ff0!important;background:#00f!important;padding:13px 10px;margin-bottom:6px}
+.tt-sidebar-sub{font-size:18px!important;color:#0ff!important;margin:8px 0 18px}
+.tt-status{display:flex;justify-content:space-between;gap:10px;color:#fff!important;font-size:21px!important;margin:4px 0 12px}
+.stMarkdown .tt-masthead{background-color:#00f!important;color:#ff0!important;font-size:90px!important;line-height:.9!important;padding:20px 22px!important;letter-spacing:4px!important}
+.stMarkdown .tt-masthead span{display:block;color:#fff!important;font-size:25px!important;letter-spacing:5px!important;margin-top:12px}
+.stMarkdown .tt-pagebar{display:flex;justify-content:space-between;gap:12px;background:#0ff!important;color:#000!important;padding:4px 12px;margin:12px 0;font-size:25px!important}
+.stMarkdown .tt-pagebar span{color:#000!important}
+.tt-fastext{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:25px}
+.stMarkdown .tt-fastext a{color:#000!important;font-size:22px!important;padding:7px 4px;text-align:center;white-space:nowrap}
+.stMarkdown .tt-fastext .tt-red{background:#f00!important}.stMarkdown .tt-fastext .tt-green{background:#0f0!important}.stMarkdown .tt-fastext .tt-yellow{background:#ff0!important}.stMarkdown .tt-fastext .tt-cyan{background:#0ff!important}
+.tt-index-row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dotted #555;padding:8px 0;font-size:26px!important}
+.tt-index-row span{color:#0ff!important}.tt-index-row b{color:#ff0!important;font-weight:400!important}
+.tt-table{width:100%;border-collapse:collapse;font:23px MFLText,monospace}.tt-table th{text-align:left;color:#ff0;font-weight:400;border-bottom:4px solid #00f;padding:8px}.tt-table td{padding:8px;color:#0ff;border-bottom:1px solid #333}.tt-table td:last-child{text-align:right;color:#0f0}
+.tt-news{border-top:6px solid #00f;padding-top:15px;margin-top:16px}.tt-news p{color:#fff!important;font-size:26px!important}
+.squad-roster .squad-player{background:#000!important;background-image:none!important;border:1px solid #00f!important;border-radius:0!important;box-shadow:none!important;transform:none!important}
+.squad-roster .squad-photo{border-radius:0!important;background:#00f!important}.squad-roster .squad-player-name{font-size:25px!important;color:#ff0!important;font-weight:400!important}.squad-roster .squad-position{color:#0ff!important;background:#000!important;border:0!important;font-size:21px!important}.squad-roster .squad-meta,.squad-roster .squad-club{color:#fff!important;font-size:20px!important}.squad-roster .squad-rating{font-size:40px!important;color:#0f0!important}.squad-roster .squad-rating small{font-size:17px!important}.squad-roster .squad-role{font-size:26px!important;color:#f0f!important;letter-spacing:.04em!important}.squad-roster .squad-card-grid{grid-template-columns:repeat(auto-fill,minmax(285px,1fr))}
+.wallet-area,.season-box{border-color:#00f!important}.wallet-short,.wallet-empty{color:#0ff!important;font-size:19px!important}.build{font-size:17px!important;color:#ff0!important}.stMarkdown .season-top{font-size:19px!important;color:#ff0!important}.stMarkdown .connected{font-size:17px!important;color:#0ff!important}
+@media(max-width:700px){.block-container{padding:1rem!important}.stMarkdown .tt-masthead{font-size:65px!important;padding:16px 12px!important;letter-spacing:1px!important}.stMarkdown .tt-masthead span{font-size:19px!important;letter-spacing:1px!important}.tt-status{font-size:17px!important}.stMarkdown .tt-pagebar{font-size:20px!important}.stMarkdown .tt-fastext a{font-size:17px!important;padding:8px 1px}.stApp h1{font-size:35px!important}.stMarkdown [class*="title"]{font-size:28px!important}.squad-roster .squad-card-grid{grid-template-columns:1fr}.tt-index-row{font-size:22px!important}.tt-table{font-size:19px}}
+/* Remove spacing left by style-only blocks and invisible persistence helpers. */
+[data-testid="stElementContainer"]:has(> .stMarkdown > [data-testid="stMarkdownContainer"] > style:only-child){display:none!important}
+[data-testid="stElementContainer"]:has(> .stMarkdown > [data-testid="stMarkdownContainer"]:empty){display:none!important}
+[data-testid="stElementContainer"]:has(iframe[title="streamlit_js_eval.streamlit_js_eval"]){position:absolute!important;width:0!important;height:0!important;overflow:hidden!important;pointer-events:none!important}
+[data-testid="stSidebarHeader"]{height:40px!important;padding:0!important}
