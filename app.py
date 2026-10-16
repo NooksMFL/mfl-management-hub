@@ -1,5 +1,6 @@
 
 import os
+from pathlib import Path
 import base64
 import html as html_lib
 import math
@@ -19,8 +20,8 @@ import browser_persistence as browser_store
 from streamlit_js_eval import get_local_storage, set_local_storage
 
 st.set_page_config(
-    page_title="MFL Text | Football Information Service",
-    page_icon="📺",
+    page_title="MFL Management Hub | Teletext Football",
+    page_icon=str(Path(__file__).with_name("assets") / "mfl-favicon.png"),
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -816,7 +817,7 @@ def make_share_card(title,subtitle,lines,portrait=None):
     y=250
     for line in lines[:7]:
         d.text((100,y),str(line),fill=(255,255,255),font=font_small); y+=52
-    d.text((100,H-95),"MFL TEXT · SEASON 17",fill=(0,255,255),font=font_small)
+    d.text((100,H-95),"MFL MANAGEMENT HUB · SEASON 17",fill=(0,255,255),font=font_small)
     if portrait:
         try:
             r=requests.get(portrait,timeout=8); r.raise_for_status()
@@ -843,7 +844,7 @@ if query_page not in nav_pages:
     query_page="Home"
 
 with st.sidebar:
-    st.markdown('<div class="tt-sidebar-logo">MFL TEXT</div><div class="tt-sidebar-sub">FOOTBALL INDEX / SEASON 17</div>',unsafe_allow_html=True)
+    st.markdown(f'<div class="tt-sidebar-logo tt-logo-sidebar">{mfl_text.logo_html(compact=True)}</div><div class="tt-sidebar-sub">FOOTBALL INDEX / SEASON 17</div>',unsafe_allow_html=True)
     st.text_input("PAGE NUMBER / ENTER TO GO",key="tt_page_number",max_chars=3,
                   placeholder="100",on_change=mfl_text.jump_to_page)
     if st.session_state.get("tt_page_error"):
@@ -890,7 +891,7 @@ with st.sidebar:
       <div class="season-top"><span>Season 17</span><span>PUBLIC</span></div>
       <div class="connected"><i></i><span>PUBLIC FOOTBALL DATA</span></div>
     </div>
-    <div class="build">MFL TEXT · INFORMATION SERVICE</div>""",unsafe_allow_html=True)
+    <div class="build">MFL MANAGEMENT HUB · TELETEXT</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 mfl_text.header(page,wallet)

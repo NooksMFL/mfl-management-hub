@@ -1,4 +1,4 @@
-"""MFL Text: shared teletext identity and numbered page navigation."""
+"""MFL Management Hub: shared teletext identity and numbered page navigation."""
 import base64
 from datetime import datetime
 from functools import lru_cache
@@ -38,11 +38,23 @@ def page_link(page,wallet=''):
     return '?'+urlencode(params)
 
 
+@lru_cache(maxsize=2)
+def logo_uri(compact=False):
+    name='mfl-management-hub-compact.svg' if compact else 'mfl-management-hub.svg'
+    asset=Path(__file__).with_name('assets') / name
+    return 'data:image/svg+xml;base64,'+base64.b64encode(asset.read_bytes()).decode('ascii')
+
+
+def logo_html(compact=False):
+    kind='tt-brand-compact' if compact else 'tt-brand-full'
+    return f'<img class="{kind}" src="{logo_uri(compact)}" alt="MFL Management Hub — teletext football network">'
+
+
 def header(page,wallet=''):
     number=PAGES.get(page,'100')
     date=datetime.now(ZoneInfo('Europe/London')).strftime('%a %d %b %Y').upper()
-    st.markdown(f'<div class="tt-status"><span>P{number} MFLTEXT {number}</span><span>{date}</span></div>'
-        '<div class="tt-masthead">MFL TEXT<span>YOUR FOOTBALL INFORMATION SERVICE</span></div>'
+    st.markdown(f'<div class="tt-status"><span>P{number} MFL HUB {number}</span><span>{date}</span></div>'
+        f'<div class="tt-masthead tt-logo-masthead">{logo_html()}</div>'
         f'<div class="tt-pagebar"><span>{number} / {escape(page.upper())}</span><span>SEASON 17</span></div>'
         '<nav class="tt-fastext" aria-label="Teletext shortcuts">'+''.join(
             f'<a class="tt-{color}" href="{escape(page_link(name,wallet),quote=True)}" target="_self">{PAGES[name]} {label}</a>'

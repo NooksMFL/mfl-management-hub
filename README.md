@@ -1,6 +1,8 @@
-# MFL Text
+# MFL Management Hub
 
-The MFL Management Hub, rebranded as a UK television teletext football service: black screens, pixel display headings, crisp monospace body text, primary colours, numbered pages and four-colour shortcuts.
+![MFL Management Hub teletext logo](assets/mfl-management-hub.svg)
+
+The MFL Management Hub, presented as a UK television teletext football service: black screens, pixel display headings, crisp monospace body text, primary colours, numbered pages and four-colour shortcuts.
 
 ## Football page index
 
@@ -22,7 +24,7 @@ The MFL Management Hub, rebranded as a UK television teletext football service: 
 
 Choose a page in the sidebar, use a coloured shortcut, or enter its three-digit number and press Enter. The header reports the current page and UK date. Connect a public wallet to load personal agency and club data; Home uses saved data and labels missing values explicitly.
 
-Squads retain the positional minimums, flexible goalkeeper ratings, retired-player exclusions, portraits, ages and CSV exports. The 4-1-3-2 and 4-3-3 formation planners retain drag-and-drop and browser-saved lineups, with matching MFL Text styling.
+Squads retain the positional minimums, flexible goalkeeper ratings, retired-player exclusions, portraits, ages and CSV exports. The 4-1-3-2 and 4-3-3 formation planners retain drag-and-drop and browser-saved lineups, with matching teletext styling.
 
 ## Run locally
 

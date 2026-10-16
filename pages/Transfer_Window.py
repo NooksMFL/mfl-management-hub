@@ -1,8 +1,9 @@
+from pathlib import Path
 import streamlit as st
 import pandas as pd
 import transfer_window_backend as tw
 
-st.set_page_config(page_title="MFL Text | Transfer Window",page_icon="📺",layout="wide")
+st.set_page_config(page_title="MFL Management Hub | Transfer Window",page_icon=str(Path(__file__).resolve().parents[1] / "assets" / "mfl-favicon.png"),layout="wide")
 import mfl_text
 mfl_text.apply_theme()
 mfl_text.header("Transfer Window",st.session_state.get("wallet",""))

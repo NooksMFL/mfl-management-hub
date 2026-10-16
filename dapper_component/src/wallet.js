@@ -27,7 +27,7 @@ window.addEventListener('message',e=>{
   const origin=(()=>{try{return new URL(document.referrer).origin;}catch(e){return location.origin;}})();
   fcl.config({'flow.network':'mainnet','accessNode.api':'https://rest-mainnet.onflow.org',
     'discovery.wallet':'https://accounts.meetdapper.com/fcl/authn','discovery.wallet.method':'POP/RPC',
-    'app.detail.title':'MFL Text','app.detail.description':'Public MFL agency and player dashboard','app.detail.url':origin});
+    'app.detail.title':'MFL Management Hub','app.detail.description':'Public MFL agency and player dashboard','app.detail.url':origin});
  }
  render();
 });

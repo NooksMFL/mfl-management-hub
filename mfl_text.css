@@ -124,3 +124,9 @@ html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="stMain"],[data
 .stMarkdown .tt-masthead,.stMarkdown .tt-masthead span{line-height:1!important}
 .stMarkdown [class*="kpi-value"],.stMarkdown [class*="stat-value"]{font-size:32px!important}
 .st-key-grower_page .stMarkdown .ls span,.st-key-grower_page .stMarkdown .leader-ovr-lab,.st-key-grower_page .stMarkdown .leader-photo-owner,.st-key-grower_page .stMarkdown .s-club,.st-key-grower_page .stMarkdown .comp-sub,.st-key-grower_page .stMarkdown .dev-owner,.st-key-grower_page .stMarkdown .dev-sub{color:#bfffff!important}
+/* Scalable, outlined pixel lettering stays sharp without a raster wordmark. */
+.stMarkdown .tt-logo-masthead{padding:0!important;line-height:0!important}
+.stMarkdown .tt-logo-sidebar{padding:0!important;line-height:0!important;margin:0 0 12px!important}
+.tt-brand-full,.tt-brand-compact{display:block;width:100%;height:auto;max-width:100%;object-fit:contain;image-rendering:auto}
+.tt-brand-full{max-height:200px;object-position:left center}.tt-brand-compact{max-height:170px}
+@media(max-width:700px){.stMarkdown .tt-logo-masthead{padding:0!important}.tt-brand-full{min-height:72px}}

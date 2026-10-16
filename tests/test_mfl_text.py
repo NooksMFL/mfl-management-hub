@@ -23,7 +23,7 @@ class MFLTextTests(unittest.TestCase):
                         at.run()
                         self.assertFalse(at.exception)
                         markup = "".join(m.value for m in at.markdown)
-                        self.assertIn(f"P{number} MFLTEXT {number}", markup)
+                        self.assertIn(f"P{number} MFL HUB {number}", markup)
             finally:
                 os.chdir(previous)
 
