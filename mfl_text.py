@@ -20,8 +20,15 @@ def font_url():
     return 'data:font/ttf;base64,' + base64.b64encode(font.read_bytes()).decode('ascii')
 
 
+@lru_cache(maxsize=2)
+def read_font_url(bold=False):
+    filename='mono-bold.ttf' if bold else 'mono.ttf'
+    font=Path(__file__).with_name('design-concepts') / 'assets' / filename
+    return 'data:font/ttf;base64,'+base64.b64encode(font.read_bytes()).decode('ascii')
+
+
 def apply_theme():
-    css = Path(__file__).with_name('mfl_text.css').read_text().replace('TELETEXT_FONT_URL',font_url())
+    css = Path(__file__).with_name('mfl_text.css').read_text().replace('TELETEXT_FONT_URL',font_url()).replace('READ_FONT_URL',read_font_url()).replace('BOLD_FONT_URL',read_font_url(True))
     st.markdown('<style>'+css+'</style>',unsafe_allow_html=True)
 
 

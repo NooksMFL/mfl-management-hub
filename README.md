@@ -1,6 +1,6 @@
 # MFL Text
 
-The MFL Management Hub, rebranded as a UK television teletext football service: black screens, pixel type, primary colours, numbered pages and four-colour shortcuts.
+The MFL Management Hub, rebranded as a UK television teletext football service: black screens, pixel display headings, crisp monospace body text, primary colours, numbered pages and four-colour shortcuts.
 
 ## Football page index
 

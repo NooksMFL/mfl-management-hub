@@ -955,116 +955,118 @@ if page=="Home":
     st.markdown('<div class="tt-pagebar"><span>NEXT: 201 AGENCY / 302 SQUADS / 888 SYNC</span></div>',unsafe_allow_html=True)
 
 elif page=="Grower or Shower":
-    conn=grower.db();grower.init_db(conn)
-    rows=grower.leaderboard(conn)
-    leader=rows[0] if rows else None
-    total_attr=sum(float(r.get("attribute_growth") or 0) for r in rows) if rows else 0
-    total_apps=sum(int(r.get("apps") or 0) for r in rows) if rows else 0
-
-    st.markdown(
-        f'<div class="grower-hero"><div class="gh-kicker">WORKTHESPACE · SEASON 17</div>'
-        f'<div class="gh-title">Grower or Shower</div>'
-        f'<div class="gh-copy">A live development race. OVR growth decides the winner, total attribute growth breaks ties, then Season 17 rating.</div>'
-        f'<div class="gh-badges"><span class="gh-badge"><b>{len(rows) if rows else 14}</b> entrants</span>'
-        f'<span class="gh-badge"><b>+{total_attr:g}</b> attribute growth</span>'
-        f'<span class="gh-badge"><b>{total_apps}</b> rated apps</span>'
-        f'<span class="gh-badge">Leader <b>{esc(leader["owner"]) if leader else "—"}</b></span></div></div>',
-        unsafe_allow_html=True
-    )
-
-    controls=st.columns([1.25,1.1,4])
-    with controls[0]:
-        refresh=st.button("↻ Refresh competition",type="primary",use_container_width=True)
-    with controls[1]:
-        with st.popover("Competition settings",use_container_width=True):
-            grower_start=st.text_input("Season 17 baseline (UTC)",value=st.session_state.get("grower_start","2026-09-22T00:00:00Z"))
-            st.session_state.grower_start=grower_start
-            os.environ["GROWER_START"]=grower_start
-
-    if refresh:
-        auth_warning=None
-        try:
-            tok=grower.refresh_access_token()
-        except Exception as auth_exc:
-            # Public player endpoints can still work when /auth/refresh is down.
-            # Do not display token values or raw response bodies in the public UI.
-            tok=None
-            auth_warning=str(auth_exc)
-            st.info("MFL authentication is unavailable. Trying public player data instead.")
-
-        bar=st.progress(0,text="Refreshing entrants…")
-        failures=[]
-        successes=0
-        for i,(pid,owner) in enumerate(grower.ENTRANTS.items(),1):
-            try:
-                grower.sync_player(conn,tok,pid,owner)
-                successes+=1
-            except Exception as exc:
-                failures.append((owner,str(exc)))
-            bar.progress(i/len(grower.ENTRANTS),text=f"{i}/{len(grower.ENTRANTS)} entrants")
-        bar.empty()
+    with st.container(key="grower_page"):
+        conn=grower.db();grower.init_db(conn)
         rows=grower.leaderboard(conn)
-        if successes:
-            st.success(f"Updated {successes} of {len(grower.ENTRANTS)} entrants.")
-        if failures:
-            st.warning(
-                f"{len(failures)} entrant(s) could not be refreshed. "
-                "Any previously saved standings are still displayed."
-            )
-            with st.expander("Refresh diagnostics"):
-                if auth_warning:
-                    st.write(f"Authentication: {auth_warning}")
-                for owner,detail in failures:
-                    st.write(f"{owner}: {detail}")
-        elif auth_warning:
-            st.caption("Competition refreshed using public MFL data.")
+        leader=rows[0] if rows else None
+        total_attr=sum(float(r.get("attribute_growth") or 0) for r in rows) if rows else 0
+        total_apps=sum(int(r.get("apps") or 0) for r in rows) if rows else 0
 
-    if not rows:
-        st.markdown('<div class="empty"><b>No competition snapshots are available yet</b>Refresh competition to try loading the entrants. If MFL is unavailable, check back when the service recovers.</div>',unsafe_allow_html=True)
-    else:
-        st.markdown('<div class="section-head2"><h3>Front runners</h3><span class="small-note2">OVR → ATTR → RATING</span></div>',unsafe_allow_html=True)
-        cards="".join(grower_leader_card(i,r) for i,r in enumerate(rows[:3],1))
-        st.markdown(f'<div class="leader-grid">{cards}</div>',unsafe_allow_html=True)
-
-        best_rating=max((float(r.get("avg_rating") or 0) for r in rows),default=0)
-        growers=sum(1 for r in rows if float(r.get("attribute_growth") or 0)>0)
         st.markdown(
-            f'<div class="comp-grid">'
-            f'<div class="comp-card"><div class="comp-title">Players showing development</div><div class="comp-big">{growers}</div><div class="comp-sub">Entrants with a recorded attribute gain</div></div>'
-            f'<div class="comp-card"><div class="comp-title">Best Season 17 rating</div><div class="comp-big">{best_rating:.2f}</div><div class="comp-sub">Highest current competition average</div></div></div>',
+            f'<div class="grower-hero"><div class="gh-kicker">WORKTHESPACE · SEASON 17</div>'
+            f'<div class="gh-title">Grower or Shower</div>'
+            f'<div class="gh-copy">A live development race. OVR growth decides the winner, total attribute growth breaks ties, then Season 17 rating.</div>'
+            f'<div class="gh-badges"><span class="gh-badge"><b>{len(rows) if rows else 14}</b> entrants</span>'
+            f'<span class="gh-badge"><b>+{total_attr:g}</b> attribute growth</span>'
+            f'<span class="gh-badge"><b>{total_apps}</b> rated apps</span>'
+            f'<span class="gh-badge">Leader <b>{esc(leader["owner"]) if leader else "—"}</b></span></div></div>',
             unsafe_allow_html=True
         )
 
-        st.markdown('<div class="section-head2"><h3>Development race</h3><span class="small-note2">LIVE RELATIVE PROGRESS</span></div>',unsafe_allow_html=True)
-        max_score=max((float(r.get("ovr_growth") or 0)*100+float(r.get("attribute_growth") or 0) for r in rows),default=1)
-        race_html=""
-        for i,r in enumerate(rows,1):
-            score=float(r.get("ovr_growth") or 0)*100+float(r.get("attribute_growth") or 0)
-            pct=max(3,(score/max(max_score,1))*100) if score>0 else 2
-            race_html+=f'<div class="race-row-v18"><div class="race-rank-v18">#{i}</div><div class="race-name-v18">{esc(r["owner"])}</div><div class="race-track-v18"><div class="race-fill-v18" style="width:{pct:.1f}%"></div></div><div class="race-score-v18">+{score:g}</div></div>'
-        st.markdown(f'<div class="feature-card-v18">{race_html}</div>',unsafe_allow_html=True)
+        controls=st.columns([1.25,1.1,4])
+        with controls[0]:
+            refresh=st.button("↻ Refresh competition",type="primary",use_container_width=True)
+        with controls[1]:
+            with st.popover("Competition settings",use_container_width=True):
+                grower_start=st.text_input("Season 17 baseline (UTC)",value=st.session_state.get("grower_start","2026-09-22T00:00:00Z"))
+                st.session_state.grower_start=grower_start
+                os.environ["GROWER_START"]=grower_start
 
-        st.markdown('<div class="section-head2"><h3>Live standings</h3><span class="small-note2">ALL ENTRANTS</span></div>',unsafe_allow_html=True)
-        st.markdown(grower_standings_html(rows),unsafe_allow_html=True)
+        if refresh:
+            auth_warning=None
+            try:
+                tok=grower.refresh_access_token()
+            except Exception as auth_exc:
+                # Public player endpoints can still work when /auth/refresh is down.
+                # Do not display token values or raw response bodies in the public UI.
+                tok=None
+                auth_warning=str(auth_exc)
+                st.info("MFL authentication is unavailable. Trying public player data instead.")
 
-        developed=[r for r in rows if float(r.get("attribute_growth") or 0)>0 or float(r.get("ovr_growth") or 0)>0]
-        if developed:
-            st.markdown('<div class="section-head2"><h3>Development spotlight</h3><span class="small-note2">RECORDED THIS COMPETITION</span></div>',unsafe_allow_html=True)
-            spotlight=[]
-            for r in developed[:3]:
-                gains=[]
-                for key,label in [("pace_growth","PAC"),("shooting_growth","SHO"),("passing_growth","PAS"),("dribbling_growth","DRI"),("defense_growth","DEF"),("physical_growth","PHY")]:
-                    v=float(r.get(key) or 0)
-                    if v>0:
-                        gains.append(f"{label} +{v:g}")
-                spotlight.append(
-                    f'<div class="dev-card"><div class="dev-player">{esc(r["player"])}</div>'
-                    f'<div class="dev-owner">{esc(r["owner"])}</div>'
-                    f'<div class="dev-gain">+{float(r.get("attribute_growth") or 0):g}</div>'
-                    f'<div class="dev-sub">{" · ".join(gains) if gains else "OVR development"}</div></div>'
+            bar=st.progress(0,text="Refreshing entrants…")
+            failures=[]
+            successes=0
+            for i,(pid,owner) in enumerate(grower.ENTRANTS.items(),1):
+                try:
+                    grower.sync_player(conn,tok,pid,owner)
+                    successes+=1
+                except Exception as exc:
+                    failures.append((owner,str(exc)))
+                bar.progress(i/len(grower.ENTRANTS),text=f"{i}/{len(grower.ENTRANTS)} entrants")
+            bar.empty()
+            rows=grower.leaderboard(conn)
+            if successes:
+                st.success(f"Updated {successes} of {len(grower.ENTRANTS)} entrants.")
+            if failures:
+                st.warning(
+                    f"{len(failures)} entrant(s) could not be refreshed. "
+                    "Any previously saved standings are still displayed."
                 )
-            st.markdown(f'<div class="development-strip">{"".join(spotlight)}</div>',unsafe_allow_html=True)
-    conn.close()
+                with st.expander("Refresh diagnostics"):
+                    if auth_warning:
+                        st.write(f"Authentication: {auth_warning}")
+                    for owner,detail in failures:
+                        st.write(f"{owner}: {detail}")
+            elif auth_warning:
+                st.caption("Competition refreshed using public MFL data.")
+
+        if not rows:
+            st.markdown('<div class="empty"><b>No competition snapshots are available yet</b>Refresh competition to try loading the entrants. If MFL is unavailable, check back when the service recovers.</div>',unsafe_allow_html=True)
+        else:
+            st.markdown('<div class="section-head2"><h3>Front runners</h3><span class="small-note2">OVR → ATTR → RATING</span></div>',unsafe_allow_html=True)
+            cards="".join(grower_leader_card(i,r) for i,r in enumerate(rows[:3],1))
+            st.markdown(f'<div class="leader-grid">{cards}</div>',unsafe_allow_html=True)
+
+            best_rating=max((float(r.get("avg_rating") or 0) for r in rows),default=0)
+            growers=sum(1 for r in rows if float(r.get("attribute_growth") or 0)>0)
+            st.markdown(
+                f'<div class="comp-grid">'
+                f'<div class="comp-card"><div class="comp-title">Players showing development</div><div class="comp-big">{growers}</div><div class="comp-sub">Entrants with a recorded attribute gain</div></div>'
+                f'<div class="comp-card"><div class="comp-title">Best Season 17 rating</div><div class="comp-big">{best_rating:.2f}</div><div class="comp-sub">Highest current competition average</div></div></div>',
+                unsafe_allow_html=True
+            )
+
+            st.markdown('<div class="section-head2"><h3>Development race</h3><span class="small-note2">LIVE RELATIVE PROGRESS</span></div>',unsafe_allow_html=True)
+            max_score=max((float(r.get("ovr_growth") or 0)*100+float(r.get("attribute_growth") or 0) for r in rows),default=1)
+            race_html=""
+            for i,r in enumerate(rows,1):
+                score=float(r.get("ovr_growth") or 0)*100+float(r.get("attribute_growth") or 0)
+                pct=max(3,(score/max(max_score,1))*100) if score>0 else 2
+                race_html+=f'<div class="race-row-v18"><div class="race-rank-v18">#{i}</div><div class="race-name-v18">{esc(r["owner"])}</div><div class="race-track-v18"><div class="race-fill-v18" style="width:{pct:.1f}%"></div></div><div class="race-score-v18">+{score:g}</div></div>'
+            st.markdown(f'<div class="feature-card-v18">{race_html}</div>',unsafe_allow_html=True)
+
+            st.markdown('<div class="section-head2"><h3>Live standings</h3><span class="small-note2">ALL ENTRANTS</span></div>',unsafe_allow_html=True)
+            st.markdown(grower_standings_html(rows),unsafe_allow_html=True)
+
+            developed=[r for r in rows if float(r.get("attribute_growth") or 0)>0 or float(r.get("ovr_growth") or 0)>0]
+            if developed:
+                st.markdown('<div class="section-head2"><h3>Development spotlight</h3><span class="small-note2">RECORDED THIS COMPETITION</span></div>',unsafe_allow_html=True)
+                spotlight=[]
+                for r in developed[:3]:
+                    gains=[]
+                    for key,label in [("pace_growth","PAC"),("shooting_growth","SHO"),("passing_growth","PAS"),("dribbling_growth","DRI"),("defense_growth","DEF"),("physical_growth","PHY")]:
+                        v=float(r.get(key) or 0)
+                        if v>0:
+                            gains.append(f"{label} +{v:g}")
+                    spotlight.append(
+                        f'<div class="dev-card"><div class="dev-player">{esc(r["player"])}</div>'
+                        f'<div class="dev-owner">{esc(r["owner"])}</div>'
+                        f'<div class="dev-gain">+{float(r.get("attribute_growth") or 0):g}</div>'
+                        f'<div class="dev-sub">{" · ".join(gains) if gains else "OVR development"}</div></div>'
+                    )
+                st.markdown(f'<div class="development-strip">{"".join(spotlight)}</div>',unsafe_allow_html=True)
+        conn.close()
+
 
 # ---------------- AGENCY ----------------
 elif page=="Agency Development":
