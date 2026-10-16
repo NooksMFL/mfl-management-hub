@@ -10,7 +10,7 @@ function remember(value){try{if(value)localStorage.setItem(KEY,value);else local
 function height(){requestAnimationFrame(()=>message('streamlit:setFrameHeight',{height:document.body.scrollHeight+5}));}
 function render(){
  connect.disabled=!args.enabled||busy;
- connect.textContent=busy?'OPENING DAPPER…':'CONNECT DAPPER';
+ connect.textContent=busy?'Opening Dapper…':'Connect Dapper';
  forget.hidden=!(args.current_wallet||read());
  status.textContent=storageBlocked?'Browser storage is blocked. Your wallet may need reconnecting next visit.':args.enabled?'Your password stays with Dapper. We use your public wallet address.':'Dapper sign-in is not available yet. Enter your public wallet once below; this browser will remember it.';
  height();

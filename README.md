@@ -1,8 +1,8 @@
 # MFL Management Hub
 
-![MFL Management Hub teletext logo](assets/mfl-management-hub.svg)
+![MFL Management Hub Manager 95 logo](assets/mfl-management-hub.svg)
 
-The MFL Management Hub, presented as a UK television teletext football service: black screens, pixel display headings, crisp monospace body text, primary colours, numbered pages and four-colour shortcuts.
+The MFL Management Hub, styled as a Windows 95 football desktop: teal wallpaper, grey bevelled windows, blue title bars, readable sans-serif text and a working Start/taskbar navigation.
 
 ## Football page index
 
@@ -22,9 +22,9 @@ The MFL Management Hub, presented as a UK television teletext football service: 
 | 888 | Sync Centre |
 | 999 | Design Studio |
 
-Choose a page in the sidebar, use a coloured shortcut, or enter its three-digit number and press Enter. The header reports the current page and UK date. Connect a public wallet to load personal agency and club data; Home uses saved data and labels missing values explicitly.
+Choose an application in the sidebar, use the desktop taskbar or menu shortcuts, or enter a page number and press Enter. The header reports the current page and UK date. Connect a public wallet to load personal agency and club data; Home uses saved data and labels missing values explicitly.
 
-Squads retain the positional minimums, flexible goalkeeper ratings, retired-player exclusions, portraits, ages and CSV exports. The 4-1-3-2 and 4-3-3 formation planners retain drag-and-drop and browser-saved lineups, with matching teletext styling.
+Squads retain the positional minimums, flexible goalkeeper ratings, retired-player exclusions, portraits, ages and CSV exports. The 4-1-3-2 and 4-3-3 formation planners retain drag-and-drop and browser-saved lineups, with matching Manager 95 styling.
 
 ## Run locally
 
@@ -33,7 +33,7 @@ python -m pip install -r requirements.txt
 streamlit run app.py
 ```
 
-The shared theme is configured in `.streamlit/config.toml`; `mfl_text.py` and `mfl_text.css` apply the visual identity. The pixel font is bundled locally with its licence, so no external font service is required. Keep refresh tokens in environment settings or Streamlit Secrets, never in the repository.
+The shared theme is configured in `.streamlit/config.toml`; `mfl_text.py` and `win95.css` apply the visual identity. Fonts are bundled locally with its licence, so no external font service is required. Keep refresh tokens in environment settings or Streamlit Secrets, never in the repository.
 
 ## Validate
 
@@ -53,4 +53,4 @@ Public wallet addresses are remembered on this browser and restored on the next 
 
 ## Ten new visual concepts
 
-Page 999 Design Studio now includes a **Ten new · Wild collection** selector, alongside the original six designs. [Browse the ten-theme gallery and PDF](design-concepts/WILD_COLLECTION.md). These are independent interactive previews; the live teletext branding is unchanged.
+Page 999 Design Studio now includes a **Ten new · Wild collection** selector, alongside the original six designs. [Browse the ten-theme gallery and PDF](design-concepts/WILD_COLLECTION.md). These are independent interactive previews; the live branding now uses Manager 95.

@@ -20,7 +20,7 @@ import browser_persistence as browser_store
 from streamlit_js_eval import get_local_storage, set_local_storage
 
 st.set_page_config(
-    page_title="MFL Management Hub | Teletext Football",
+    page_title="MFL Management Hub | Manager 95",
     page_icon=str(Path(__file__).with_name("assets") / "mfl-favicon.png"),
     layout="wide",
     initial_sidebar_state="expanded",
@@ -800,24 +800,24 @@ def combined_players(wallet):
 
 def make_share_card(title,subtitle,lines,portrait=None):
     W,H=1200,675
-    im=Image.new("RGB",(W,H),(0,0,0)); d=ImageDraw.Draw(im)
+    im=Image.new("RGB",(W,H),(192,192,192)); d=ImageDraw.Draw(im)
     # background panels
-    d.rectangle((45,45,W-45,H-45),fill=(0,0,0),outline=(0,0,255),width=4)
-    d.rectangle((45,45,60,H-45),fill=(0,0,255))
+    d.rectangle((45,45,W-45,H-45),fill=(192,192,192),outline=(255,255,255),width=4)
+    d.rectangle((45,45,60,H-45),fill=(0,0,128))
     try:
         from pathlib import Path
-        text_font=str(Path(mfl_text.__file__).with_name("design-concepts") / "assets" / "teletext.ttf")
-        font_big=ImageFont.truetype(text_font,72)
-        font_mid=ImageFont.truetype(text_font,38)
-        font_small=ImageFont.truetype(text_font,32)
+        text_font=str(Path(mfl_text.__file__).with_name("design-concepts") / "assets" / "sans.ttf")
+        font_big=ImageFont.truetype(text_font,52)
+        font_mid=ImageFont.truetype(text_font,30)
+        font_small=ImageFont.truetype(text_font,25)
     except:
         font_big=font_mid=font_small=None
-    d.text((95,90),title,fill=(255,255,0),font=font_big)
-    d.text((98,165),subtitle,fill=(0,255,255),font=font_mid)
+    d.text((95,90),title,fill=(0,0,128),font=font_big)
+    d.text((98,165),subtitle,fill=(0,0,0),font=font_mid)
     y=250
     for line in lines[:7]:
-        d.text((100,y),str(line),fill=(255,255,255),font=font_small); y+=52
-    d.text((100,H-95),"MFL MANAGEMENT HUB · SEASON 17",fill=(0,255,255),font=font_small)
+        d.text((100,y),str(line),fill=(0,0,0),font=font_small); y+=52
+    d.text((100,H-95),"MFL MANAGEMENT HUB · SEASON 17",fill=(0,0,0),font=font_small)
     if portrait:
         try:
             r=requests.get(portrait,timeout=8); r.raise_for_status()
@@ -844,8 +844,8 @@ if query_page not in nav_pages:
     query_page="Home"
 
 with st.sidebar:
-    st.markdown(f'<div class="tt-sidebar-logo tt-logo-sidebar">{mfl_text.logo_html(compact=True)}</div><div class="tt-sidebar-sub">FOOTBALL INDEX / SEASON 17</div>',unsafe_allow_html=True)
-    st.text_input("PAGE NUMBER / ENTER TO GO",key="tt_page_number",max_chars=3,
+    st.markdown(f'<div class="win-sidebar-title">MFL Management Hub</div><div class="win-sidebar-logo">{mfl_text.logo_html(compact=True)}</div><div class="win-sidebar-sub">My Football Network · Season 17</div>',unsafe_allow_html=True)
+    st.text_input("Open page number",key="tt_page_number",max_chars=3,
                   placeholder="100",on_change=mfl_text.jump_to_page)
     if st.session_state.get("tt_page_error"):
         st.caption(st.session_state["tt_page_error"])
@@ -891,7 +891,7 @@ with st.sidebar:
       <div class="season-top"><span>Season 17</span><span>PUBLIC</span></div>
       <div class="connected"><i></i><span>PUBLIC FOOTBALL DATA</span></div>
     </div>
-    <div class="build">MFL MANAGEMENT HUB · TELETEXT</div>""",unsafe_allow_html=True)
+    <div class="build">MFL MANAGEMENT HUB · MANAGER 95</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 mfl_text.header(page,wallet)
@@ -915,7 +915,7 @@ if wallet:
 
 # ---------------- HOME ----------------
 if page=="Home":
-    st.subheader("YOUR FOOTBALL NETWORK, ON SCREEN")
+    st.subheader("Your football network")
     if not wallet:
         st.info("Connect your public wallet in the sidebar to see your agency, clubs and development. Page 302 opens the squad builder.")
     roster=shared.roster_rows(wallet) if wallet else []
@@ -931,11 +931,11 @@ if page=="Home":
     kpis[2].metric("CACHED CLUB OVR GAIN",f"+{gain:g}" if not good.empty else "—")
     left,right=st.columns([1.15,1])
     with left:
-        st.subheader("FOOTBALL PAGE INDEX")
+        st.subheader("My Football / Applications")
         st.markdown(''.join(f'<a class="tt-index-row" href="{mfl_text.page_link(name,wallet)}" target="_self"><span>{esc(name.upper())}</span><b>{number}</b></a>'
                            for name,number in mfl_text.PAGES.items() if name not in ("Home","Design Studio")),unsafe_allow_html=True)
     with right:
-        st.subheader("LEAGUE PLANNING POOL")
+        st.subheader("League planning pool")
         import squad_builder as squads
         records=[{"player_id":r["player_id"],"player":r["player_name"],"position":r["position"],"current_ovr":r["overall"],"club":r["club"]} for r in roster] if roster else (af.to_dict("records") if not af.empty else [])
         if records:
@@ -951,7 +951,7 @@ if page=="Home":
         else:
             st.info("No saved players yet. Connect a wallet, then use page 888 to load the shared roster.")
         st.caption("Based on saved wallet data. Goalkeeper ratings may cross league bands. Refresh in Sync Centre after player changes.")
-    st.markdown('<div class="tt-pagebar"><span>NEXT: 201 AGENCY / 302 SQUADS / 888 SYNC</span></div>',unsafe_allow_html=True)
+    st.markdown('<div class="tt-pagebar"><span>My Agency · Squad Builder · Sync Centre</span></div>',unsafe_allow_html=True)
 
 elif page=="Grower or Shower":
     with st.container(key="grower_page"):
