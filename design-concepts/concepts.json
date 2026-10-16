@@ -46,5 +46,95 @@
     "style": "Technical scouting console",
     "description": "Cool grey, signal orange, monospaced data and engineering grid lines.",
     "rationale": "A detailed working tool for the analytical manager, with compact tables and clearly exposed squad gaps."
+  },
+  {
+    "slug": "07-windows95",
+    "number": "07",
+    "title": "Manager 95",
+    "style": "A football desktop from 1995",
+    "description": "Grey bevelled windows, teal desktop wallpaper, a Start bar and a manager\u2019s inbox.",
+    "rationale": "Grey bevelled windows, teal desktop wallpaper, a Start bar and a manager\u2019s inbox.",
+    "collection": "Wild collection"
+  },
+  {
+    "slug": "08-arcade",
+    "number": "08",
+    "title": "Extra Time Arcade",
+    "style": "Insert coin. Build squad.",
+    "description": "Purple arcade cabinets, pixel sprites, score counters and a loud yellow marquee.",
+    "rationale": "Purple arcade cabinets, pixel sprites, score counters and a loud yellow marquee.",
+    "collection": "Wild collection"
+  },
+  {
+    "slug": "09-orbital",
+    "number": "09",
+    "title": "Orbital FC",
+    "style": "Football in deep space",
+    "description": "An orbital mission display with planetary graphics, black space and burnt-orange telemetry.",
+    "rationale": "An orbital mission display with planetary graphics, black space and burnt-orange telemetry.",
+    "collection": "Wild collection"
+  },
+  {
+    "slug": "10-wabi",
+    "number": "10",
+    "title": "Wabi Sabi",
+    "style": "Quiet Japanese minimalism",
+    "description": "Vermilion, white space, vertical typography and a restrained asymmetrical composition.",
+    "rationale": "Vermilion, white space, vertical typography and a restrained asymmetrical composition.",
+    "collection": "Wild collection"
+  },
+  {
+    "slug": "11-zine",
+    "number": "11",
+    "title": "Offside Zine",
+    "style": "A football fanzine gone rogue",
+    "description": "Acid green, pink photocopy blocks, cut-out headlines, tape and deliberately unruly cards.",
+    "rationale": "Acid green, pink photocopy blocks, cut-out headlines, tape and deliberately unruly cards.",
+    "collection": "Wild collection"
+  },
+  {
+    "slug": "12-bubble",
+    "number": "12",
+    "title": "Bubble League",
+    "style": "A very unserious football universe",
+    "description": "Candy pink, sky blue, oversized pill shapes and a cheerful illustrated football.",
+    "rationale": "Candy pink, sky blue, oversized pill shapes and a cheerful illustrated football.",
+    "collection": "Wild collection"
+  },
+  {
+    "slug": "13-noir",
+    "number": "13",
+    "title": "The Final Third",
+    "style": "A football noir dossier",
+    "description": "Black and white, cinematic serif headlines, evidence notes and film-strip framing.",
+    "rationale": "Black and white, cinematic serif headlines, evidence notes and film-strip framing.",
+    "collection": "Wild collection"
+  },
+  {
+    "slug": "14-nautical",
+    "number": "14",
+    "title": "Captain\u2019s Log",
+    "style": "Run your agency like a fleet",
+    "description": "Deep ocean blue, cream navigation charts, compass drawings and a captain\u2019s roster.",
+    "rationale": "Deep ocean blue, cream navigation charts, compass drawings and a captain\u2019s roster.",
+    "collection": "Wild collection"
+  },
+  {
+    "slug": "15-blueprint",
+    "number": "15",
+    "title": "The Architect",
+    "style": "Draw up the next great team",
+    "description": "Engineering blueprints, white linework, dimension markers and a tactical construction plan.",
+    "rationale": "Engineering blueprints, white linework, dimension markers and a tactical construction plan.",
+    "collection": "Wild collection"
+  },
+  {
+    "slug": "16-rave",
+    "number": "16",
+    "title": "Squad Frequency",
+    "style": "A football warehouse party",
+    "description": "Signal red, black, giant typography, festival line-ups and a static audio-spectrum graphic.",
+    "rationale": "Signal red, black, giant typography, festival line-ups and a static audio-spectrum graphic.",
+    "collection": "Wild collection"
   }
 ]

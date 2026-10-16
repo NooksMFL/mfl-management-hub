@@ -50,3 +50,7 @@ Page 306 estimates each player from at least five independent active asking-pric
 ## Dapper and remembered wallets
 
 Public wallet addresses are remembered on this browser and restored on the next visit. Use **Forget saved wallet** to remove the saved selection. Manual entry remains available. The Dapper connection component is prepared but sign-in stays disabled until the app owner completes Dapper developer registration. See [Dapper setup](dapper_component/README.md) for the activation setting and pinned SDK build instructions.
+
+## Ten new visual concepts
+
+Page 999 Design Studio now includes a **Ten new · Wild collection** selector, alongside the original six designs. [Browse the ten-theme gallery and PDF](design-concepts/WILD_COLLECTION.md). These are independent interactive previews; the live teletext branding is unchanged.
