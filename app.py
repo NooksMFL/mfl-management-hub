@@ -836,7 +836,7 @@ if "wallet" not in st.session_state:
     st.session_state.wallet=saved_wallet.strip().lower() if valid_wallet(saved_wallet) else ""
 
 # ---------------- SIDEBAR ----------------
-nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Squad Builder","Transfer Window","Transfer Bargains","Watchlist","Compare","Insights","Sync Centre"]
+nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Squad Builder","Transfer Window","Transfer Bargains","Watchlist","Compare","Insights","Sync Centre","Design Studio"]
 query_page=st.query_params.get("page","Home")
 if query_page not in nav_pages:
     query_page="Home"
@@ -2022,6 +2022,10 @@ elif page=="Insights":
                     resp=requests.post(webhook,data=data,files=files,headers={"User-Agent":"MFL-Management-Hub/1.0"},timeout=20)
                     resp.raise_for_status();st.success("Posted to Discord.")
                 except Exception as e:st.error(f"Discord post failed: {e}")
+
+elif page=="Design Studio":
+    import design_studio
+    design_studio.render()
 
 elif page=="Sync Centre":
     if not wallet:

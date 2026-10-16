@@ -1,0 +1,50 @@
+[
+  {
+    "slug": "01-teletext",
+    "number": "01",
+    "title": "MFL Text",
+    "style": "UK teletext \u00b7 1988",
+    "description": "Black screens, primary colours, pixel typography and numbered football pages.",
+    "rationale": "The nostalgic one. A proper football information service with keyboard page entry and Fastext-style navigation."
+  },
+  {
+    "slug": "02-touchline",
+    "number": "02",
+    "title": "Touchline",
+    "style": "Modern sports editorial",
+    "description": "Ivory paper, forest green, oversized serif headlines and a tactical pitch.",
+    "rationale": "A calm, premium football journal. Strong hierarchy and generous space make long sessions feel lighter."
+  },
+  {
+    "slug": "03-floodlight",
+    "number": "03",
+    "title": "Floodlight",
+    "style": "Match-night broadcast",
+    "description": "Aubergine, electric lilac, luminous stadium lights and a broadcast scoreboard.",
+    "rationale": "A cinematic match-night experience with horizontal navigation and large, vivid performance graphics."
+  },
+  {
+    "slug": "04-clubroom",
+    "number": "04",
+    "title": "The Clubroom",
+    "style": "Heritage football club",
+    "description": "Warm stone, oxblood, brass accents and traditional serif typography.",
+    "rationale": "A club secretary\u2019s desk reimagined: restrained, confident and rooted in football heritage."
+  },
+  {
+    "slug": "05-dugout",
+    "number": "05",
+    "title": "Dugout",
+    "style": "Bold sportswear",
+    "description": "Cobalt, acid yellow, sharp black lettering and oversized athletic typography.",
+    "rationale": "An energetic football brand built around player cards, squad building and decisive actions."
+  },
+  {
+    "slug": "06-control",
+    "number": "06",
+    "title": "Control Room",
+    "style": "Technical scouting console",
+    "description": "Cool grey, signal orange, monospaced data and engineering grid lines.",
+    "rationale": "A detailed working tool for the analytical manager, with compact tables and clearly exposed squad gaps."
+  }
+]

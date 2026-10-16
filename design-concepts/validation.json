@@ -1,0 +1,38 @@
+[
+  {
+    "concept": "01-teletext",
+    "javascript_errors": [],
+    "mobile_overflow": false,
+    "mobile_squad_overflow": false
+  },
+  {
+    "concept": "02-touchline",
+    "javascript_errors": [],
+    "mobile_overflow": false,
+    "mobile_squad_overflow": false
+  },
+  {
+    "concept": "03-floodlight",
+    "javascript_errors": [],
+    "mobile_overflow": false,
+    "mobile_squad_overflow": false
+  },
+  {
+    "concept": "04-clubroom",
+    "javascript_errors": [],
+    "mobile_overflow": false,
+    "mobile_squad_overflow": false
+  },
+  {
+    "concept": "05-dugout",
+    "javascript_errors": [],
+    "mobile_overflow": false,
+    "mobile_squad_overflow": false
+  },
+  {
+    "concept": "06-control",
+    "javascript_errors": [],
+    "mobile_overflow": false,
+    "mobile_squad_overflow": false
+  }
+]
