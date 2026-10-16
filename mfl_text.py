@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 import streamlit as st
 
 PAGES = {"Home":"100", "Grower or Shower":"200", "Agency Development":"201", "Club Development":"202",
-         "Squad Builder":"302", "Transfer Window":"303", "Transfer Bargains":"304", "Watchlist":"305",
+         "Squad Builder":"302", "Transfer Window":"303", "Transfer Bargains":"304", "Watchlist":"305", "Agency / Player Valuation":"306",
          "Compare":"400", "Insights":"500", "Sync Centre":"888", "Design Studio":"999"}
 
 

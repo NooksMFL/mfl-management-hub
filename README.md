@@ -14,6 +14,7 @@ The MFL Management Hub, rebranded as a UK television teletext football service: 
 | 303 | Transfer Window |
 | 304 | Transfer Bargains |
 | 305 | Watchlist |
+| 306 | Agency / Player Valuation |
 | 400 | Compare |
 | 500 | Insights |
 | 888 | Sync Centre |
@@ -39,3 +40,7 @@ python -m unittest discover -s tests -v
 ```
 
 The suite checks squad allocation, retirement and goalkeeper rules, player-card escaping, preview rendering, numbered pages and navigation. [The original six design studies](design-concepts/README.md) remain available for reference.
+
+## Agency valuations
+
+Page 306 estimates each player from at least five independent active asking-price comparables, using age, OVR and position. It shows price ranges, evidence and priced-player coverage; these are not completed-sale valuations. Market snapshots are saved locally in `valuation_market_cache.db` and reused on later visits. Scan failures preserve the previous snapshot. Currency groups are kept separate; listings without currency metadata are labelled market units.

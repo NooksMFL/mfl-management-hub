@@ -840,7 +840,7 @@ if "wallet" not in st.session_state:
 # ---------------- SIDEBAR ----------------
 import mfl_text
 mfl_text.apply_theme()
-nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Squad Builder","Transfer Window","Transfer Bargains","Watchlist","Compare","Insights","Sync Centre","Design Studio"]
+nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Squad Builder","Transfer Window","Transfer Bargains","Agency / Player Valuation","Watchlist","Compare","Insights","Sync Centre","Design Studio"]
 query_page=st.query_params.get("page","Home")
 if query_page not in nav_pages:
     query_page="Home"
@@ -1616,6 +1616,10 @@ elif page=="Transfer Bargains":
             st.dataframe(result,use_container_width=True,hide_index=True)
             st.download_button("Export bargains as CSV",result.to_csv(index=False).encode("utf-8-sig"),"mfl_transfer_bargains.csv","text/csv",key="bargains_csv")
     st.caption("Valuation method: median of at least five other active asking prices with matching position, within ±3 OVR and ±3 years. Small samples, changing markets, and player attributes can distort estimates.")
+
+elif page=="Agency / Player Valuation":
+    import valuation_page
+    valuation_page.render(wallet)
 
 elif page=="Watchlist":
     if not wallet:
