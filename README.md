@@ -54,3 +54,7 @@ Public wallet addresses are remembered on this browser and restored on the next 
 ## Ten new visual concepts
 
 Page 999 Design Studio now includes a **Ten new · Wild collection** selector, alongside the original six designs. [Browse the ten-theme gallery and PDF](design-concepts/WILD_COLLECTION.md). These are independent interactive previews; the live branding now uses Manager Workspace.
+
+### Season progression cards
+
+Open **Insights → Progression cards** to select a player and download a blue shield-style 720 × 1080 PNG showing their portrait, age, position, season OVR gain and PAC / SHO / PAS / DRI / DEF / PHY gains. Cards use Club Development season records, not agency ownership gains. Sync Club Development first; unavailable fields display an em dash and unavailable portraits use a silhouette. The displayed baseline and latest progression dates identify the saved measurement window.

@@ -1759,7 +1759,7 @@ elif page=="Insights":
     if not cf.empty:
         cf=cf[cf["error"].isna()] if "error" in cf.columns else cf
         shared.capture_club_snapshot(wallet,cf)
-    tabs=st.tabs(["Movers & timeline","Position & age","Milestones","Season snapshot","Market & share"])
+    tabs=st.tabs(["Movers & timeline","Position & age","Milestones","Season snapshot","Market & share","Progression cards"])
     with tabs[0]:
         if cf.empty:st.info("Sync Club Development to unlock Season 17 movers.")
         else:
@@ -1847,6 +1847,9 @@ elif page=="Insights":
             st.markdown(f'<div class="feature-grid-4"><div class="feature-metric"><div class="fm-lab">Season OVR</div><div class="fm-val mint">+{total_ovr:g}</div></div><div class="feature-metric"><div class="fm-lab">Attributes</div><div class="fm-val violet">+{total_attr:g}</div></div><div class="feature-metric"><div class="fm-lab">Best club</div><div class="fm-val">{esc(bc)}</div></div><div class="feature-metric"><div class="fm-lab">Best player</div><div class="fm-val">{esc(bp)}</div></div></div>',unsafe_allow_html=True)
             snap=cf[["player_id","player","club","start_ovr","current_ovr","ovr_gain","attr_gain","pac","sho","pas","dri","defn","phy"]]
             st.download_button("↓ Export Season 17 snapshot",snap.to_csv(index=False).encode("utf-8-sig"),file_name="mfl_season17_snapshot.csv",mime="text/csv")
+    with tabs[5]:
+        import progression_cards
+        progression_cards.render(cf, shared.roster_rows(wallet))
     with tabs[4]:
         allp=combined_players(wallet)
         if allp.empty and shared.roster_rows(wallet):
