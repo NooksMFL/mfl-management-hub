@@ -46,6 +46,12 @@ def has_current_club(value):
     }
 
 
+def role_rating(player,role):
+    from tactics_engine import rating_at
+    values=[rating_at(player,p)[0] for p in POSITIONS[role]]
+    return max((v for v in values if v is not None),default=None)
+
+
 def _assign(players, quotas=None):
     """Maximum-weight assignment to 25 role slots, with dummy empty slots.
 
@@ -55,11 +61,12 @@ def _assign(players, quotas=None):
     """
     slots = [role for role, count in (QUOTAS if quotas is None else quotas).items() for _ in range(count)]
     n, m = len(slots), len(players) + len(slots)
+    role_values={(i,role):role_rating(p,role) for i,p in enumerate(players) for role in set(slots)}
     costs = []
     for role in slots:
         costs.append([
-            -((100000 if role == "Additional outfield" else 10000000) + min(p["current_ovr"], 1000)) if role in p["groups"] else 1000000
-            for p in players
+            -((100000 if role == "Additional outfield" else 10000000) + role_values[i,role]) if role in p["groups"] and role_values[i,role] is not None else 1000000
+            for i,p in enumerate(players)
         ] + [0] * n)
     u, v, matched, way = [0] * (n+1), [0] * (m+1), [0] * (m+1), [0] * (m+1)
     for i in range(1, n+1):
@@ -92,7 +99,7 @@ def _assign(players, quotas=None):
     result = []
     for j in range(1, len(players)+1):
         if matched[j] and costs[matched[j]-1][j-1] < 0:
-            result.append({**players[j-1], "assigned_role": slots[matched[j]-1]})
+            result.append({**players[j-1], "assigned_role": slots[matched[j]-1], "assigned_role_rating":role_values[j-1,slots[matched[j]-1]]})
     return sorted(result, key=lambda p: (list(QUOTAS).index(p["assigned_role"]), -p["current_ovr"], p["player_id"]))
 
 
@@ -150,7 +157,7 @@ def build_squads(records, sixty_league="Spark"):
                 keeper = min(keepers, key=lambda p: (
                     max(low-p["current_ovr"], 0, p["current_ovr"]-high),
                     -p["current_ovr"], p["player_id"]))
-                squad["players"].insert(0, {**keeper, "assigned_role": "Goalkeeper"})
+                squad["players"].insert(0, {**keeper, "assigned_role": "Goalkeeper", "assigned_role_rating": role_rating(keeper,"Goalkeeper")})
                 keepers.remove(keeper)
     for squads in result.values():
         for squad in squads:

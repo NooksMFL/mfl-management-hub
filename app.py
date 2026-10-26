@@ -838,23 +838,26 @@ wallet_connection.restore_wallet(st.session_state,st.query_params.get("wallet","
 # ---------------- SIDEBAR ----------------
 import mfl_text
 mfl_text.apply_theme()
-nav_pages=["Home","Grower or Shower","Agency Development","Club Development","Squad Builder","Transfer Window","Transfer Bargains","Agency / Player Valuation","Watchlist","Compare","Insights","Sync Centre","Design Studio"]
+nav_pages=["Home","Sync Centre","Squad Builder","Agency Development","Club Development","Transfer Window","Transfer Bargains","Agency / Player Valuation","Watchlist","Compare","Insights","Grower or Shower","Design Studio"]
 query_page=st.query_params.get("page","Home")
 if query_page not in nav_pages:
     query_page="Home"
 
 with st.sidebar:
-    st.markdown(f'<div class="manager-sidebar-logo">{mfl_text.logo_html(compact=True)}</div><div class="manager-sidebar-sub">Your football network · Season 17</div>',unsafe_allow_html=True)
-    st.text_input("Open page number",key="tt_page_number",max_chars=3,
-                  placeholder="100",on_change=mfl_text.jump_to_page)
+    st.markdown(f'<div class="manager-sidebar-logo">{mfl_text.logo_html(compact=True)}</div><div class="manager-sidebar-sub">Your football network</div>',unsafe_allow_html=True)
+    with st.expander("Page shortcuts"):
+        st.text_input("Open page number",key="tt_page_number",max_chars=3,
+                      placeholder="100",on_change=mfl_text.jump_to_page)
     if st.session_state.get("tt_page_error"):
         st.caption(st.session_state["tt_page_error"])
     if "hub_nav" not in st.session_state:
         st.session_state["hub_nav"]=query_page
     elif st.query_params.get("page") and st.session_state["hub_nav"]!=query_page:
         st.session_state["hub_nav"]=query_page
-    page=st.radio("Navigation",nav_pages,key="hub_nav",
-                  format_func=lambda name:f"{name}",
+    community_open=st.toggle("Community & design",value=query_page in ("Grower or Shower","Design Studio"),key="show_community")
+    visible_pages=[name for name in nav_pages if community_open or name not in ("Grower or Shower","Design Studio") or name==st.session_state.get("hub_nav")]
+    page=st.radio("Navigation",visible_pages,key="hub_nav",
+                  format_func=lambda name:{"Club Development":"Club progression","Agency Development":"Agency progression"}.get(name,name),
                   on_change=mfl_text.sync_navigation,label_visibility="collapsed")
 
     st.markdown('<div class="wallet-area"><div class="wallet-label">ACTIVE WALLET</div>',unsafe_allow_html=True)
@@ -888,10 +891,10 @@ with st.sidebar:
         if shared.roster_rows(st.session_state.wallet):
             st.caption("✓ Wallet data saved for this browser")
     st.markdown("""<div class="season-box">
-      <div class="season-top"><span>Season 17</span><span>PUBLIC</span></div>
+      <div class="season-top"><span>Your workspace</span><span>PUBLIC</span></div>
       <div class="connected"><i></i><span>PUBLIC FOOTBALL DATA</span></div>
     </div>
-    <div class="build">MFL MANAGEMENT HUB · MANAGER 95</div>""",unsafe_allow_html=True)
+    <div class="build">MFL MANAGEMENT HUB · MANAGER WORKSPACE</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 mfl_text.header(page,wallet)
@@ -916,6 +919,9 @@ if wallet:
 # ---------------- HOME ----------------
 if page=="Home":
     st.subheader("Your football network")
+    st.info("Start here: connect your wallet → load players → choose your team in Squad Builder. Use Club progression to track gains since joining your club, or switch to the whole-season view.")
+    import squad_sync
+    squad_sync.render(wallet, key="home_load_players")
     if not wallet:
         st.info("Connect your public wallet in the sidebar to see your agency, clubs and development. Page 302 opens the squad builder.")
     roster=shared.roster_rows(wallet) if wallet else []
@@ -928,24 +934,34 @@ if page=="Home":
     kpis=st.columns(3)
     kpis[0].metric("AGENCY PLAYERS",players if wallet else "—")
     kpis[1].metric("OWNED CLUBS",clubs if wallet else "—")
-    kpis[2].metric("CACHED CLUB OVR GAIN",f"+{gain:g}" if not good.empty else "—")
+    kpis[2].metric("SAVED SEASON 17 CLUB OVR GAIN",f"+{gain:g}" if not good.empty else "—")
     left,right=st.columns([1.15,1])
     with left:
         st.subheader("Manager’s office")
-        st.markdown(''.join(f'<a class="tt-index-row" href="{mfl_text.page_link(name,wallet)}" target="_self"><span>{esc(name.upper())}</span><b>{number}</b></a>'
-                           for name,number in mfl_text.PAGES.items() if name not in ("Home","Design Studio")),unsafe_allow_html=True)
+        st.markdown(''.join(f'<a class="tt-index-row" href="{mfl_text.page_link(name,wallet)}" target="_self"><span>{esc({"Club Development":"Club progression","Agency Development":"Agency progression"}.get(name,name))}</span><b>{number}</b></a>'
+                           for name,number in mfl_text.PAGES.items() if name in ("Squad Builder","Club Development","Agency Development","Sync Centre")),unsafe_allow_html=True)
     with right:
         st.subheader("League planning pool")
         import squad_builder as squads
-        records=[{"player_id":r["player_id"],"player":r["player_name"],"position":r["position"],"current_ovr":r["overall"],"club":r["club"]} for r in roster] if roster else (af.to_dict("records") if not af.empty else [])
+        records=[{"player_id":r["player_id"],"player":r["player_name"],"position":r["position"],"current_ovr":r["overall"],"club":r["club"],"position_ratings":r.get("position_ratings")} for r in roster] if roster else (af.to_dict("records") if not af.empty else [])
         if records:
+            import tactics_page
+            records=tactics_page.prepare(records,wallet,active_only=False)
             planned,omitted=squads.build_squads(records)
             lines=""
             for league,groups in planned.items():
                 members=[p for g in groups for p in g["players"]]
                 avg=f'{sum(p["current_ovr"] for p in members)/len(members):.1f}' if members else "—"
-                lines+=f'<tr><td>{league.upper()}</td><td>{len(groups)}</td><td>{len(members)}</td><td>{avg}</td></tr>'
-            st.markdown('<table class="tt-table"><thead><tr><th>LEAGUE</th><th>SQUADS</th><th>PLAYERS</th><th>OVR</th></tr></thead><tbody>'+lines+'</tbody></table>',unsafe_allow_html=True)
+                lines+=f'<tr><td>{league.upper()}</td><td>{len(groups)}</td><td>{sum(not g["shortages"] for g in groups)}</td><td>{len(members)}</td><td>{avg}</td></tr>'
+            st.markdown('<table class="tt-table"><thead><tr><th>LEAGUE</th><th>GROUPS</th><th>FULL 25</th><th>PLAYERS</th><th>BASE OVR</th></tr></thead><tbody>'+lines+'</tbody></table>',unsafe_allow_html=True)
+            assigned_ids={int(p['player_id']) for groups in planned.values() for g in groups for p in g['players']}
+            assigned=len(assigned_ids)
+            st.caption(f"{len(records)} agency records = {assigned} players in planning groups + {len(records)-assigned} records not assigned. Groups may contain fewer than 25; they are not your actual MFL clubs.")
+            with st.expander("Why are some players not in planning groups?"):
+                reasons={int(r['player_id']):r['reason'] for r in omitted if r.get('player_id') is not None}
+                unused=[{'Player':r.get('player') or r.get('player_name'),'Player ID':r.get('player_id'),'Reason':reasons.get(int(r['player_id']),'Duplicate or not selected')} for r in records if int(r['player_id']) not in assigned_ids]
+                if unused:st.dataframe(pd.DataFrame(unused),hide_index=True,use_container_width=True)
+                else:st.caption('All unique players were assigned. Any remaining record difference comes from duplicate IDs.')
             ready=sum(not g["shortages"] for groups in planned.values() for g in groups)
             st.markdown(f'<div class="tt-news"><p>{ready} COMPLETE SQUADS IN YOUR CURRENT PLANNING POOL.</p><p>PAGE 302: ARRANGE YOUR NEXT XI.</p></div>',unsafe_allow_html=True)
         else:
@@ -1320,184 +1336,196 @@ elif page=="Club Development":
         </div>""",unsafe_allow_html=True)
         st.stop()
 
-    try:
-        mine=club.owned_clubs(wallet)
-    except Exception:
-        mine=[]
-    cached=club.cached(wallet)
-    good=cached[cached["error"].isna()] if (not cached.empty and "error" in cached.columns) else cached
-
-    total_ovr=float(good["ovr_gain"].fillna(0).sum()) if not good.empty else 0
-    total_attr=float(good["attr_gain"].fillna(0).sum()) if not good.empty else 0
-    developed=int(((good["ovr_gain"].fillna(0)>0) | (good["attr_gain"].fillna(0)>0)).sum()) if not good.empty else 0
-    synced=len(good)
-
-    st.markdown(
-        f'<div class="club-hero"><div class="ch-kicker">CLUB NETWORK · SEASON 17</div>'
-        f'<div class="ch-title">Club Development</div>'
-        f'<div class="ch-copy">Compare progression across your owned clubs, then drill into the players driving each club forward.</div>'
-        f'<div class="ch-badges"><span class="ch-badge"><b>{len(mine) if mine else "—"}</b> owned clubs</span>'
-        f'<span class="ch-badge"><b>{synced}</b> players synced</span>'
-        f'<span class="ch-badge"><b>+{total_ovr:g}</b> OVR</span>'
-        f'<span class="ch-badge"><b>+{total_attr:g}</b> attributes</span></div></div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        f'<div class="club-kpis">'
-        f'<div class="ckpi"><div class="ckpi-label">Owned clubs</div><div class="ckpi-value">{len(mine) if mine else "—"}</div></div>'
-        f'<div class="ckpi"><div class="ckpi-label">Players synced</div><div class="ckpi-value blue">{synced}</div></div>'
-        f'<div class="ckpi"><div class="ckpi-label">OVR gained</div><div class="ckpi-value green">+{total_ovr:g}</div></div>'
-        f'<div class="ckpi"><div class="ckpi-label">Players developing</div><div class="ckpi-value violet">{developed}</div></div>'
-        f'</div>',
-        unsafe_allow_html=True
-    )
-
-    remaining=club.cooldown_remaining()
-    st.markdown(
-        f'<div class="sync-panel"><div class="sync-row"><div class="sync-left"><div class="sync-icon">⟳</div><div>'
-        f'<div class="sync-title2">Slow full-network sync</div><div class="sync-sub2">Processes all remaining owned-club players safely and saves each one immediately.</div>'
-        f'</div></div><div class="sync-status">{"COOLDOWN" if remaining>0 else "READY"}</div></div></div>',
-        unsafe_allow_html=True
-    )
-    st.write("")
-    b1,b2=st.columns([1.2,4])
-    with b1:
-        do_sync=st.button("Sync all remaining",type="primary",use_container_width=True,disabled=remaining>0)
-    with b2:
-        if remaining>0:
-            st.info(f"MFL cooldown active — about {max(1,math.ceil(remaining/60))} minute(s) remaining. Cached data is safe.")
-        else:
-            st.caption(f"{synced} player records currently cached. One click continues from the first unsynced player.")
-
-    if do_sync:
-        bar=st.progress(0,text="Preparing full sync…")
-        status=st.empty()
-        starting=synced
-        def prog(done,total,errs):
-            bar.progress(done/max(total,1),text=f"{done}/{total} remaining players processed")
-            status.caption(f"{starting + done - errs} total cached · {errs} delayed/skipped · leave this page open")
-        try:
-            season_start=st.session_state.get("season_start","2026-09-22T00:00:00Z")
-            res=club.sync_batch(wallet,season_start,None,prog)
-            bar.empty();status.empty()
-            if res.get("rate_limited"):
-                mins=max(1,math.ceil(res.get("cooldown",0)/60))
-                st.warning(f"MFL rate limit reached after saving {res['saved']} player(s). Wait about {mins} minute(s), then run again.")
-            elif res["errors"]:
-                st.warning(f"Saved {res['saved']} player(s); {len(res['errors'])} slow/failed player(s) can be retried next run.")
-            else:
-                st.success(f"Saved {res['saved']} player(s). Full run complete.")
-            st.rerun()
-        except Exception as e:
-            bar.empty();status.empty()
-            st.error("MFL could not complete the sync.")
-            with st.expander("Technical detail"):
-                st.code(str(e))
-
-    cached=club.cached(wallet)
-    good=cached[cached["error"].isna()] if (not cached.empty and "error" in cached.columns) else cached
-
-    if good.empty:
-        st.markdown('<div class="empty"><b>No club development loaded yet</b>Run the sync once and this page will populate automatically.</div>',unsafe_allow_html=True)
+    progression_view=st.radio("Progression period",["Whole season","Since joining my club"],horizontal=True,key="club_progression_period")
+    if progression_view=="Since joining my club":
+        import club_tenure
+        club_tenure.render(wallet)
     else:
-        clubs=(good.groupby("club").agg(
-            Players=("player_id","count"),OVR=("ovr_gain","sum"),Attributes=("attr_gain","sum"),
-            PAC=("pac","sum"),SHO=("sho","sum"),PAS=("pas","sum"),DRI=("dri","sum"),DEF=("defn","sum"),PHY=("phy","sum")
-        ).reset_index().sort_values(["OVR","Attributes"],ascending=False))
-        clubs=clubs.rename(columns={"club":"Club","OVR":"OVR ↑","Attributes":"ATTR ↑"})
+        st.info("Whole-season view: uses the saved season baseline. These totals can differ from progression since joining a club or since agency acquisition.")
+        try:
+            mine=club.owned_clubs(wallet)
+        except Exception:
+            mine=[]
+        cached=club.cached(wallet)
+        good=cached[cached["error"].isna()] if (not cached.empty and "error" in cached.columns) else cached
 
-        club_players_export=good[[
-            "player_id","player","club","start_ovr","current_ovr","ovr_gain","attr_gain",
-            "pac","sho","pas","dri","defn","phy","baseline_at","last_progression","checked_at"
-        ]].copy()
-        club_players_export=club_players_export.rename(columns={
-            "player_id":"Player ID","player":"Player","club":"Club","start_ovr":"S17 Start OVR",
-            "current_ovr":"Current OVR","ovr_gain":"OVR ↑","attr_gain":"ATTR ↑","pac":"PAC ↑",
-            "sho":"SHO ↑","pas":"PAS ↑","dri":"DRI ↑","defn":"DEF ↑","phy":"PHY ↑",
-            "baseline_at":"Baseline Date","last_progression":"Last Progression","checked_at":"Last Checked"
-        })
-        for col in ["Baseline Date","Last Progression","Last Checked"]:
-            club_players_export[col]=pd.to_datetime(club_players_export[col],utc=True,errors="coerce").dt.strftime("%Y-%m-%d %H:%M UTC").fillna("")
-
-        ex1,ex2,_=st.columns([1.3,1.5,4])
-        with ex1:
-            st.download_button(
-                "↓ Export Club Summary CSV",
-                data=clubs.to_csv(index=False).encode("utf-8-sig"),
-                file_name=f"mfl_club_summary_{short_wallet(wallet).replace('…','_')}.csv",
-                mime="text/csv",
-                use_container_width=True,
-                key="club_summary_export_csv"
-            )
-        with ex2:
-            st.download_button(
-                "↓ Export All Club Players CSV",
-                data=club_players_export.to_csv(index=False).encode("utf-8-sig"),
-                file_name=f"mfl_club_development_{short_wallet(wallet).replace('…','_')}.csv",
-                mime="text/csv",
-                use_container_width=True,
-                key="club_players_export_csv"
-            )
-
-        st.markdown('<div class="section-head2"><h3>Top developing clubs</h3><span class="small-note2">SEASON 17 NETWORK LEADERS</span></div>',unsafe_allow_html=True)
-        top=clubs.head(3)
-        max_attr=float(top["ATTR ↑"].max()) if not top.empty else 1
-        cards="".join(club_feature_card(i,r,max_attr) for i,r in enumerate(top.to_dict("records"),1))
-        st.markdown(f'<div class="club-rank-grid">{cards}</div>',unsafe_allow_html=True)
-
-        st.markdown('<div class="section-head2"><h3>Club drill-down</h3><span class="small-note2">PLAYER DEVELOPMENT</span></div>',unsafe_allow_html=True)
-        choice=st.selectbox("Choose club",clubs["Club"].tolist(),label_visibility="collapsed",key="club_visual_choice")
-        detail=good[good.club==choice].sort_values(["ovr_gain","attr_gain","current_ovr"],ascending=False)
-        selected_row=clubs[clubs["Club"]==choice].iloc[0]
+        total_ovr=float(good["ovr_gain"].fillna(0).sum()) if not good.empty else 0
+        total_attr=float(good["attr_gain"].fillna(0).sum()) if not good.empty else 0
+        developed=int(((good["ovr_gain"].fillna(0)>0) | (good["attr_gain"].fillna(0)>0)).sum()) if not good.empty else 0
+        synced=len(good)
 
         st.markdown(
-            f'<div class="club-selector-wrap"><div class="club-detail-head"><div>'
-            f'<div class="club-detail-name">{esc(choice)}</div>'
-            f'<div class="club-detail-meta">{int(selected_row["Players"])} players · +{float(selected_row["ATTR ↑"]):g} attributes</div>'
-            f'</div><div class="club-detail-total">+{float(selected_row["OVR ↑"]):g} OVR</div></div></div>',
+            f'<div class="club-hero"><div class="ch-kicker">CLUB NETWORK · SEASON 17</div>'
+            f'<div class="ch-title">Club Development</div>'
+            f'<div class="ch-copy">Compare progression across your owned clubs, then drill into the players driving each club forward.</div>'
+            f'<div class="ch-badges"><span class="ch-badge"><b>{len(mine) if mine else "—"}</b> owned clubs</span>'
+            f'<span class="ch-badge"><b>{synced}</b> players synced</span>'
+            f'<span class="ch-badge"><b>+{total_ovr:g}</b> OVR</span>'
+            f'<span class="ch-badge"><b>+{total_attr:g}</b> attributes</span></div></div>',
             unsafe_allow_html=True
         )
 
-        movers=detail[(detail["ovr_gain"].fillna(0)>0) | (detail["attr_gain"].fillna(0)>0)].head(8)
-        if movers.empty:
-            st.markdown('<div class="empty"><b>No recorded development in this club yet</b>The detail table below still shows every synced player.</div>',unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="club-kpis">'
+            f'<div class="ckpi"><div class="ckpi-label">Owned clubs</div><div class="ckpi-value">{len(mine) if mine else "—"}</div></div>'
+            f'<div class="ckpi"><div class="ckpi-label">Players synced</div><div class="ckpi-value blue">{synced}</div></div>'
+            f'<div class="ckpi"><div class="ckpi-label">OVR gained</div><div class="ckpi-value green">+{total_ovr:g}</div></div>'
+            f'<div class="ckpi"><div class="ckpi-label">Players developing</div><div class="ckpi-value violet">{developed}</div></div>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
+
+        remaining=club.cooldown_remaining()
+        st.markdown(
+            f'<div class="sync-panel"><div class="sync-row"><div class="sync-left"><div class="sync-icon">⟳</div><div>'
+            f'<div class="sync-title2">Slow full-network sync</div><div class="sync-sub2">Processes all remaining owned-club players safely and saves each one immediately.</div>'
+            f'</div></div><div class="sync-status">{"COOLDOWN" if remaining>0 else "READY"}</div></div></div>',
+            unsafe_allow_html=True
+        )
+        st.write("")
+        b1,b2=st.columns([1.2,4])
+        with b1:
+            do_sync=st.button("Sync all remaining",type="primary",use_container_width=True,disabled=remaining>0)
+        with b2:
+            if remaining>0:
+                st.info(f"MFL cooldown active — about {max(1,math.ceil(remaining/60))} minute(s) remaining. Cached data is safe.")
+            else:
+                st.caption(f"{synced} player records currently cached. One click continues from the first unsynced player.")
+
+        if do_sync:
+            bar=st.progress(0,text="Preparing full sync…")
+            status=st.empty()
+            starting=synced
+            def prog(done,total,errs):
+                bar.progress(done/max(total,1),text=f"{done}/{total} remaining players processed")
+                status.caption(f"{starting + done - errs} total cached · {errs} delayed/skipped · leave this page open")
+            try:
+                season_start=st.session_state.get("season_start","2026-09-22T00:00:00Z")
+                res=club.sync_batch(wallet,season_start,None,prog)
+                bar.empty();status.empty()
+                if res.get("rate_limited"):
+                    mins=max(1,math.ceil(res.get("cooldown",0)/60))
+                    st.warning(f"MFL rate limit reached after saving {res['saved']} player(s). Wait about {mins} minute(s), then run again.")
+                elif res["errors"]:
+                    st.warning(f"Saved {res['saved']} player(s); {len(res['errors'])} slow/failed player(s) can be retried next run.")
+                else:
+                    st.success(f"Saved {res['saved']} player(s). Full run complete.")
+                st.rerun()
+            except Exception as e:
+                bar.empty();status.empty()
+                st.error("MFL could not complete the sync.")
+                with st.expander("Technical detail"):
+                    st.code(str(e))
+
+        cached=club.cached(wallet)
+        good=cached[cached["error"].isna()] if (not cached.empty and "error" in cached.columns) else cached
+
+        if good.empty:
+            st.markdown('<div class="empty"><b>No club development loaded yet</b>Run the sync once and this page will populate automatically.</div>',unsafe_allow_html=True)
         else:
-            st.write("")
-            player_html="".join(club_player_card(r) for _,r in movers.iterrows())
-            st.markdown(f'<div class="player-grid-club">{player_html}</div>',unsafe_allow_html=True)
+            clubs=(good.groupby("club").agg(
+                Players=("player_id","count"),OVR=("ovr_gain","sum"),Attributes=("attr_gain","sum"),
+                PAC=("pac","sum"),SHO=("sho","sum"),PAS=("pas","sum"),DRI=("dri","sum"),DEF=("defn","sum"),PHY=("phy","sum")
+            ).reset_index().sort_values(["OVR","Attributes"],ascending=False))
+            clubs=clubs.rename(columns={"club":"Club","OVR":"OVR ↑","Attributes":"ATTR ↑"})
 
-        st.markdown('<div class="section-head2"><h3>Club leaderboard</h3><span class="small-note2">ALL OWNED CLUBS</span></div>',unsafe_allow_html=True)
-        st.dataframe(
-            clubs,
-            use_container_width=True,hide_index=True,height=min(500,75+35*len(clubs))
-        )
+            club_players_export=good[[
+                "player_id","player","club","start_ovr","current_ovr","ovr_gain","attr_gain",
+                "pac","sho","pas","dri","defn","phy","baseline_at","last_progression","checked_at"
+            ]].copy()
+            club_players_export=club_players_export.rename(columns={
+                "player_id":"Player ID","player":"Player","club":"Club","start_ovr":"S17 Start OVR",
+                "current_ovr":"Current OVR","ovr_gain":"OVR ↑","attr_gain":"ATTR ↑","pac":"PAC ↑",
+                "sho":"SHO ↑","pas":"PAS ↑","dri":"DRI ↑","defn":"DEF ↑","phy":"PHY ↑",
+                "baseline_at":"Baseline Date","last_progression":"Last Progression","checked_at":"Last Checked"
+            })
+            for col in ["Baseline Date","Last Progression","Last Checked"]:
+                club_players_export[col]=pd.to_datetime(club_players_export[col],utc=True,errors="coerce").dt.strftime("%Y-%m-%d %H:%M UTC").fillna("")
 
-        st.markdown('<div class="section-head2"><h3>Full player detail</h3><span class="small-note2">SELECTED CLUB</span></div>',unsafe_allow_html=True)
-        st.dataframe(
-            detail[["player","start_ovr","current_ovr","ovr_gain","attr_gain","pac","sho","pas","dri","defn","phy"]]
-            .rename(columns={"player":"Player","start_ovr":"S17 Start","current_ovr":"Current","ovr_gain":"OVR ↑","attr_gain":"ATTR ↑",
-                             "pac":"PAC ↑","sho":"SHO ↑","pas":"PAS ↑","dri":"DRI ↑","defn":"DEF ↑","phy":"PHY ↑"}),
-            use_container_width=True,hide_index=True,height=520
-        )
+            ex1,ex2,_=st.columns([1.3,1.5,4])
+            with ex1:
+                st.download_button(
+                    "↓ Export Club Summary CSV",
+                    data=clubs.to_csv(index=False).encode("utf-8-sig"),
+                    file_name=f"mfl_club_summary_{short_wallet(wallet).replace('…','_')}.csv",
+                    mime="text/csv",
+                    use_container_width=True,
+                    key="club_summary_export_csv"
+                )
+            with ex2:
+                st.download_button(
+                    "↓ Export All Club Players CSV",
+                    data=club_players_export.to_csv(index=False).encode("utf-8-sig"),
+                    file_name=f"mfl_club_development_{short_wallet(wallet).replace('…','_')}.csv",
+                    mime="text/csv",
+                    use_container_width=True,
+                    key="club_players_export_csv"
+                )
+
+            st.markdown('<div class="section-head2"><h3>Top developing clubs</h3><span class="small-note2">SEASON 17 NETWORK LEADERS</span></div>',unsafe_allow_html=True)
+            top=clubs.head(3)
+            max_attr=float(top["ATTR ↑"].max()) if not top.empty else 1
+            cards="".join(club_feature_card(i,r,max_attr) for i,r in enumerate(top.to_dict("records"),1))
+            st.markdown(f'<div class="club-rank-grid">{cards}</div>',unsafe_allow_html=True)
+
+            st.markdown('<div class="section-head2"><h3>Club drill-down</h3><span class="small-note2">PLAYER DEVELOPMENT</span></div>',unsafe_allow_html=True)
+            choice=st.selectbox("Choose club",clubs["Club"].tolist(),label_visibility="collapsed",key="club_visual_choice")
+            detail=good[good.club==choice].sort_values(["ovr_gain","attr_gain","current_ovr"],ascending=False)
+            selected_row=clubs[clubs["Club"]==choice].iloc[0]
+
+            st.markdown(
+                f'<div class="club-selector-wrap"><div class="club-detail-head"><div>'
+                f'<div class="club-detail-name">{esc(choice)}</div>'
+                f'<div class="club-detail-meta">{int(selected_row["Players"])} players · +{float(selected_row["ATTR ↑"]):g} attributes</div>'
+                f'</div><div class="club-detail-total">+{float(selected_row["OVR ↑"]):g} OVR</div></div></div>',
+                unsafe_allow_html=True
+            )
+
+            movers=detail[(detail["ovr_gain"].fillna(0)>0) | (detail["attr_gain"].fillna(0)>0)].head(8)
+            if movers.empty:
+                st.markdown('<div class="empty"><b>No recorded development in this club yet</b>The detail table below still shows every synced player.</div>',unsafe_allow_html=True)
+            else:
+                st.write("")
+                player_html="".join(club_player_card(r) for _,r in movers.iterrows())
+                st.markdown(f'<div class="player-grid-club">{player_html}</div>',unsafe_allow_html=True)
+
+            st.markdown('<div class="section-head2"><h3>Club leaderboard</h3><span class="small-note2">ALL OWNED CLUBS</span></div>',unsafe_allow_html=True)
+            import ranked_table
+            ranked_table.render(
+                clubs,
+                use_container_width=True,hide_index=True,height=min(500,75+35*len(clubs))
+            )
+
+            st.markdown('<div class="section-head2"><h3>Full player detail</h3><span class="small-note2">SELECTED CLUB</span></div>',unsafe_allow_html=True)
+            ranked_table.render(
+                detail[["player","start_ovr","current_ovr","ovr_gain","attr_gain","pac","sho","pas","dri","defn","phy"]]
+                .rename(columns={"player":"Player","start_ovr":"S17 Start","current_ovr":"Current","ovr_gain":"OVR ↑","attr_gain":"ATTR ↑",
+                                 "pac":"PAC ↑","sho":"SHO ↑","pas":"PAS ↑","dri":"DRI ↑","defn":"DEF ↑","phy":"PHY ↑"}),
+                use_container_width=True,hide_index=True,height=520
+            )
 
 
 elif page=="Squad Builder":
     import squad_builder as squads
     import squad_cards
     st.markdown(squad_cards.STYLE,unsafe_allow_html=True)
-    st.markdown('<div class="suite-hero"><div class="suite-kicker">AGENCY SQUAD PLANNING</div><div class="suite-title">Squad Builder</div><div class="suite-copy">Turn your agency into balanced 25-player squads for Stone, Ice, Spark and Flint.</div></div>',unsafe_allow_html=True)
+    st.caption("Choose a club, use the suggested XI and adjust your tactics. Switch to League squads for 25-player planning.")
     if not wallet:
         st.info("Connect your wallet in the sidebar to build your squads.")
         st.stop()
-    sixty_league=st.radio("Assign 60-rated players to",["Spark","Flint"],horizontal=True,
-        help="Your league ranges overlap at 60. Choose one league so a player is never assigned twice.")
-    st.caption("Stone: 73+ · Ice: 67–72 · " + ("Spark: 60–66 · Flint: below 60" if sixty_league=="Spark" else "Spark: 61–66 · Flint: 60 and below"))
-    st.caption("Each 25-player squad targets 2 goalkeepers, 2 LB, 4 CB, 2 RB, 2 CDM, 3 CM and 4 wingers, plus 6 additional outfield players. LB/LWB and RB/RWB count as full-back cover; LW/RW/LM/RM/LF/RF count as wingers. Required positions are filled before the flexible places. Strongest squads are built first using listed positions; versatile players fill a suitable role. Goalkeepers can cross league rating bands: closest ratings are preferred, with one starter per squad before backups. Surplus keepers are left out. Each player appears once. These are planning suggestions and do not change MFL club assignments.")
+    import squad_sync
+    squad_sync.render(wallet, key="squad_load_players")
+    planning_view=st.radio("Planning view",["Club tactics","League squads"],horizontal=True,key="squad_planning_view",label_visibility="collapsed")
+    sixty_league="Spark"
+    if planning_view=="League squads":
+        sixty_league=st.radio("Assign 60-rated players to",["Spark","Flint"],horizontal=True,
+            help="Your league ranges overlap at 60. Choose one league so a player is never assigned twice.")
+        st.caption("Stone: 73+ · Ice: 67–72 · " + ("Spark: 60–66 · Flint: below 60" if sixty_league=="Spark" else "Spark: 61–66 · Flint: 60 and below"))
+        st.caption("Each 25-player squad targets 2 goalkeepers, 2 LB, 4 CB, 2 RB, 2 CDM, 3 CM and 4 wingers, plus 6 additional outfield players. LB/LWB and RB/RWB count as full-back cover; LW/RW/LM/RM/LF/RF count as wingers. Required positions are filled before the flexible places. League bands use base OVR. Role selection uses supplied or entered position ratings, with a first-position fallback only. Unknown secondary ratings do not fill quotas. Goalkeepers can cross league rating bands: closest ratings are preferred, with one starter per squad before backups. Surplus keepers are left out. Each player appears once. These are planning suggestions and do not change MFL club assignments.")
     roster=shared.roster_rows(wallet)
     if roster:
         records=[{"player_id":r["player_id"],"player":r["player_name"],"position":r["position"],
-                  "current_ovr":r["overall"],"club":r["club"],"age":r.get("age")} for r in roster]
+                  "current_ovr":r["overall"],"club":r["club"],"age":r.get("age"),"position_ratings":r.get("position_ratings")} for r in roster]
         st.caption(f"Using {len(records)} players from your shared wallet roster · refreshed {age_text(shared.freshness(wallet).get('roster'))}. Refresh in Sync Centre after transfers or rating changes.")
     else:
         cached=agency_frame(wallet)
@@ -1505,54 +1533,63 @@ elif page=="Squad Builder":
         if records:
             st.warning("Using saved agency analysis. It may include players you have since sold or older ratings. Refresh your shared wallet in Sync Centre for current squad suggestions.")
     if not records:
-        st.info("Load your wallet in Sync Centre or Agency Development, then return here. Squads generate automatically from the saved players.")
+        st.info("Use Load / refresh team players above to get started. Your team list and formation suggestions will appear here.")
         st.stop()
-    built,excluded=squads.build_squads(records,sixty_league)
-    complete=sum(not s["shortages"] for league_squads in built.values() for s in league_squads)
-    retired=sum(r["reason"]=="Retired / no current club" for r in excluded)
-    cols=st.columns(3)
-    cols[0].metric("Players available",len(records)-len(excluded))
-    cols[1].metric("Complete squads",complete)
-    cols[2].metric("Retired players excluded",retired)
-    st.caption("Players without a current club are treated as retired and excluded from every squad and formation.")
-    exports=[]
-    for tab,league in zip(st.tabs(list(squads.LEAGUES)),squads.LEAGUES):
-        with tab:
-            league_squads=built[league]
-            if not league_squads:
-                st.info(f"No players with a suitable rating and recognised position for {league}.")
-            for number,squad in enumerate(league_squads,1):
-                players=squad["players"]
-                average=sum(p["current_ovr"] for p in players)/len(players)
-                st.subheader(f"{league} squad {number} · {len(players)}/25 players · {average:.1f} average OVR")
-                if squad["shortages"]:
-                    st.warning("Incomplete squad — still needed: " + ", ".join(f"{count} {role.lower()}" for role,count in squad["shortages"].items()) + ".")
-                display=pd.DataFrame([{"Role":p["assigned_role"],"Player":p.get("player",f"Player {p['player_id']}"),
-                    "Player ID":p["player_id"],"Positions":p["position"],"Age":squad_cards.age_label(p.get("age")),"OVR":p["current_ovr"],"Current club":p.get("club")} for p in players])
-                st.markdown(squad_cards.roster_html(players),unsafe_allow_html=True)
-                with st.expander("View squad as a table"):
-                    st.dataframe(display,hide_index=True,use_container_width=True)
-                exports.extend({"League":league,"Squad":number,**row} for row in display.to_dict("records"))
-    if exports:
-        st.download_button("Download all squads CSV",pd.DataFrame(exports).to_csv(index=False).encode("utf-8"),
-                           file_name="mfl_squads.csv",mime="text/csv")
-        import formation_board
-        st.subheader("Formation planner")
-        options={f"{league} squad {number}": (league,number,squad) for league,league_squads in built.items()
-                 for number,squad in enumerate(league_squads,1)}
-        selected_squad=st.selectbox("Squad to arrange",list(options),key="formation_squad")
-        selected_league,selected_number,selected=options[selected_squad]
-        formation_board.render_board(selected["players"],f"mfl_formation_v1_{wallet}_{sixty_league}_{selected_league}_{selected_number}")
-    if excluded:
-        with st.expander(f"Excluded players ({len(excluded)})"):
-            st.dataframe(pd.DataFrame(excluded).reindex(columns=["player_id","player","position","current_ovr","reason"]),hide_index=True,use_container_width=True)
+    if planning_view=="Club tactics":
+        import tactics_page
+        tactics_page.render(records,wallet)
+    else:
+        import tactics_page
+        records=tactics_page.prepare(records,wallet,active_only=False)
+        built,excluded=squads.build_squads(records,sixty_league)
+        complete=sum(not s["shortages"] for league_squads in built.values() for s in league_squads)
+        retired=sum(r["reason"]=="Retired / no current club" for r in excluded)
+        cols=st.columns(3)
+        cols[0].metric("Players available",len(records)-len(excluded))
+        cols[1].metric("Complete squads",complete)
+        cols[2].metric("Retired players excluded",retired)
+        st.caption("Players without a current club are treated as retired and excluded from every squad and formation.")
+        exports=[]
+        for tab,league in zip(st.tabs(list(squads.LEAGUES)),squads.LEAGUES):
+            with tab:
+                league_squads=built[league]
+                if not league_squads:
+                    st.info(f"No players with a suitable rating and recognised position for {league}.")
+                for number,squad in enumerate(league_squads,1):
+                    players=squad["players"]
+                    average=sum(p["current_ovr"] for p in players)/len(players)
+                    st.subheader(f"{league} squad {number} · {len(players)}/25 players · {average:.1f} average OVR")
+                    if squad["shortages"]:
+                        st.warning("Incomplete squad — still needed: " + ", ".join(f"{count} {role.lower()}" for role,count in squad["shortages"].items()) + ".")
+                    display=pd.DataFrame([{"Role":p["assigned_role"],"Player":p.get("player",f"Player {p['player_id']}"),
+                        "Player ID":p["player_id"],"Positions":p["position"],"Age":squad_cards.age_label(p.get("age")),"Base OVR":p["current_ovr"],"Role OVR":p.get("assigned_role_rating"),"Current club":p.get("club")} for p in players])
+                    st.markdown(squad_cards.roster_html(players),unsafe_allow_html=True)
+                    with st.expander("View squad as a table"):
+                        st.dataframe(display,hide_index=True,use_container_width=True)
+                    exports.extend({"League":league,"Squad":number,**row} for row in display.to_dict("records"))
+        if exports:
+            st.download_button("Download all squads CSV",pd.DataFrame(exports).to_csv(index=False).encode("utf-8"),
+                               file_name="mfl_squads.csv",mime="text/csv")
+            import formation_board
+            st.subheader("Formation planner")
+            options={f"{league} squad {number}": (league,number,squad) for league,league_squads in built.items()
+                     for number,squad in enumerate(league_squads,1)}
+            selected_squad=st.selectbox("Squad to arrange",list(options),key="formation_squad")
+            selected_league,selected_number,selected=options[selected_squad]
+            formation_board.render_board(selected["players"],f"mfl_formation_v1_{wallet}_{sixty_league}_{selected_league}_{selected_number}")
+        if excluded:
+            with st.expander(f"Excluded players ({len(excluded)})"):
+                st.dataframe(pd.DataFrame(excluded).reindex(columns=["player_id","player","position","current_ovr","reason"]),hide_index=True,use_container_width=True)
 
 
 elif page=="Transfer Window":
     import transfer_window_backend as tw
-    st.markdown('<div class="suite-hero"><div class="suite-kicker">SEASON 17 · MID-SEASON</div><div class="suite-title">Transfer Window</div><div class="suite-copy">Scan every player at your owned clubs and flag anyone with fewer than four official Season 17 appearances. Friendlies and preseason are excluded.</div></div>',unsafe_allow_html=True)
+    season=st.number_input("Season to scan",min_value=1,max_value=999,value=18,step=1,key="tw_season")
+    st.markdown(f'<div class="suite-hero"><div class="suite-kicker">SEASON {season}</div><div class="suite-title">Transfer Window</div><div class="suite-copy">Scan every player at your owned clubs and flag anyone with fewer than four official Season {season} appearances. Friendlies and preseason are excluded.</div></div>',unsafe_allow_html=True)
     if not wallet:
         st.warning("Connect a wallet first.");st.stop()
+    if st.session_state.get("tw_scope")!=(wallet,season):
+        st.session_state.tw_scope=(wallet,season);st.session_state.tw_results=None;st.session_state.tw_errors=[]
     if "tw_results" not in st.session_state: st.session_state.tw_results=None
     if "tw_errors" not in st.session_state: st.session_state.tw_errors=[]
     if st.button("Scan all managed clubs",type="primary",use_container_width=True,key="tw_scan"):
@@ -1561,14 +1598,14 @@ elif page=="Transfer Window":
             bar.progress(done/max(total,1))
             status.caption(f"Scanning {done}/{total} players · {flagged} under 4 apps · {errors} API errors")
         try:
-            with st.spinner("Checking official Season 17 appearances…"):
-                twdf,twerrs,twtotal=tw.candidates(wallet,tw_progress)
+            with st.spinner(f"Checking official Season {season} appearances…"):
+                twdf,twerrs,twtotal=tw.candidates(wallet,tw_progress,season=season)
             st.session_state.tw_results=twdf;st.session_state.tw_errors=twerrs
             status.success(f"Scan complete · {twtotal} managed-club players checked.")
         except Exception as e: st.error(f"Scan stopped: {e}")
     twdf=st.session_state.tw_results
     if twdf is not None:
-        if twdf.empty: st.success("No managed-club players are below 4 official Season 17 appearances.")
+        if twdf.empty: st.info(f"No flagged players returned for Season {season}. Review API errors below before treating the scan as complete.")
         else:
             a,b,c,d=st.columns(4)
             a.metric("Under 4 apps",len(twdf));b.metric("0 apps",int((twdf["Apps"]==0).sum()))
@@ -1577,7 +1614,7 @@ elif page=="Transfer Window":
             chosen=st.selectbox("Club",clubs,key="tw_club")
             view=twdf if chosen=="All clubs" else twdf[twdf["Club"]==chosen]
             st.dataframe(view,use_container_width=True,hide_index=True)
-            st.download_button("Download shortlist CSV",twdf.to_csv(index=False).encode("utf-8-sig"),file_name="mfl_s17_under_4_apps.csv",mime="text/csv",key="tw_csv")
+            st.download_button("Download shortlist CSV",twdf.to_csv(index=False).encode("utf-8-sig"),file_name=f"mfl_s{season}_under_4_apps.csv",mime="text/csv",key="tw_csv")
     if st.session_state.tw_errors:
         with st.expander(f"API errors ({len(st.session_state.tw_errors)})"):
             st.dataframe(pd.DataFrame(st.session_state.tw_errors,columns=["Player ID","Error"]),use_container_width=True,hide_index=True)

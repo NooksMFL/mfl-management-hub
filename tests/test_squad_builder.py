@@ -34,7 +34,7 @@ class SquadBuilderTests(unittest.TestCase):
         self.assertGreater(totals[0],totals[1])
 
     def test_versatile_player_preserves_specialist_slot(self):
-        records=[player(0,"CB / CM",72)]
+        records=[{**player(0,"CB / CM",72),"position_ratings":{"CB":72,"CM":70}}]
         for pos,count in [("GK",2),("LB",2),("CB",4),("RB",2),("CDM",2),("CM",2),("LW",4),("ST",6)]:
             start=len(records)
             records.extend(player(start+i,pos) for i in range(count))

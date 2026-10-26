@@ -30,7 +30,7 @@ def roster_html(players):
                 f'<div class="squad-meta"><span class="squad-position">{escape(str(p.get("position") or "—"))}</span>'
                 f'<span>Age {age_label(p.get("age"))}</span></div>'
                 f'<div class="squad-club">{escape(str(p.get("club") or "—"))}</div></div>'
-                f'<div class="squad-rating">{float(p["current_ovr"]):g}<small>OVR</small></div></article>')
+                f'<div class="squad-rating">{float(p["current_ovr"]):g}<small>BASE OVR</small></div></article>')
         label = {"Goalkeeper": "Goalkeepers", "Winger": "Wingers"}.get(role, role)
         sections.append(f'<div class="squad-role">{label} <span>{len(members)}</span></div><div class="squad-card-grid">{"".join(cards)}</div>')
     return '<div class="squad-roster">'+"".join(sections)+'</div>'

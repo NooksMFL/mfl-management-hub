@@ -42,6 +42,7 @@ class SquadBuilderPageTests(unittest.TestCase):
             c.execute("INSERT INTO roster(wallet,player_id,player_name,position,overall) VALUES(?,?,?,?,?)",
                       (wallet,999,"Retired player","GK",60))
         at = self.page(wallet)
+        at.radio(key="squad_planning_view").set_value("League squads").run()
         self.assertFalse(at.exception)
         self.assertTrue(any(m.label == "Complete squads" and m.value == "1" for m in at.metric))
         self.assertEqual(len(at.dataframe[0].value),25)
@@ -52,3 +53,25 @@ class SquadBuilderPageTests(unittest.TestCase):
         self.assertFalse(at.exception)
         self.assertTrue(any("Flint squad 1" in h.value for h in at.subheader))
         self.assertFalse(any("Spark squad 1" in h.value for h in at.subheader))
+    def test_club_tactics_default_and_saved_secondary_rating(self):
+        wallet='0x1234567890abcdef'
+        with shared.db() as c:
+            c.execute('INSERT INTO roster(wallet,player_id,player_name,position,overall,club) VALUES(?,?,?,?,?,?)',(wallet,1,'Habibou','CM / CDM',69,'Test Club'))
+        shared.save_tactics_ratings(wallet,1,{'CM':69,'CDM':62})
+        at=self.page(wallet)
+        self.assertFalse(at.exception)
+        self.assertEqual(at.radio(key='squad_planning_view').value,'Club tactics')
+        self.assertTrue(any('Club tactics' in h.value for h in at.subheader))
+        self.assertTrue(any(b.label=='Load / refresh team players' for b in at.button))
+        self.assertTrue(any('complete-XI average is unavailable' in w.value for w in at.warning))
+        edited=next(d.value for d in at.dataframe if 'Entered rating' in d.value.columns)
+        self.assertEqual(dict(zip(edited['Position'],edited['Entered rating'])),{'CM':69,'CDM':62})
+
+    def test_load_players_action_shows_counts(self):
+        from unittest.mock import patch
+        wallet='0x1234567890abcdef'
+        at=self.page(wallet)
+        with patch.object(shared,'sync_wallet',return_value={'players':24,'clubs':1}):
+            at.button(key='squad_load_players').click().run()
+        self.assertFalse(at.exception)
+        self.assertTrue(any('Loaded 24 player(s) and 1 club(s)' in m.value for m in at.success))

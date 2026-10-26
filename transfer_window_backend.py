@@ -5,7 +5,7 @@ import pandas as pd
 import agency_backend as agency
 import wallet_cache_backend as shared
 
-SEASON = 17
+SEASON = 18
 MAX_APPS = 3
 
 def _arr(d):
@@ -63,7 +63,7 @@ def _season(rec):
 def _apps(rec):
     # The working MFL competition payload calls this "matches" (older scanner:
     # Aspirants Cup 3 matches + Spark League 14 matches = 17 appearances).
-    v=_first(rec,("matches","appearances","apps","gamesPlayed","matchesPlayed","played"))
+    v=_first(rec,("nbMatches","matches","appearances","apps","gamesPlayed","matchesPlayed","played"))
     if v is None:
         keys=[]
         def collect(x,prefix=""):
@@ -77,7 +77,10 @@ def _apps(rec):
                 for i,val in enumerate(x[:2]): collect(val,f"{prefix}[{i}]")
         collect(rec)
         raise ValueError("No recognised appearance field. RAW RECORD: "+json.dumps(rec,default=str)[:3500]+" | FLAT: "+"; ".join(keys[:120]))
-    try:return int(float(v))
+    try:
+        result=int(float(v))
+        if result<0:raise ValueError("Negative appearances")
+        return result
     except Exception as e:raise ValueError(f"Unrecognised appearance value: {v!r}") from e
 
 def _competition_name(rec):
@@ -85,39 +88,32 @@ def _competition_name(rec):
     return str(v or "").strip()
 
 def _is_official(rec):
-    name=_competition_name(rec).upper()
+    name=json.dumps(rec.get("competition") or rec,default=str).upper()
     # Explicitly exclude non-competitive match buckets.
     blocked=("FRIENDLY","PRESEASON","PRE-SEASON","EXHIBITION")
     return not any(x in name for x in blocked)
 
-def player_apps(pid, token):
-    """Count official Season 17 appearances from MFL's proven MATCH progression events.
-    Season 17 began 23 Sep 2026; preseason friendlies were before this boundary.
-    One MATCH progression event corresponds to a player appearance.
-    """
-    events=agency.exp_history(int(pid),token)
-    season_start=pd.Timestamp("2026-09-23T00:00:00Z")
-    matches=[]
-    for e in events:
-        if not isinstance(e,dict) or agency.event_reason(e)!="MATCH":
-            continue
-        dt=agency.activity_event_date(e)
-        if dt is None:
-            continue
-        ts=pd.Timestamp(dt)
-        if ts.tzinfo is None: ts=ts.tz_localize("UTC")
-        else: ts=ts.tz_convert("UTC")
-        if ts>=season_start:
-            matches.append(e)
-    return len(matches),matches
+def player_apps(pid, token=None, season=SEASON):
+    """Use season-tagged competition stats; MATCH history cannot exclude friendlies."""
+    payload=shared._public_get(f"/players/{int(pid)}/competitions")
+    records=_arr(payload)
+    if not isinstance(payload,list) and not records:
+        valid_empty=isinstance(payload,dict) and any(isinstance(payload.get(k),list) for k in ("data","items","results","competitions","playerCompetitions"))
+        if not valid_empty:raise ValueError("Unrecognised competition response; appearances are unknown")
+    if records and all(_season(r) is None for r in records):raise ValueError("Competition seasons are unknown; appearances cannot be verified")
+    matching=[];total=0
+    for record in records:
+        if _season(record)!=int(season) or not _is_official(record):continue
+        total+=_apps(record);matching.append(record)
+    return total,matching
 
 def _owned_names(wallet, token):
     clubs=shared.fetch_clubs(wallet,token,force=False)
     return {str(x.get("name") or "").strip().casefold():str(x.get("name") or "").strip() for x in clubs if x.get("name")}
 
-def candidates(wallet, progress=None, delay=0.55):
+def candidates(wallet, progress=None, delay=0.55, season=SEASON):
     wallet=wallet.strip().lower()
-    token=agency.token()
+    token=None
     # Refresh only when no cache exists; avoids wasting API calls during the 72h window.
     roster=shared.roster_rows(wallet)
     if not roster:
@@ -133,7 +129,7 @@ def candidates(wallet, progress=None, delay=0.55):
     total=len(eligible)
     for i,r in enumerate(eligible,1):
         try:
-            apps,_=player_apps(r["player_id"],token)
+            apps,_=player_apps(r["player_id"],token,season=season)
             if apps<=MAX_APPS:
                 out.append({
                     "Club":r.get("club"),"Player":r.get("player_name"),

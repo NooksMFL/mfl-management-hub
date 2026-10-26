@@ -106,3 +106,12 @@ html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="stMain"]{backg
 .st-key-grower_page .stMarkdown .rating-disc,.st-key-grower_page .stMarkdown .ls,.st-key-grower_page .stMarkdown .gain-pill,.st-key-grower_page .stMarkdown .s-gain{background:#292f45!important;border:1px solid #414961!important;border-radius:5px!important}
 .st-key-grower_page .stMarkdown .race-track-v18{background:#34394f!important}.st-key-grower_page .stMarkdown .race-fill-v18{background:#a68aef!important}
 @media(max-width:700px){.st-key-grower_page .leader-grid{grid-template-columns:1fr!important}.st-key-grower_page .stMarkdown .gh-title{font-size:32px!important}.st-key-grower_page .stMarkdown .race-row-v18{grid-template-columns:32px minmax(100px,1fr) 1fr 65px!important;gap:8px!important}}
+
+/* A consistent workspace with a quiet, distinct identity for each section. */
+.stMarkdown div.manager-header{border-left:4px solid var(--section-accent,#bca4ff)!important;padding-left:16px!important}
+.stMarkdown .manager-breadcrumb,.stMarkdown .manager-season strong,.stMarkdown .manager-tabs a.active{color:var(--section-accent,#bca4ff)!important}
+.stMarkdown .manager-tabs a.active{border-bottom:2px solid var(--section-accent,#bca4ff)!important;padding-bottom:5px}
+[data-testid="stMetric"]{border-top-color:var(--section-accent,#bca4ff)!important}
+.stApp button[kind="primary"]{background:var(--section-accent,#bca4ff)!important;border-color:var(--section-accent,#bca4ff)!important;color:#121823!important}
+.stMarkdown [class*="hero"]{border-top:3px solid var(--section-accent,#bca4ff)!important;background:var(--section-tint,#302b47)!important}
+.stMarkdown .tt-index-row{font-size:15px!important;padding:14px!important;text-decoration:none!important}.tt-index-row span{text-decoration:none!important}

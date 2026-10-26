@@ -14,6 +14,16 @@ PAGES = {"Home":"100", "Grower or Shower":"200", "Agency Development":"201", "Cl
          "Compare":"400", "Insights":"500", "Sync Centre":"888", "Design Studio":"999"}
 
 
+SECTION_COLOURS={
+    'Home':('#bca4ff','#302b47'),'Squad Builder':('#9de0aa','#243c32'),
+    'Club Development':('#72ddd0','#203b3c'),'Agency Development':('#8ebeff','#25344d'),
+    'Transfer Window':('#f1c278','#423627'),'Transfer Bargains':('#f1c278','#423627'),
+    'Agency / Player Valuation':('#e1cf8b','#3e3928'),'Watchlist':('#eca2b9','#402b3a'),
+    'Compare':('#92d0ef','#253b49'),'Insights':('#c4a8ff','#342b49'),
+    'Sync Centre':('#9accc5','#293a3b'),'Grower or Shower':('#c8df8e','#343b29'),
+    'Design Studio':('#c5b0f0','#332c45')}
+
+
 @lru_cache(maxsize=1)
 def font_url():
     font = Path(__file__).with_name('design-concepts') / 'assets' / 'teletext.ttf'
@@ -52,11 +62,13 @@ def logo_html(compact=False):
 
 def header(page,wallet=''):
     number=PAGES.get(page,'100')
+    accent,tint=SECTION_COLOURS.get(page,SECTION_COLOURS['Home'])
+    st.markdown(f'<style>:root{{--section-accent:{accent};--section-tint:{tint};}}</style>',unsafe_allow_html=True)
     now=datetime.now(ZoneInfo('Europe/London'))
     links=''.join(f'<a class="{"active" if name==page else ""}" href="{escape(page_link(name,wallet),quote=True)}" target="_self">{label}</a>'
-        for name,label in [('Home','Overview'),('Squad Builder','Squad & tactics'),('Agency Development','Development'),('Agency / Player Valuation','Valuations'),('Sync Centre','Data centre')])
+        for name,label in [('Home','Overview'),('Squad Builder','Squad & tactics'),('Agency Development','Development'),('Agency / Player Valuation','Valuations'),('Sync Centre','Load & sync')])
     st.markdown(f'<div class="manager-header" data-page="{number}"><div><div class="manager-breadcrumb">MFL Management Hub / Manager workspace</div>'
-        f'<div class="manager-page-title">{escape(page)}</div></div><div class="manager-season"><strong>SEASON 17</strong><br>{now.strftime("%d %b %Y")}</div></div>'
+        f'<div class="manager-page-title">{escape({"Club Development":"Club progression","Agency Development":"Agency progression"}.get(page,page))}</div></div><div class="manager-season"><strong>WORKSPACE</strong><br>{now.strftime("%d %b %Y")}</div></div>'
         f'<nav class="manager-tabs" aria-label="Application shortcuts">{links}</nav>',unsafe_allow_html=True)
 
 

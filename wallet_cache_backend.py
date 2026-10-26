@@ -27,6 +27,17 @@ def db():
       PRIMARY KEY(wallet,player_id,snapshot_at));
     """)
     c.commit()
+    columns={row[1] for row in c.execute("PRAGMA table_info(roster)")}
+    if "position_ratings" not in columns:
+        c.execute("ALTER TABLE roster ADD COLUMN position_ratings TEXT")
+    c.execute("""CREATE TABLE IF NOT EXISTS tactics_position_ratings(
+        wallet TEXT,player_id INTEGER,position TEXT,rating REAL,updated_at TEXT,
+        PRIMARY KEY(wallet,player_id,position))""")
+    c.execute("""CREATE TABLE IF NOT EXISTS club_tenure(
+        wallet TEXT,player_id INTEGER,club TEXT,joined_at TEXT,baseline_at TEXT,latest_at TEXT,
+        baseline_json TEXT,current_json TEXT,checked_at TEXT,status TEXT,
+        PRIMARY KEY(wallet,player_id,club))""")
+    c.commit()
     return c
 
 def _now(): return datetime.now(timezone.utc).replace(microsecond=0)
@@ -138,7 +149,7 @@ def _position(p):
     p=_unwrap(p); m=p.get("metadata") if isinstance(p.get("metadata"),dict) else {}
     pos=m.get("positions") or p.get("positions") or []
     if isinstance(pos,str): pos=[pos]
-    return " / ".join(str(x) for x in pos if x) or None
+    return " / ".join(str(x.get("position") or x.get("name") or "") if isinstance(x,dict) else str(x) for x in pos if x) or None
 
 def _is_fresh(wallet,key,max_age_hours=MAX_AGE_HOURS):
     raw=_meta_get(wallet,key)
@@ -160,7 +171,7 @@ def roster_payload(wallet,t=None,force=False):
           "id":r["player_id"],"name":r["player_name"],
           "metadata":{"id":r["player_id"],"age":r["age"],"positions":[r["position"]] if r["position"] else [],
                       "overall":r["overall"],"pace":r["pace"],"shooting":r["shooting"],"passing":r["passing"],
-                      "dribbling":r["dribbling"],"defense":r["defense"],"physical":r["physical"]},
+                      "dribbling":r["dribbling"],"defense":r["defense"],"physical":r["physical"],"positionRatings":json.loads(r["position_ratings"] or "{}")},
           "club":{"name":r["club"]} if r["club"] else None
         } for r in rows]
     raw=[]; seen=set(); before=None
@@ -198,11 +209,11 @@ def roster_payload(wallet,t=None,force=False):
         try:pid=int(pid)
         except:continue
         name=p.get("name") or m.get("name") or (str(p.get("firstName") or m.get("firstName") or "")+" "+str(p.get("lastName") or m.get("lastName") or "")).strip() or f"Player {pid}"
-        c.execute("""INSERT OR REPLACE INTO roster VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        c.execute("""INSERT OR REPLACE INTO roster(wallet,player_id,player_name,club,age,position,overall,pace,shooting,passing,dribbling,defense,physical,cached_at,position_ratings) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                   (wallet,pid,name,_club_name(p),m.get("age") or p.get("age"),_position(p),
                    _val(p,"overall","overallRating","ovr"),_val(p,"pace","PAC"),_val(p,"shooting","SHO"),
                    _val(p,"passing","PAS"),_val(p,"dribbling","DRI"),_val(p,"defense","defending","DEF"),
-                   _val(p,"physical","physicality","PHY"),now))
+                   _val(p,"physical","physicality","PHY"),now,json.dumps(__import__("tactics_engine").payload_ratings(p))))
     c.commit(); c.close()
     _meta_set(wallet,"roster_updated",now)
     return roster_payload(wallet,None,False)
@@ -295,3 +306,18 @@ def snapshot_deltas(wallet,days):
     out["period_ovr"]=out["current_ovr"]-out["current_ovr_old"]
     out["period_attr"]=out["attr_gain"]-out["attr_gain_old"]
     return out.reset_index()
+
+
+def tactics_ratings(wallet):
+    with db() as c:
+        rows=c.execute("SELECT player_id,position,rating,updated_at FROM tactics_position_ratings WHERE wallet=?",(wallet.lower(),)).fetchall()
+    result={}
+    for row in rows:result.setdefault(int(row['player_id']),{})[row['position']]={'rating':row['rating'],'updated_at':row['updated_at']}
+    return result
+
+
+def save_tactics_ratings(wallet,player_id,ratings):
+    from tactics_engine import explicit_ratings
+    with db() as c:
+        c.execute("DELETE FROM tactics_position_ratings WHERE wallet=? AND player_id=?",(wallet.lower(),int(player_id)))
+        c.executemany("INSERT INTO tactics_position_ratings VALUES(?,?,?,?,?)",[(wallet.lower(),int(player_id),pos,rating,_iso()) for pos,rating in explicit_ratings(ratings).items()])
