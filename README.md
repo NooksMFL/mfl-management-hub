@@ -1,8 +1,8 @@
 # MFL Management Hub
 
-![MFL Management Hub Manager Workspace logo](assets/mfl-management-hub.svg)
+![MFL Management Hub Signal logo](assets/mfl-management-hub.svg)
 
-The MFL Management Hub, with a Football Manager–inspired dark workspace: navy panels, violet accents, crisp typography, a manager sidebar and a green tactics pitch.
+The MFL Management Hub, in the Signal theme: warm ivory, yellow wayfinding, charcoal controls and compact sans-serif typography. Body text is 14px, headings and controls are smaller, and the Load → Track → Select route links the main tasks.
 
 ## Football page index
 
@@ -53,7 +53,7 @@ Public wallet addresses are remembered on this browser and restored on the next 
 
 ## Ten new visual concepts
 
-Page 999 Design Studio now includes a **Ten new · Wild collection** selector, alongside the original six designs. [Browse the ten-theme gallery and PDF](design-concepts/WILD_COLLECTION.md). These are independent interactive previews; the live branding now uses Manager Workspace.
+Page 999 Design Studio now includes a **Ten new · Wild collection** selector, alongside the original six designs. [Browse the ten-theme gallery and PDF](design-concepts/WILD_COLLECTION.md). These are independent interactive previews; the live branding now uses Signal.
 
 ### Season progression cards
 
@@ -78,3 +78,7 @@ Retired / no-current-club players are hidden by default from agency and club dev
 ### Fifteen fresh website directions
 
 [Browse the new 15-design gallery](design-concepts/FRESH_FIFTEEN.md) · [PDF lookbook](design-concepts/MFL_Fresh_15_Lookbook.pdf). In **Design Studio**, the default **Fifteen new · Fresh directions** collection includes 15 distinct layout studies, locally bundled fonts, desktop/mobile screenshots and working demo interactions. Previews use illustrative data; choosing a preview does not rebrand the live app.
+
+### Signal theme
+
+The live Hub uses **12 · Signal** from the fresh-design collection. `signal.css` supplies the shared theme, with matching styles for the formation planner, sortable progression tables, wallet panel, icons and exported tactics boards. Default body text is 14px, controls 13px and the main page heading 26px (23px on phones). The compact pitch and optional expanded view remain available. Design Studio keeps the original concept previews for comparison.

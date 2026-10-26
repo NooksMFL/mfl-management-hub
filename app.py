@@ -20,7 +20,7 @@ import browser_persistence as browser_store
 from streamlit_js_eval import get_local_storage, set_local_storage
 
 st.set_page_config(
-    page_title="MFL Management Hub | Manager Workspace",
+    page_title="MFL Management Hub | Signal",
     page_icon=str(Path(__file__).with_name("assets") / "mfl-favicon.png"),
     layout="wide",
     initial_sidebar_state="expanded",
@@ -805,10 +805,10 @@ def combined_players(wallet):
 
 def make_share_card(title,subtitle,lines,portrait=None):
     W,H=1200,675
-    im=Image.new("RGB",(W,H),(21,24,36)); d=ImageDraw.Draw(im)
+    im=Image.new("RGB",(W,H),(244,240,223)); d=ImageDraw.Draw(im)
     # background panels
-    d.rectangle((45,45,W-45,H-45),fill=(21,24,36),outline=(58,64,89),width=4)
-    d.rectangle((45,45,60,H-45),fill=(182,160,255))
+    d.rectangle((45,45,W-45,H-45),fill=(244,240,223),outline=(33,39,36),width=4)
+    d.rectangle((45,45,60,H-45),fill=(108,91,0))
     try:
         from pathlib import Path
         text_font=str(Path(mfl_text.__file__).with_name("design-concepts") / "assets" / "sans.ttf")
@@ -817,12 +817,12 @@ def make_share_card(title,subtitle,lines,portrait=None):
         font_small=ImageFont.truetype(text_font,25)
     except:
         font_big=font_mid=font_small=None
-    d.text((95,90),title,fill=(182,160,255),font=font_big)
-    d.text((98,165),subtitle,fill=(237,240,250),font=font_mid)
+    d.text((95,90),title,fill=(108,91,0),font=font_big)
+    d.text((98,165),subtitle,fill=(33,39,36),font=font_mid)
     y=250
     for line in lines[:7]:
-        d.text((100,y),str(line),fill=(237,240,250),font=font_small); y+=52
-    d.text((100,H-95),"MFL MANAGEMENT HUB · SEASON 17",fill=(237,240,250),font=font_small)
+        d.text((100,y),str(line),fill=(33,39,36),font=font_small); y+=52
+    d.text((100,H-95),"MFL MANAGEMENT HUB · SEASON 17",fill=(33,39,36),font=font_small)
     if portrait:
         try:
             r=requests.get(portrait,timeout=8); r.raise_for_status()
@@ -900,7 +900,7 @@ with st.sidebar:
       <div class="season-top"><span>Your workspace</span><span>PUBLIC</span></div>
       <div class="connected"><i></i><span>PUBLIC FOOTBALL DATA</span></div>
     </div>
-    <div class="build">MFL MANAGEMENT HUB · MANAGER WORKSPACE</div>""",unsafe_allow_html=True)
+    <div class="build">MFL MANAGEMENT HUB · SIGNAL</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 mfl_text.header(page,wallet)

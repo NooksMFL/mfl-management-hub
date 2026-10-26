@@ -4,7 +4,7 @@
 
 **New: [ten wild new themes (07–16)](WILD_COLLECTION.md)** · [Wild collection PDF](MFL_Wild_Design_Lookbook.pdf)
 
-Six alternative visual directions for review. Each has its own layout, background, typography and colours. The live Hub now includes a **Design Studio** preview section; the live theme is now Manager Workspace, while this gallery preserves the earlier design studies.
+Six alternative visual directions for review. Each has its own layout, background, typography and colours. The live Hub now includes a **Design Studio** preview section; the live theme is now Signal, while this gallery preserves the earlier design studies.
 
 [Open the PDF lookbook](MFL_Design_Lookbook.pdf) · [Downloadable gallery archive](MFL_Design_Gallery.zip)
 
