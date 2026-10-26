@@ -20,7 +20,7 @@ import browser_persistence as browser_store
 from streamlit_js_eval import get_local_storage, set_local_storage
 
 st.set_page_config(
-    page_title="MFL Management Hub | Signal",
+    page_title="MFL Management Hub | Command Centre",
     page_icon=str(Path(__file__).with_name("assets") / "mfl-favicon.png"),
     layout="wide",
     initial_sidebar_state="expanded",
@@ -805,10 +805,10 @@ def combined_players(wallet):
 
 def make_share_card(title,subtitle,lines,portrait=None):
     W,H=1200,675
-    im=Image.new("RGB",(W,H),(244,240,223)); d=ImageDraw.Draw(im)
+    im=Image.new("RGB",(W,H),(8,15,25)); d=ImageDraw.Draw(im)
     # background panels
-    d.rectangle((45,45,W-45,H-45),fill=(244,240,223),outline=(33,39,36),width=4)
-    d.rectangle((45,45,60,H-45),fill=(108,91,0))
+    d.rectangle((45,45,W-45,H-45),fill=(8,15,25),outline=(236,242,250),width=4)
+    d.rectangle((45,45,60,H-45),fill=(185,232,63))
     try:
         from pathlib import Path
         text_font=str(Path(mfl_text.__file__).with_name("design-concepts") / "assets" / "sans.ttf")
@@ -817,12 +817,12 @@ def make_share_card(title,subtitle,lines,portrait=None):
         font_small=ImageFont.truetype(text_font,25)
     except:
         font_big=font_mid=font_small=None
-    d.text((95,90),title,fill=(108,91,0),font=font_big)
-    d.text((98,165),subtitle,fill=(33,39,36),font=font_mid)
+    d.text((95,90),title,fill=(185,232,63),font=font_big)
+    d.text((98,165),subtitle,fill=(236,242,250),font=font_mid)
     y=250
     for line in lines[:7]:
-        d.text((100,y),str(line),fill=(33,39,36),font=font_small); y+=52
-    d.text((100,H-95),"MFL MANAGEMENT HUB · SEASON 17",fill=(33,39,36),font=font_small)
+        d.text((100,y),str(line),fill=(236,242,250),font=font_small); y+=52
+    d.text((100,H-95),"MFL MANAGEMENT HUB · SEASON 17",fill=(236,242,250),font=font_small)
     if portrait:
         try:
             r=requests.get(portrait,timeout=8); r.raise_for_status()
@@ -900,7 +900,7 @@ with st.sidebar:
       <div class="season-top"><span>Your workspace</span><span>PUBLIC</span></div>
       <div class="connected"><i></i><span>PUBLIC FOOTBALL DATA</span></div>
     </div>
-    <div class="build">MFL MANAGEMENT HUB · SIGNAL</div>""",unsafe_allow_html=True)
+    <div class="build">MFL MANAGEMENT HUB · COMMAND CENTRE</div>""",unsafe_allow_html=True)
 
 wallet=st.session_state.wallet
 mfl_text.header(page,wallet)
@@ -924,8 +924,7 @@ if wallet:
 
 # ---------------- HOME ----------------
 if page=="Home":
-    st.subheader("Your football network")
-    st.info("Start here: connect your wallet → load players → choose your team in Squad Builder. Use Club progression to track gains since joining your club, or switch to the whole-season view.")
+    st.caption("Manage your agency, follow club progression and prepare your next XI.")
     import squad_sync
     squad_sync.render(wallet, key="home_load_players")
     if not wallet:
@@ -944,6 +943,14 @@ if page=="Home":
     kpis[0].metric("AGENCY PLAYERS" if st.session_state.get("show_retired_players") else "ACTIVE AGENCY PLAYERS",players if wallet else "—")
     kpis[1].metric("OWNED CLUBS",clubs if wallet else "—")
     kpis[2].metric("SAVED SEASON 17 CLUB OVR GAIN",f"+{gain:g}" if not good.empty else "—")
+    import command_dashboard
+    preview=roster if roster else af.to_dict("records")
+    if preview:
+        query=st.text_input("Search your players",placeholder="Search player names…",key="command_player_search",label_visibility="collapsed")
+        matches=[p for p in preview if query.casefold() in str(p.get('player_name') or p.get('player') or '').casefold()]
+        matches=command_dashboard.sort_players(matches)
+        if matches:st.markdown(command_dashboard.roster_html(matches,wallet,total=len(matches)),unsafe_allow_html=True)
+        else:st.info('No saved players match that search.')
     left,right=st.columns([1.15,1])
     with left:
         st.subheader("Manager’s office")

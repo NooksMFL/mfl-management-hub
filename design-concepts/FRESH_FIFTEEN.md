@@ -6,7 +6,7 @@ Fifteen new directions, numbered **01–15 in this collection**. These explore d
 
 **In the Hub:** open **Design Studio** under **Community & design**, then choose **Fifteen new · Fresh directions**. Or [open Design Studio directly](https://mfl-management-app22.streamlit.app/?page=Design+Studio).
 
-Each concept includes working navigation, a compact example squad, progression-period switching, player search, league filters, player profiles and retired-player visibility. All figures are clearly labelled illustrative data. The live Hub now uses **12 · Signal**, with smaller typography; these pages preserve the original design studies.
+Each concept includes working navigation, a compact example squad, progression-period switching, player search, league filters, player profiles and retired-player visibility. All figures are clearly labelled illustrative data. The live Hub now follows the later **Command Centre** reference, retaining compact typography; these pages preserve the original design studies, including **12 · Signal**.
 
 ## Compare the designs
 

@@ -15,13 +15,13 @@ PAGES = {"Home":"100", "Grower or Shower":"200", "Agency Development":"201", "Cl
 
 
 SECTION_COLOURS={
-    'Home':('#6c5b00','#fff4c8'),'Squad Builder':('#356449','#edf1e4'),
-    'Club Development':('#286d62','#e8f0e7'),'Agency Development':('#365f7d','#e9edf0'),
-    'Transfer Window':('#8c5a1f','#f7ead0'),'Transfer Bargains':('#8c5a1f','#f7ead0'),
-    'Agency / Player Valuation':('#76601e','#f3ebd3'),'Watchlist':('#88545f','#f3e7df'),
-    'Compare':('#426879','#e7efed'),'Insights':('#6a597b','#eee8ef'),
-    'Sync Centre':('#556941','#edf0df'),'Grower or Shower':('#667338','#eef0dc'),
-    'Design Studio':('#745c79','#f0e8ef')}
+    'Home':('#b9e83f','#142332'),'Squad Builder':('#b9e83f','#142b2b'),
+    'Club Development':('#57dab1','#142a2b'),'Agency Development':('#79d6ff','#15283a'),
+    'Transfer Window':('#e7c17b','#2a251c'),'Transfer Bargains':('#e7c17b','#2a251c'),
+    'Agency / Player Valuation':('#d7cd8b','#27291f'),'Watchlist':('#dca1bc','#292131'),
+    'Compare':('#86cdeb','#142835'),'Insights':('#bea6ed','#221e34'),
+    'Sync Centre':('#b9e83f','#1d2b23'),'Grower or Shower':('#b9d87f','#233020'),
+    'Design Studio':('#bba8dd','#211f32')}
 
 
 @lru_cache(maxsize=1)
@@ -38,7 +38,7 @@ def read_font_url(bold=False):
 
 
 def apply_theme():
-    css = Path(__file__).with_name('signal.css').read_text().replace('TELETEXT_FONT_URL',font_url()).replace('READ_FONT_URL',read_font_url()).replace('BOLD_FONT_URL',read_font_url(True))
+    css = Path(__file__).with_name('command.css').read_text().replace('TELETEXT_FONT_URL',font_url()).replace('READ_FONT_URL',read_font_url()).replace('BOLD_FONT_URL',read_font_url(True))
     st.markdown('<style>'+css+'</style>',unsafe_allow_html=True)
 
 
@@ -67,8 +67,8 @@ def header(page,wallet=''):
     now=datetime.now(ZoneInfo('Europe/London'))
     links=''.join(f'<a class="{"active" if name==page else ""}" href="{escape(page_link(name,wallet),quote=True)}" target="_self">{label}</a>'
         for name,label in [('Home','Overview'),('Squad Builder','Squad & tactics'),('Agency Development','Development'),('Agency / Player Valuation','Valuations'),('Sync Centre','Load & sync')])
-    st.markdown(f'<div class="manager-header" data-page="{number}"><div><div class="manager-breadcrumb">MFL Management Hub / Your football workspace</div>'
-        f'<div class="manager-page-title">{escape({"Club Development":"Club progression","Agency Development":"Agency progression"}.get(page,page))}</div></div><div class="manager-season"><strong>WORKSPACE</strong><br>{now.strftime("%d %b %Y")}</div></div>'
+    st.markdown(f'<div class="manager-header" data-page="{number}"><div><div class="manager-breadcrumb">MFL Management Hub / Matchday workspace</div>'
+        f'<div class="manager-page-title">{escape({"Home":"Command centre","Club Development":"Club progression","Agency Development":"Agency progression"}.get(page,page))}</div></div><div class="manager-season"><strong>WORKSPACE</strong><br>{now.strftime("%d %b %Y")}</div></div>'
         f'<nav class="manager-tabs" aria-label="Application shortcuts">{links}</nav>'
         '<nav class="signal-route" aria-label="Workspace steps">'+''.join(
             f'<a href="{escape(page_link(name,wallet),quote=True)}" target="_self"><b>{step}</b>{label}</a>'+('<i aria-hidden="true"></i>' if step!='03' else '')

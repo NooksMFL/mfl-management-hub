@@ -1,8 +1,8 @@
 # MFL Management Hub
 
-![MFL Management Hub Signal logo](assets/mfl-management-hub.svg)
+![MFL Management Hub Command Centre logo](assets/mfl-management-hub.svg)
 
-The MFL Management Hub, in the Signal theme: warm ivory, yellow wayfinding, charcoal controls and compact sans-serif typography. Body text is 14px, headings and controls are smaller, and the Load → Track → Select route links the main tasks.
+The MFL Management Hub, in the Command Centre theme: dark navy panels, lime navigation, mint links and compact typography. The Home dashboard shows searchable portrait cards from the saved roster, with position, age and OVR badges. Body text remains 14px.
 
 ## Football page index
 
@@ -53,7 +53,7 @@ Public wallet addresses are remembered on this browser and restored on the next 
 
 ## Ten new visual concepts
 
-Page 999 Design Studio now includes a **Ten new · Wild collection** selector, alongside the original six designs. [Browse the ten-theme gallery and PDF](design-concepts/WILD_COLLECTION.md). These are independent interactive previews; the live branding now uses Signal.
+Page 999 Design Studio now includes a **Ten new · Wild collection** selector, alongside the original six designs. [Browse the ten-theme gallery and PDF](design-concepts/WILD_COLLECTION.md). These are independent interactive previews; the live branding now uses Command Centre.
 
 ### Season progression cards
 
@@ -81,4 +81,8 @@ Retired / no-current-club players are hidden by default from agency and club dev
 
 ### Signal theme
 
-The live Hub uses **12 · Signal** from the fresh-design collection. `signal.css` supplies the shared theme, with matching styles for the formation planner, sortable progression tables, wallet panel, icons and exported tactics boards. Default body text is 14px, controls 13px and the main page heading 26px (23px on phones). The compact pitch and optional expanded view remain available. Design Studio keeps the original concept previews for comparison.
+The previous **12 · Signal** design is preserved in `signal.css`, with matching styles for the formation planner, sortable progression tables, wallet panel, icons and exported tactics boards. Default body text is 14px, controls 13px and the main page heading 26px (23px on phones). The compact pitch and optional expanded view remain available. Design Studio keeps the original concept previews for comparison.
+
+### Command Centre reference
+
+The active theme is `command.css`, based on the supplied navy-and-lime reference. Home adds a compact, searchable preview of the 12 highest-rated matching players from the saved roster. Player cards use real saved names, portrait URLs, positions, ages and base ratings; missing values remain unknown, and the retired-player visibility rule still applies. Remaining-player links preserve the connected wallet. The screenshot’s example metrics, warnings and unimplemented features are not copied into live data. Formation planning, wallet components and sortable progression tables use the same dark palette.
