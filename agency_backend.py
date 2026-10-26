@@ -252,7 +252,7 @@ def seed_from_shared(wallet):
                      ON CONFLICT(wallet,player_id) DO UPDATE SET
                      age=COALESCE(excluded.age,player_meta.age),
                      position=COALESCE(excluded.position,player_meta.position),
-                     club=COALESCE(excluded.club,player_meta.club)""",
+                     club=excluded.club""",
                   (wallet,pid,r.get("age"),r.get("position"),r.get("club")))
 
         if exists:

@@ -71,15 +71,16 @@ def render(wallet):
     st.subheader('Every player')
     a,b=st.columns([2,1])
     query=a.text_input('Search player or club',key='valuation_search')
-    status=b.selectbox('Valuation filter',['All players','Estimated','Unpriced active','Retired / no club'])
+    status=b.selectbox('Valuation filter',['Active players','All players','Estimated','Unpriced active','Retired / no club'],index=1 if st.session_state.get('show_retired_players',False) else 0)
     view=frame.copy()
     if query:
         view=view[view.Player.fillna('').str.contains(query,case=False,regex=False)|view['Current club'].fillna('').str.contains(query,case=False,regex=False)]
-    if status=='Estimated':view=view[view.Estimate.notna()]
+    if status=='Active players':view=view[view.Status!='Retired / no current club']
+    elif status=='Estimated':view=view[view.Estimate.notna()]
     elif status=='Unpriced active':view=view[(view.Estimate.isna())&(view.Status!='Retired / no current club')]
     elif status=='Retired / no club':view=view[view.Status=='Retired / no current club']
     st.dataframe(view.sort_values('Estimate',ascending=False,na_position='last'),hide_index=True,use_container_width=True)
-    export=frame.assign(**{'Market snapshot':snapshot['captured_at']})
+    export=view.assign(**{'Market snapshot':snapshot['captured_at']})
     st.download_button('Download agency valuations CSV',export.to_csv(index=False).encode('utf-8-sig'),
                        file_name='mfl_agency_valuations.csv',mime='text/csv')
     st.subheader('Individual player / valuation evidence')

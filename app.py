@@ -752,6 +752,11 @@ def age_text(ts):
         return f"{hrs//24}d ago"
     except:return "Unknown"
 
+def visible_frame(frame,wallet,update_clubs=False):
+    from player_visibility import filter_frame
+    return filter_frame(frame,wallet,show_retired=st.session_state.get('show_retired_players',False),update_clubs=update_clubs)
+
+
 def agency_frame(wallet):
     if not wallet:return pd.DataFrame()
     c=agency.db();agency.init(c);agency.ensure_v2(c)
@@ -764,7 +769,7 @@ def agency_frame(wallet):
       WHERE o.wallet=?""",(wallet.lower(),)).fetchall()
     c.close()
     if not rows:return pd.DataFrame()
-    df=pd.DataFrame([dict(r) for r in rows])
+    df=visible_frame(pd.DataFrame([dict(r) for r in rows]),wallet,update_clubs=True)
     for lab,cur,start_col in [
       ("OVR ↑","current_ovr","start_ovr"),("PAC ↑","current_pac","start_pac"),("SHO ↑","current_sho","start_sho"),
       ("PAS ↑","current_pas","start_pas"),("DRI ↑","current_dri","start_dri"),("DEF ↑","current_def","start_def"),("PHY ↑","current_phy","start_phy")]:
@@ -773,7 +778,7 @@ def agency_frame(wallet):
 
 def combined_players(wallet):
     af=agency_frame(wallet)
-    cf=club.cached(wallet) if wallet else pd.DataFrame()
+    cf=visible_frame(club.cached(wallet),wallet) if wallet else pd.DataFrame()
     rows={}
     if not af.empty:
         for _,r in af.iterrows():
@@ -854,6 +859,7 @@ with st.sidebar:
         st.session_state["hub_nav"]=query_page
     elif st.query_params.get("page") and st.session_state["hub_nav"]!=query_page:
         st.session_state["hub_nav"]=query_page
+    st.toggle("Show retired players",value=False,key="show_retired_players",help="Hidden by default. Players with no current club are treated as retired. Squad Builder always excludes them.")
     community_open=st.toggle("Community & design",value=query_page in ("Grower or Shower","Design Studio"),key="show_community")
     visible_pages=[name for name in nav_pages if community_open or name not in ("Grower or Shower","Design Studio") or name==st.session_state.get("hub_nav")]
     page=st.radio("Navigation",visible_pages,key="hub_nav",
@@ -925,14 +931,17 @@ if page=="Home":
     if not wallet:
         st.info("Connect your public wallet in the sidebar to see your agency, clubs and development. Page 302 opens the squad builder.")
     roster=shared.roster_rows(wallet) if wallet else []
+    total_roster=len(roster)
+    if roster:roster=visible_frame(pd.DataFrame(roster),wallet).to_dict('records')
+    if total_roster>len(roster):st.caption(f"{total_roster-len(roster)} retired / no-club players hidden. Use Show retired players in the sidebar to review them.")
     af=agency_frame(wallet) if wallet else pd.DataFrame()
-    cf=club.cached(wallet) if wallet else pd.DataFrame()
+    cf=visible_frame(club.cached(wallet),wallet) if wallet else pd.DataFrame()
     good=cf[cf["error"].isna()] if not cf.empty and "error" in cf else cf
     gain=float(good["ovr_gain"].fillna(0).sum()) if not good.empty else 0
     players=len(roster) if roster else len(af)
     clubs=len(shared.clubs_rows(wallet)) if wallet else 0
     kpis=st.columns(3)
-    kpis[0].metric("AGENCY PLAYERS",players if wallet else "—")
+    kpis[0].metric("AGENCY PLAYERS" if st.session_state.get("show_retired_players") else "ACTIVE AGENCY PLAYERS",players if wallet else "—")
     kpis[1].metric("OWNED CLUBS",clubs if wallet else "—")
     kpis[2].metric("SAVED SEASON 17 CLUB OVR GAIN",f"+{gain:g}" if not good.empty else "—")
     left,right=st.columns([1.15,1])
@@ -1132,7 +1141,11 @@ elif page=="Agency Development":
                     with st.expander("Technical detail"):
                         st.code(str(e))
     else:
-        df=pd.DataFrame([dict(r) for r in rows])
+        df=visible_frame(pd.DataFrame([dict(r) for r in rows]),wallet,update_clubs=True)
+        if df.empty:
+            st.info('No active players in this saved agency view. Retired / no-club players are hidden. Enable Show retired players in the sidebar to review them, or refresh team players on Home.')
+            c.close()
+            st.stop()
         for lab,cur,start_col in [
             ("OVR ↑","current_ovr","start_ovr"),("PAC ↑","current_pac","start_pac"),("SHO ↑","current_sho","start_sho"),
             ("PAS ↑","current_pas","start_pas"),("DRI ↑","current_dri","start_dri"),("DEF ↑","current_def","start_def"),("PHY ↑","current_phy","start_phy")]:
@@ -1346,7 +1359,7 @@ elif page=="Club Development":
             mine=club.owned_clubs(wallet)
         except Exception:
             mine=[]
-        cached=club.cached(wallet)
+        cached=visible_frame(club.cached(wallet),wallet)
         good=cached[cached["error"].isna()] if (not cached.empty and "error" in cached.columns) else cached
 
         total_ovr=float(good["ovr_gain"].fillna(0).sum()) if not good.empty else 0
@@ -1417,7 +1430,7 @@ elif page=="Club Development":
                 with st.expander("Technical detail"):
                     st.code(str(e))
 
-        cached=club.cached(wallet)
+        cached=visible_frame(club.cached(wallet),wallet)
         good=cached[cached["error"].isna()] if (not cached.empty and "error" in cached.columns) else cached
 
         if good.empty:
@@ -1750,7 +1763,7 @@ elif page=="Compare":
 
     with tabs[1]:
         st.markdown('<div class="compare-intro-v182"><b>Club comparison</b><span>Select 2–4 owned clubs and compare total OVR gained, total attributes gained and where those gains are coming from.</span></div>',unsafe_allow_html=True)
-        cf=club.cached(wallet)
+        cf=visible_frame(club.cached(wallet),wallet)
         if cf.empty:
             st.info("Sync Club Development first.")
         else:
@@ -1792,7 +1805,7 @@ elif page=="Insights":
     if not wallet:
         st.warning("Connect a wallet first.");st.stop()
     st.markdown('<div class="suite-hero"><div class="suite-kicker">DEVELOPMENT INTELLIGENCE</div><div class="suite-title">See the patterns behind the gains.</div><div class="suite-copy">Recent movers, age and position trends, player milestones, your Season 17 snapshot and on-demand market history.</div></div>',unsafe_allow_html=True)
-    af=agency_frame(wallet); cf=club.cached(wallet)
+    af=agency_frame(wallet); cf=visible_frame(club.cached(wallet),wallet)
     if not cf.empty:
         cf=cf[cf["error"].isna()] if "error" in cf.columns else cf
         shared.capture_club_snapshot(wallet,cf)
@@ -1894,7 +1907,8 @@ elif page=="Insights":
                 "player_id":r["player_id"],"player":r["player_name"],"club":r.get("club"),
                 "current_ovr":r.get("overall"),"ovr_gain":0,"attr_gain":0
             } for r in shared.roster_rows(wallet)])
-        if allp.empty:st.info("Load the shared wallet roster first.")
+        allp=visible_frame(allp,wallet)
+        if allp.empty:st.info("Load active players first, or enable Show retired players in the sidebar.")
         else:
             choices={f'{r["player"]} · {int(r["player_id"])}':int(r["player_id"]) for _,r in allp.sort_values("player").iterrows()}
             choice=st.selectbox("Player",list(choices),key="market_player");pid=choices[choice]
@@ -1935,7 +1949,7 @@ elif page=="Sync Centre":
         st.warning("Connect a wallet first.");st.stop()
     st.markdown('<div class="suite-hero"><div class="suite-kicker">DATA & SYNC CENTRE</div><div class="suite-title">Refresh once. Reuse everywhere.</div><div class="suite-copy">The shared wallet roster is reused by Agency and Club Development, so the same wallet list is not fetched from MFL twice.</div></div>',unsafe_allow_html=True)
     fresh=shared.freshness(wallet)
-    af=agency_frame(wallet);cf=club.cached(wallet)
+    af=agency_frame(wallet);cf=visible_frame(club.cached(wallet),wallet)
     gc=grower.db();grower.init_db(gc);grows=grower.leaderboard(gc);gc.close()
     st.markdown(f'<div class="sync-grid-v18"><div class="sync-card-v18"><div class="sync-name-v18">Shared wallet cache</div><div class="sync-status-v18">{len(shared.roster_rows(wallet))} players · roster {age_text(fresh.get("roster"))}<br>{len(shared.clubs_rows(wallet))} clubs · clubs {age_text(fresh.get("clubs"))}</div></div><div class="sync-card-v18"><div class="sync-name-v18">Agency</div><div class="sync-status-v18">{len(af)} analysed players</div></div><div class="sync-card-v18"><div class="sync-name-v18">Clubs</div><div class="sync-status-v18">{len(cf)} Season 17 player records</div></div><div class="sync-card-v18"><div class="sync-name-v18">Grower or Shower</div><div class="sync-status-v18">{len(grows)} entrants cached</div></div></div>',unsafe_allow_html=True)
     st.write("")
