@@ -81,6 +81,8 @@ def jump_to_page():
     if target:
         st.session_state['hub_nav']=target
         st.query_params['page']=target
+        st.query_params.pop('player',None)
+        st.session_state.pop('active_player_profile',None)
         st.session_state.pop('tt_page_error',None)
     else:
         st.session_state['tt_page_error']='PAGE NOT FOUND. TRY 100, 201, 202 OR 302.'
@@ -88,3 +90,5 @@ def jump_to_page():
 
 def sync_navigation():
     st.query_params['page']=st.session_state['hub_nav']
+    st.query_params.pop('player',None)
+    st.session_state.pop('active_player_profile',None)

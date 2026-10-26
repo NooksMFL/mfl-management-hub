@@ -235,3 +235,25 @@ html,body,.stApp,[data-testid="stAppViewContainer"],[data-testid="stMain"]{backg
 @media(max-width:1250px){.stMarkdown .ops-player-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:900px){.stMarkdown .ops-player-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.stMarkdown .ops-player-grid{grid-template-columns:1fr;padding:10px}.stMarkdown .ops-panel-head{padding:14px}.stMarkdown .ops-panel-head p{font-size:11px!important}.stMarkdown .manager-page-title{font-size:23px!important}}
+/* Player cards are keyboard-accessible links into a roster-scoped profile. */
+.stMarkdown a.ops-player-link{display:block;color:inherit!important;text-decoration:none!important;border-radius:11px}
+.stMarkdown .ops-player-link:hover .ops-player-card{border-color:#6b8e38!important;background:#142333!important}
+.stMarkdown .ops-player-link:focus-visible{outline:2px solid #b9e83f!important;outline-offset:3px}
+[data-testid="stDialog"] [role="dialog"]{background:#0c1725;border:1px solid #30465d;border-radius:14px}
+.stMarkdown .ops-profile-hero{display:flex;align-items:center;gap:18px;padding:16px;background:#142337;border:1px solid #2d4459;border-radius:12px;margin-bottom:22px}
+.ops-profile-photo{width:85px;height:105px;flex-shrink:0;background-color:#1c3343;background-size:cover;background-position:top center;border-radius:8px}
+.stMarkdown .ops-profile-name{font-size:23px!important;line-height:1.2!important;font-weight:700;color:#eef5fc!important}
+.stMarkdown .ops-profile-meta,.stMarkdown .ops-profile-club{font-size:13px!important;color:#a4b9d0!important;margin-top:8px}
+.stMarkdown .ops-profile-ovr{margin-left:auto;font-size:36px!important;font-weight:700!important;color:#b9e83f!important;text-align:center}
+.stMarkdown .ops-profile-ovr small{display:block;font-size:10px!important;letter-spacing:.06em;color:#8fa6bd!important}
+.stMarkdown .ops-profile-section{font-size:16px!important;font-weight:700!important;margin:14px 0}
+.ops-attribute-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.stMarkdown .ops-attribute{padding:14px;background:#101e2e;border:1px solid #2b4056;border-radius:8px}
+.stMarkdown .ops-attribute>div:first-child{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.stMarkdown .ops-attribute span{font-size:13px!important;color:#b6c7d9!important}.stMarkdown .ops-attribute strong{font-size:18px!important;color:#e7f3fc!important}
+.ops-attribute-track{height:5px;border-radius:4px;background:#293b4f;margin-top:12px;overflow:hidden}.ops-attribute-track i{display:block;background:#67d6b3;height:100%}
+.stMarkdown .ops-attribute-missing{font-size:11px!important;color:#8498af!important;margin-top:8px}
+.stMarkdown .ops-profile-agency{color:#65dcba!important;font-size:13px!important;text-decoration:none!important}
+@media(max-width:600px){.stMarkdown .ops-profile-hero{gap:10px;padding:12px;flex-wrap:wrap}.ops-profile-photo{width:58px;height:75px}.stMarkdown .ops-profile-name{font-size:18px!important}.stMarkdown .ops-profile-ovr{font-size:28px!important}.ops-attribute-grid{gap:8px}.stMarkdown .ops-attribute{padding:10px}.stMarkdown .ops-attribute strong{font-size:15px!important}}
+.ops-profile-photo{display:block}
+.stMarkdown .ops-profile-hero{border-radius:12px!important;background:#142337!important;border:1px solid #2d4459!important;padding:16px!important}

@@ -86,3 +86,7 @@ The previous **12 · Signal** design is preserved in `signal.css`, with matching
 ### Command Centre reference
 
 The active theme is `command.css`, based on the supplied navy-and-lime reference. Home adds a compact, searchable preview of the 12 highest-rated matching players from the saved roster. Player cards use real saved names, portrait URLs, positions, ages and base ratings; missing values remain unknown, and the retired-player visibility rule still applies. Remaining-player links preserve the connected wallet. The screenshot’s example metrics, warnings and unimplemented features are not copied into live data. Formation planning, wallet components and sortable progression tables use the same dark palette.
+
+### Clickable player profiles
+
+Click a player card on Home (or focus it and press Enter) to open a profile dialog containing the saved portrait, club, age, positions, base OVR and all six attributes. The position-rating table uses the same supplied/manual ratings as the tactics planner. Missing attributes remain unavailable. Card URLs preserve the wallet and validate the selected player against that wallet’s currently visible roster. Opening a profile makes no API request; use the existing roster refresh action for newer attributes. Close with the button, Escape or the dialog close icon.

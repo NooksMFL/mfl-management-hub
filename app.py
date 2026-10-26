@@ -951,6 +951,9 @@ if page=="Home":
         matches=command_dashboard.sort_players(matches)
         if matches:st.markdown(command_dashboard.roster_html(matches,wallet,total=len(matches)),unsafe_allow_html=True)
         else:st.info('No saved players match that search.')
+    if st.query_params.get('player') or st.session_state.get('active_player_profile'):
+        import player_profile
+        player_profile.open_requested(preview,wallet,st.query_params.get('player'))
     left,right=st.columns([1.15,1])
     with left:
         st.subheader("Manager’s office")
