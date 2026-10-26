@@ -3,7 +3,7 @@
     "slug": "01-teletext",
     "number": "01",
     "title": "MFL Text",
-    "style": "UK teletext \u00b7 1988",
+    "style": "UK teletext · 1988",
     "description": "Black screens, primary colours, pixel typography and numbered football pages.",
     "rationale": "The nostalgic one. A proper football information service with keyboard page entry and Fastext-style navigation."
   },
@@ -29,7 +29,7 @@
     "title": "The Clubroom",
     "style": "Heritage football club",
     "description": "Warm stone, oxblood, brass accents and traditional serif typography.",
-    "rationale": "A club secretary\u2019s desk reimagined: restrained, confident and rooted in football heritage."
+    "rationale": "A club secretary’s desk reimagined: restrained, confident and rooted in football heritage."
   },
   {
     "slug": "05-dugout",
@@ -52,8 +52,8 @@
     "number": "07",
     "title": "Manager 95",
     "style": "A football desktop from 1995",
-    "description": "Grey bevelled windows, teal desktop wallpaper, a Start bar and a manager\u2019s inbox.",
-    "rationale": "Grey bevelled windows, teal desktop wallpaper, a Start bar and a manager\u2019s inbox.",
+    "description": "Grey bevelled windows, teal desktop wallpaper, a Start bar and a manager’s inbox.",
+    "rationale": "Grey bevelled windows, teal desktop wallpaper, a Start bar and a manager’s inbox.",
     "collection": "Wild collection"
   },
   {
@@ -113,10 +113,10 @@
   {
     "slug": "14-nautical",
     "number": "14",
-    "title": "Captain\u2019s Log",
+    "title": "Captain’s Log",
     "style": "Run your agency like a fleet",
-    "description": "Deep ocean blue, cream navigation charts, compass drawings and a captain\u2019s roster.",
-    "rationale": "Deep ocean blue, cream navigation charts, compass drawings and a captain\u2019s roster.",
+    "description": "Deep ocean blue, cream navigation charts, compass drawings and a captain’s roster.",
+    "rationale": "Deep ocean blue, cream navigation charts, compass drawings and a captain’s roster.",
     "collection": "Wild collection"
   },
   {
@@ -136,5 +136,155 @@
     "description": "Signal red, black, giant typography, festival line-ups and a static audio-spectrum graphic.",
     "rationale": "Signal red, black, giant typography, festival line-ups and a static audio-spectrum graphic.",
     "collection": "Wild collection"
+  },
+  {
+    "slug": "17-federation",
+    "number": "17",
+    "collection_number": "01",
+    "title": "Federation",
+    "style": "Swiss federation portal",
+    "description": "White, vermilion and precise typography. A slim left navigation and a disciplined operations grid.",
+    "collection": "Fresh fifteen",
+    "rationale": "A new left composition focused on the everyday load, develop and select workflow."
+  },
+  {
+    "slug": "18-sprint",
+    "number": "18",
+    "collection_number": "02",
+    "title": "Sprint",
+    "style": "Performance sports app",
+    "description": "Oversized athletic headlines, tangerine panels and a horizontal race-strip navigation.",
+    "collection": "Fresh fifteen",
+    "rationale": "A new top composition focused on the everyday load, develop and select workflow."
+  },
+  {
+    "slug": "19-pink-sheet",
+    "number": "19",
+    "collection_number": "03",
+    "title": "The Pink Sheet",
+    "style": "Financial broadsheet",
+    "description": "Salmon paper, ink rules and editorial columns. Football progression presented as a daily briefing.",
+    "collection": "Fresh fifteen",
+    "rationale": "A new newspaper composition focused on the everyday load, develop and select workflow."
+  },
+  {
+    "slug": "20-mondrian",
+    "number": "20",
+    "collection_number": "04",
+    "title": "Mondrian",
+    "style": "Geometric primary blocks",
+    "description": "Primary-colour rectangles, thick ink borders and a modular federation-style control surface.",
+    "collection": "Fresh fifteen",
+    "rationale": "A new tiles composition focused on the everyday load, develop and select workflow."
+  },
+  {
+    "slug": "21-alpine",
+    "number": "21",
+    "collection_number": "05",
+    "title": "Alpine",
+    "style": "Outdoor field guide",
+    "description": "Sage and pine, generous type and a terrain-inspired side panel. Club progress becomes an expedition log.",
+    "collection": "Fresh fifteen",
+    "rationale": "A new right composition focused on the everyday load, develop and select workflow."
+  },
+  {
+    "slug": "22-bento",
+    "number": "22",
+    "collection_number": "06",
+    "title": "Bento Club",
+    "style": "Colourful modular workspace",
+    "description": "Bright white, coral and aqua. A wide card canvas, small status chips and a different-sized tile for each job.",
+    "collection": "Fresh fifteen",
+    "rationale": "A new bento composition focused on the everyday load, develop and select workflow."
+  },
+  {
+    "slug": "23-prism",
+    "number": "23",
+    "collection_number": "07",
+    "title": "Prism",
+    "style": "Light glass dashboard",
+    "description": "A pale lilac and ice-blue mesh, translucent panels and a floating command dock. Light rather than luminous black.",
+    "collection": "Fresh fifteen",
+    "rationale": "A new float composition focused on the everyday load, develop and select workflow."
+  },
+  {
+    "slug": "24-cobalt",
+    "number": "24",
+    "collection_number": "08",
+    "title": "Cobalt Club",
+    "style": "Ultramarine web app",
+    "description": "An immersive blue canvas, high-contrast white panels and a compact right-hand utility rail.",
+    "collection": "Fresh fifteen",
+    "rationale": "A new blue composition focused on the everyday load, develop and select workflow."
+  },
+  {
+    "slug": "25-kiln",
+    "number": "25",
+    "collection_number": "09",
+    "title": "Kiln",
+    "style": "Mediterranean colour blocking",
+    "description": "Terracotta, chalk and deep blue. A horizontal architectural composition with generous square sections.",
+    "collection": "Fresh fifteen",
+    "rationale": "A new split composition focused on the everyday load, develop and select workflow."
+  },
+  {
+    "slug": "26-silverline",
+    "number": "26",
+    "collection_number": "10",
+    "title": "Silverline",
+    "style": "Motorsport pit wall",
+    "description": "Cool aluminium, graphite and orange. A numbered navigation rail and a horizontal performance ledger.",
+    "collection": "Fresh fifteen",
+    "rationale": "A new rail composition focused on the everyday load, develop and select workflow."
+  },
+  {
+    "slug": "27-atelier",
+    "number": "27",
+    "collection_number": "11",
+    "title": "Atelier Eleven",
+    "style": "Contemporary gallery",
+    "description": "Lavender, plum and sculptural serif type. A large typographic masthead with a calm gallery grid.",
+    "collection": "Fresh fifteen",
+    "rationale": "A new gallery composition focused on the everyday load, develop and select workflow."
+  },
+  {
+    "slug": "28-signal",
+    "number": "28",
+    "collection_number": "12",
+    "title": "Signal",
+    "style": "Transport wayfinding",
+    "description": "Warm yellow and charcoal with route-like navigation. Big labels, compact boards and exceptionally clear wayfinding.",
+    "collection": "Fresh fifteen",
+    "rationale": "A new signal composition focused on the everyday load, develop and select workflow."
+  },
+  {
+    "slug": "29-playbook",
+    "number": "29",
+    "collection_number": "13",
+    "title": "The Coach’s Pad",
+    "style": "Coaching notebook",
+    "description": "Warm ivory, hand-drawn field marks and ochre tabs. A useful notebook rather than a software dashboard.",
+    "collection": "Fresh fifteen",
+    "rationale": "A new notebook composition focused on the everyday load, develop and select workflow."
+  },
+  {
+    "slug": "30-data-bloom",
+    "number": "30",
+    "collection_number": "14",
+    "title": "Data Bloom",
+    "style": "Data-first analysis studio",
+    "description": "White and teal with rose heatmap cells. Progression tables lead the page and compact charts carry the story.",
+    "collection": "Fresh fifteen",
+    "rationale": "A new data composition focused on the everyday load, develop and select workflow."
+  },
+  {
+    "slug": "31-workbench",
+    "number": "31",
+    "collection_number": "15",
+    "title": "Workbench",
+    "style": "Visual management board",
+    "description": "A bright indigo-and-white canvas with three working lanes: load, develop and select. Tasks lead, analytics follow.",
+    "collection": "Fresh fifteen",
+    "rationale": "A new kanban composition focused on the everyday load, develop and select workflow."
   }
 ]

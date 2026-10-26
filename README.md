@@ -74,3 +74,7 @@ Explicit position-rating maps returned in player metadata are retained in the sh
 ### Retired-player visibility
 
 Retired / no-current-club players are hidden by default from agency and club development displays, comparisons, watchlists, insights and the Home player count. The latest shared roster takes priority over stale analysis metadata, including an explicit null club; refreshing the roster can no longer retain an old club during agency hydration. Use **Show retired players** in the sidebar to review saved history. Squads and tactics always exclude retired players. Valuation tables default to active players and export the selected filter. No player history is deleted.
+
+### Fifteen fresh website directions
+
+[Browse the new 15-design gallery](design-concepts/FRESH_FIFTEEN.md) · [PDF lookbook](design-concepts/MFL_Fresh_15_Lookbook.pdf). In **Design Studio**, the default **Fifteen new · Fresh directions** collection includes 15 distinct layout studies, locally bundled fonts, desktop/mobile screenshots and working demo interactions. Previews use illustrative data; choosing a preview does not rebrand the live app.

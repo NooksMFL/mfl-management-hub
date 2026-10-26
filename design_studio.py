@@ -22,18 +22,20 @@ def embedded_concept(slug):
                             '<span>Choose another concept above this preview.</span>')
     source = source.replace('<a href="wild-index.html">ALL TEN NEW CONCEPTS ↗</a>',
                             '<span>Choose another concept above this preview.</span>')
+    source = source.replace('<a href="fresh-index.html">ALL FIFTEEN NEW DESIGNS ↗</a>', '<span>Choose another concept above this preview.</span>')
     return source
 
 
 def render():
     st.title("Design Studio")
-    st.write("Ten new, wildly different directions, plus the original six. Choose a collection and try each theme’s squad navigation and player filters.")
-    collection = st.radio("Theme collection", ["Ten new · Wild collection", "Original six"], horizontal=True)
+    st.write("Fifteen fresh directions with different layouts, fonts and colours. Try their navigation, progression periods, squad previews and player filters.")
+    collection = st.radio("Theme collection", ["Fifteen new · Fresh directions", "Ten new · Wild collection", "Original six"], horizontal=True)
     all_concepts = json.loads((ROOT / "concepts.json").read_text())
-    concepts = [c for c in all_concepts if (c.get("collection") == "Wild collection") == (collection != "Original six")]
+    group={"Fifteen new · Fresh directions":"Fresh fifteen","Ten new · Wild collection":"Wild collection","Original six":None}[collection]
+    concepts = [c for c in all_concepts if c.get("collection")==group]
     selected = st.selectbox("Design concept", range(len(concepts)),
-                            format_func=lambda i: f'{concepts[i]["number"]} · {concepts[i]["title"]} — {concepts[i]["style"]}',
-                            key="design_choice_wild" if collection != "Original six" else "design_choice_original")
+                            format_func=lambda i: f'{concepts[i].get("collection_number",concepts[i]["number"])} · {concepts[i]["title"]} — {concepts[i]["style"]}',
+                            key="design_choice_"+str(group or "original"))
     concept = concepts[selected]
     st.subheader(concept["title"])
     st.write(concept["description"])
@@ -45,8 +47,8 @@ def render():
         for row in range(0, len(concepts), 2):
             for col, item in zip(st.columns(2), concepts[row:row+2]):
                 with col:
-                    st.image(str(ROOT / "previews" / f'{item["slug"]}.png'), caption=f'{item["number"]} · {item["title"]}')
-    pdf = ROOT / ("MFL_Wild_Design_Lookbook.pdf" if collection != "Original six" else "MFL_Design_Lookbook.pdf")
+                    st.image(str(ROOT / "previews" / f'{item["slug"]}.png'), caption=f'{item.get("collection_number",item["number"])} · {item["title"]}')
+    pdf = ROOT / ({"Fresh fifteen":"MFL_Fresh_15_Lookbook.pdf","Wild collection":"MFL_Wild_Design_Lookbook.pdf",None:"MFL_Design_Lookbook.pdf"}[group])
     if pdf.exists():
         st.download_button("Download this collection’s lookbook", pdf.read_bytes(),
                            file_name=pdf.name, mime="application/pdf")
