@@ -218,8 +218,8 @@ class EntireAgencyTests(unittest.TestCase):
             button = next(b for b in at.button if b.label=='Sync entire agency')
             button.click().run()
         self.assertFalse(at.exception)
-        self.assertTrue(any('2 / 2 profiles checked' in s.value for s in at.success))
-        self.assertTrue(any('Download full agency CSV (2)' in b.label for b in at.get('download_button')))
+        self.assertTrue(any('All 2 players updated' in s.value for s in at.caption))
+        self.assertTrue(any('Download agency CSV' == b.label for b in at.get('download_button')))
 
 
 if __name__=='__main__':

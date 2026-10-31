@@ -65,26 +65,3 @@ class ValuationTests(unittest.TestCase):
                 with self.assertRaisesRegex(RuntimeError,'403'):
                     v.fetch_market(pages=1)
             self.assertEqual(v.load_market(),snapshot)
-
-    def test_ui_from_saved_market_and_partial_total(self):
-        previous=os.getcwd()
-        with tempfile.TemporaryDirectory() as temp:
-            os.chdir(temp)
-            try:
-                wallet='0x1234567890abcdef'
-                with shared.db() as conn:
-                    conn.executemany('INSERT INTO roster(wallet,player_id,player_name,age,position,overall,club) VALUES(?,?,?,?,?,?,?)',
-                                     [(wallet,1,'Priced player',24,'CM',70,'Test Club'),(wallet,2,'Unpriced keeper',24,'GK',70,'Test Club')])
-                snapshot={'captured_at':'2026-10-16T12:00:00+00:00','records_scanned':5,'listings':[listing(i+10,100+i) for i in range(5)]}
-                with patch.object(v,'load_market',return_value=snapshot):
-                    at=AppTest.from_file(str(Path(v.__file__).with_name('app.py')),default_timeout=30)
-                    at.query_params['page']='Agency / Player Valuation';at.session_state['wallet']=wallet;at.run()
-                    self.assertFalse(at.exception)
-                    self.assertTrue(any(m.label=='Priced-player subtotal' and m.value=='102.00' for m in at.metric))
-                    self.assertTrue(any(m.label=='Valuation coverage' and m.value=='1/2 active players' for m in at.metric))
-                    select=next(s for s in at.selectbox if s.label=='Player to inspect')
-                    select.set_value('Unpriced keeper · 2').run()
-                    self.assertFalse(at.exception)
-                    self.assertTrue(any('Insufficient comparables' in i.value for i in at.info))
-            finally:
-                os.chdir(previous)

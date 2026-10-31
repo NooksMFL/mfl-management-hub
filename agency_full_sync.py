@@ -17,7 +17,10 @@ from tactics_engine import payload_ratings
 
 
 class SyncError(RuntimeError):
-    pass
+    def __init__(self, message, status=None, retry_after=0):
+        super().__init__(message)
+        self.status = status
+        self.retry_after = retry_after
 
 
 def now():
@@ -53,7 +56,7 @@ def items(payload, kind):
             raise SyncError(f'MFL returned invalid {kind} records.')
         return payload
     if isinstance(payload, dict):
-        for key in (kind, 'data', 'items', 'results'):
+        for key in (kind, 'experiences', 'data', 'items', 'results'):
             if key in payload and isinstance(payload[key], (dict, list)):
                 return items(payload[key], kind)
     raise SyncError(f'MFL returned an unrecognised {kind} response; saved data was not replaced.')
@@ -76,20 +79,28 @@ class Client:
     def __init__(self):
         self.access = None
         self.auth_attempted = False
+        self.session = requests.Session()
 
     def get(self, path, params=None):
+        try:
+            remaining=float(shared._meta_get('__api__','retry_until') or 0)-time.time()
+        except (ValueError,TypeError):
+            remaining=0
+        if remaining>0:
+            raise SyncError('MFL asked us to wait. Your progress is saved.',status=429,retry_after=remaining)
         headers = dict(shared.H)
         headers['Cache-Control'] = 'no-cache'
         if self.access:
             headers['Authorization'] = 'Bearer ' + self.access
         try:
-            response = requests.get(shared.BASE + path, params=params, headers=headers, timeout=(6, 25))
-            if response.status_code == 401 and not self.auth_attempted:
+            response = self.session.get(shared.BASE + path, params=params, headers=headers, timeout=(6, 25))
+            html_block = response.status_code == 403 and 'text/html' in response.headers.get('content-type', '')
+            if response.status_code in (401,403) and not html_block and not self.auth_attempted:
                 self.auth_attempted = True
                 refresh = os.getenv('MFL_REFRESH_TOKEN', '').strip()
                 if not refresh:
                     raise SyncError('MFL requires authentication. Set MFL_REFRESH_TOKEN in app Secrets.')
-                auth = requests.post(shared.BASE + '/auth/refresh', headers=shared.H,
+                auth = self.session.post(shared.BASE + '/auth/refresh', headers=shared.H,
                                      json={'refreshToken': refresh}, timeout=(6, 20))
                 if not auth.ok:
                     raise SyncError(f'MFL authentication returned HTTP {auth.status_code}.')
@@ -100,11 +111,16 @@ class Client:
                     raise SyncError('MFL authentication did not return an access token.')
                 return self.get(path, params)
             if response.status_code == 429:
-                raise SyncError('MFL rate limit reached. Wait a few minutes, then resume the sync.')
-            if response.status_code == 403 and 'text/html' in response.headers.get('content-type', ''):
+                try:
+                    wait = max(30, int(response.headers.get('Retry-After',180)))
+                except (ValueError,TypeError):
+                    wait = 180
+                shared._meta_set('__api__','retry_until',time.time()+wait)
+                raise SyncError('MFL asked us to wait. Your progress is saved.',status=429,retry_after=wait)
+            if html_block:
                 raise SyncError('MFL security service blocked this server (HTTP 403).')
             if not response.ok:
-                raise SyncError(f'MFL returned HTTP {response.status_code} for {path}. Resume to retry.')
+                raise SyncError(f'MFL returned HTTP {response.status_code} for {path}. Resume to retry.',status=response.status_code)
             return response.json()
         except requests.RequestException:
             raise SyncError('MFL could not be reached. Resume to retry; saved profiles are retained.') from None
@@ -280,6 +296,8 @@ def sync(wallet, client=None, progress=None, restart=False, delay=.25, max_profi
         c.execute('BEGIN IMMEDIATE')
         row = c.execute('SELECT payload FROM agency_full_sync WHERE wallet=?', (wallet,)).fetchone()
         run = json.loads(row[0]) if row else {}
+        if not restart and run.get('retry_until',0)>time.time():
+            return {**run,'cooldown':True}
         if run.get('status') == 'running':
             heartbeat = datetime.fromisoformat(run['heartbeat'])
             if (datetime.now(timezone.utc) - heartbeat).total_seconds() < 120:
@@ -289,9 +307,10 @@ def sync(wallet, client=None, progress=None, restart=False, delay=.25, max_profi
         run.update(status='running', heartbeat=now(), error=None)
         c.execute('INSERT OR REPLACE INTO agency_full_sync VALUES(?,?)', (wallet,json.dumps(run)))
     try:
-        if run['ids'] is None:
-            run['ids'], run['pages'] = discover(wallet, client, progress)
-            _save(wallet, run)
+        # Re-discover on resume: a sold player must not trap a run on a stale ID.
+        run['ids'], run['pages'] = discover(wallet, client, progress)
+        run['checked'] = len(set(staged(wallet,run['run_id'])) & set(run['ids']))
+        _save(wallet, run)
         checked_this_call = 0
         for reconciliation in range(3):
             profiles = {pid:p for pid,p in staged(wallet, run['run_id']).items() if pid in set(run['ids'])}
@@ -302,7 +321,16 @@ def sync(wallet, client=None, progress=None, restart=False, delay=.25, max_profi
                     raise SyncError('Sync paused. Resume to check the remaining players.')
                 if progress:
                     progress(len(profiles), len(run['ids']), f'Checking player #{pid}…')
-                profile = normalise(client.get(f'/players/{pid}'), pid)
+                try:
+                    profile = normalise(client.get(f'/players/{pid}'), pid)
+                except SyncError as exc:
+                    if exc.status == 404:
+                        latest, pages = discover(wallet,client)
+                        if pid not in latest:
+                            run['ids'],run['pages']=latest,pages
+                            _save(wallet,run)
+                            break
+                    raise
                 with shared.db() as c:
                     c.execute('INSERT OR REPLACE INTO agency_full_profiles VALUES(?,?,?,?,?)',
                               (wallet,run['run_id'],pid,json.dumps(profile),profile['cached_at']))
@@ -322,6 +350,8 @@ def sync(wallet, client=None, progress=None, restart=False, delay=.25, max_profi
                 run['ids'] = final_ids
                 _save(wallet, run)
                 continue
+            if not set(run['ids']).issubset(profiles):
+                continue
             run['clubs'] = owned_clubs(wallet, client)
             profiles = {pid: profiles[pid] for pid in run['ids']}
             run['unverified_clubs'] = sum(not p['club_verified'] for p in profiles.values())
@@ -331,6 +361,8 @@ def sync(wallet, client=None, progress=None, restart=False, delay=.25, max_profi
         raise SyncError('Agency membership changed repeatedly during this sync. Resume to verify the latest roster.')
     except (SyncError, requests.RequestException) as exc:
         run.update(status='paused', error=str(exc))
+        if getattr(exc,'retry_after',0):
+            run['retry_until']=time.time()+exc.retry_after
         _save(wallet, run)
         return run
     except Exception:

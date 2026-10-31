@@ -1,124 +1,44 @@
 # MFL Management Hub
 
-![MFL Management Hub Command Centre logo](assets/mfl-management-hub.svg)
+A Streamlit app with three sections:
 
-The MFL Management Hub, in the Command Centre theme: dark navy panels, lime navigation, mint links and compact typography. The Home dashboard shows searchable portrait cards from the saved roster, with position, age and OVR badges. Body text remains 14px.
+- **Transfer Bargains** — search current player listings and compare asking prices.
+- **Agency progression** — track current players against their recorded purchase or earliest available history.
+- **Club progression** — track player and club gains from the selected season's starting stats.
 
-## Football page index
+The interface uses a charcoal and violet theme with bundled Open Sans fonts, simple navigation and player photos. Missing stats display as a dash rather than a zero.
 
-| Page | Section |
-|---|---|
-| 100 | Home / live cached network overview |
-| 200 | Grower or Shower |
-| 201 | Agency Development |
-| 202 | Club Development |
-| 302 | Squad Builder and formation planner |
-| 303 | Transfer Window |
-| 304 | Transfer Bargains |
-| 305 | Watchlist |
-| 306 | Agency / Player Valuation |
-| 400 | Compare |
-| 500 | Insights |
-| 888 | Sync Centre |
-| 999 | Design Studio |
+## Using the Hub
 
-Choose an application in the sidebar, use the workspace shortcuts, or enter a page number and press Enter. The header reports the current page and UK date. Connect a public wallet to load personal agency and club data; Home uses saved data and labels missing values explicitly.
+Save your public MFL wallet address in the sidebar, then choose **Sync entire agency**. This loads current profiles, attributes, clubs and agency membership. Use **Update progression** to read player histories. Each section offers a CSV download.
 
-Squads retain the positional minimums, flexible goalkeeper ratings, retired-player exclusions, portraits, ages and CSV exports. The 4-1-3-2 and 4-3-3 formation planners retain drag-and-drop and browser-saved lineups, with matching Manager Workspace styling.
+If MFL limits requests, the app saves its place and shows **Continue sync** or **Continue update**. Wait for the displayed cooldown before continuing. Previously completed data stays available throughout an interrupted sync. Pages do not request MFL data automatically when opened.
 
-## Run locally
+## Run
 
 ```sh
 python -m pip install -r requirements.txt
 streamlit run app.py
 ```
 
-The shared theme is configured in `.streamlit/config.toml`; `mfl_text.py` and `win95.css` apply the visual identity. Fonts are bundled locally with its licence, so no external font service is required. Keep refresh tokens in environment settings or Streamlit Secrets, never in the repository.
+For Streamlit Community Cloud, use this repository's `main` branch and `app.py`. Store `MFL_REFRESH_TOKEN` in Streamlit Secrets or an environment variable; never commit it. The API client refreshes authentication when required and shares its rate-limit cooldown between all three sections.
+
+## Data and recovery
+
+Full agency sync follows every roster page, including short pages. It checkpoints each profile and verifies membership again before publishing. A changed or sold player is reconciled on continuation. Current-club fields override historic parent-club data. Unavailable details are marked in exports.
+
+A full sync publishes its roster, owned clubs and current agency stats together, preserving existing acquisition baselines and progression history. Incomplete runs leave the last completed roster untouched. The full-agency CSV is frozen to the completed run, with individual check times.
+
+Progression updates also checkpoint completed players. Club progression uses a recorded state at or before the season boundary; a missing starting state is never replaced by a later state. Agency results label the baseline source as purchase, first record or unverified.
+
+SQLite stores data on the server. Wallet-specific browser backups help restore saved data after a Streamlit restart. Keep CSV exports for a separate copy. Historical helper modules remain in the repository for data compatibility; only the three sections above are exposed in the app.
 
 ## Validate
 
 ```sh
-python -m unittest discover -s tests -v
+python -m unittest discover -s tests
 ```
 
-## Sync entire agency
+The suite covers full-sync completeness, checkpoint recovery, membership changes, HTTP 429 cooldowns, authentication, progression baselines, browser backups and the simplified interface. Tests use simulated API responses; they do not prove that a live MFL sync has completed.
 
-**Sync entire agency** is available on Home, Agency Development, Squad Builder and Sync Centre.
-It discovers every roster page, then reads each current player profile to refresh name,
-age, listed positions, current club, OVR, all attributes and explicit position ratings.
-It continues past short pages until the API returns an empty page, detects pagination
-that does not advance, and checks a declared total where provided. Current club/contract
-fields take precedence over a stale parent-club name; an explicit null club clears it.
-
-Progress shows the number of player profiles checked. Each checked profile is staged,
-so an interruption or rate limit offers **Resume entire agency sync** without repeating
-completed profiles. The old completed snapshot remains in use until every current ID is
-checked, ownership membership is re-read and reconciled, and the owned-club lookup succeeds.
-Publication updates shared roster, owned clubs and Agency current values together, while
-preserving historical ownership baselines, progression and tags. Sold players retain history
-but disappear from verified current-agency views. An interrupted running lease can be resumed
-after two minutes; a concurrent sync of the same wallet is rejected.
-
-After completion, use **Download full agency CSV** beside the sync control for squad analysis.
-It contains every player in that completed run, including no-club players hidden by normal
-display filters, with per-profile check timestamps, sync completion time, run ID, club
-verification flags and explicit position-rating maps. It exports the committed full-sync
-snapshot rather than mixing in a later quick-cache refresh. Missing API fields are marked,
-not silently filled from old data. This is a wallet-owned agency export, not a complete club
-roster of players loaned in from other owners. Current-data sync does not recompute historical
-ownership or season progression; those remain separate analyses.
-
-The development environment cannot currently reach the live MFL API past its Cloudflare
-block. Pagination, profile updates, membership changes, resumability, data preservation and
-the Streamlit control are checked with controlled API responses; verify live completion in
-the deployed app before using its new CSV as a current squad audit.
-
-The suite checks squad allocation, retirement and goalkeeper rules, player-card escaping, preview rendering, numbered pages and navigation. [The original six design studies](design-concepts/README.md) remain available for reference.
-
-## Agency valuations
-
-Page 306 estimates each player from at least five independent active asking-price comparables, using age, OVR and position. It shows price ranges, evidence and priced-player coverage; these are not completed-sale valuations. Market snapshots are saved locally in `valuation_market_cache.db` and reused on later visits. Scan failures preserve the previous snapshot. Currency groups are kept separate; listings without currency metadata are labelled market units.
-
-## Dapper and remembered wallets
-
-Public wallet addresses are remembered on this browser and restored on the next visit. Use **Forget saved wallet** to remove the saved selection. Manual entry remains available. The Dapper connection component is prepared but sign-in stays disabled until the app owner completes Dapper developer registration. See [Dapper setup](dapper_component/README.md) for the activation setting and pinned SDK build instructions.
-
-## Ten new visual concepts
-
-Page 999 Design Studio now includes a **Ten new · Wild collection** selector, alongside the original six designs. [Browse the ten-theme gallery and PDF](design-concepts/WILD_COLLECTION.md). These are independent interactive previews; the live branding now uses Command Centre.
-
-### Season progression cards
-
-Open **Insights → Progression cards** to select a player and download a blue shield-style 720 × 1080 PNG showing their portrait, age, position, season OVR gain and PAC / SHO / PAS / DRI / DEF / PHY gains. Cards use Club Development season records, not agency ownership gains. Sync Club Development first; unavailable fields display an em dash and unavailable portraits use a silhouette. The displayed baseline and latest progression dates identify the saved measurement window.
-
-### Club tactics and navigation update
-
-**Squad Builder → Club tactics** is the default workspace. Select a current club, compare eight formations, apply a suggested XI, and drag players between the pitch and reserves. The compact desktop pitch has an optional Large pitch toggle. Download a self-contained 1800 × 1500 tactics PNG or a lineup CSV including position OVR and rating source. **League squads** retains the 25-player quotas, two goalkeepers and retired-player exclusions; league bands use base OVR while role assignments use known position ratings.
-
-Explicit position-rating maps returned in player metadata are retained in the shared roster cache. Enter missing values under **Review / enter position ratings**. Ratings are stored per wallet and player; e.g. CM 69 / CDM 62 stays 62 at CDM. Unknown secondary ratings are not invented or selected automatically. A labelled base-OVR fallback is available only for the first listed position. Complete-XI averages are unavailable when any slot is empty or unverified. Live MFL data access was blocked in the development environment; automatic position-data ingestion supports explicit maps and has controlled-payload tests, but has not been verified against a live response.
-
-**Load / refresh team players** is available on Home and Squad Builder. Community & design hides Grower or Shower and Design Studio by default; existing page links still work. Section accents differentiate the main workspaces. Home distinguishes incomplete planning groups from complete 25-player squads and reconciles the agency roster with assigned and omitted records.
-
-**Club progression** keeps the whole-season club/player overview as its default. Numeric leaderboard headings sort highest first on their first click. **Since joining my club** is a separate option: enter actual joining dates, then refresh player histories in batches of eight. Dates are entered explicitly because a verified club-joining date is not present in the saved roster. The baseline is the latest known attribute snapshot at or before the entered date (date-only entries use midnight UTC). Unknown baselines and missing attributes remain unavailable; totals show coverage. Changing a joining date resets its cached baseline. Whole-season, club-tenure and agency-acquisition totals are separate measurement periods.
-
-**Transfer Window** now uses public, season-tagged competition appearance records instead of requiring a refresh-token login or treating every MATCH history event as an official appearance. Select the season explicitly (default 18); friendlies/preseason are excluded, and unrecognised responses are errors rather than false zeros. Scan state is scoped to wallet and season. A failed or partial scan does not claim all players are clear. Live API verification remains subject to MFL access from the deployed app.
-
-### Retired-player visibility
-
-Retired / no-current-club players are hidden by default from agency and club development displays, comparisons, watchlists, insights and the Home player count. The latest shared roster takes priority over stale analysis metadata, including an explicit null club; refreshing the roster can no longer retain an old club during agency hydration. Use **Show retired players** in the sidebar to review saved history. Squads and tactics always exclude retired players. Valuation tables default to active players and export the selected filter. No player history is deleted.
-
-### Fifteen fresh website directions
-
-[Browse the new 15-design gallery](design-concepts/FRESH_FIFTEEN.md) · [PDF lookbook](design-concepts/MFL_Fresh_15_Lookbook.pdf). In **Design Studio**, the default **Fifteen new · Fresh directions** collection includes 15 distinct layout studies, locally bundled fonts, desktop/mobile screenshots and working demo interactions. Previews use illustrative data; choosing a preview does not rebrand the live app.
-
-### Signal theme
-
-The previous **12 · Signal** design is preserved in `signal.css`, with matching styles for the formation planner, sortable progression tables, wallet panel, icons and exported tactics boards. Default body text is 14px, controls 13px and the main page heading 26px (23px on phones). The compact pitch and optional expanded view remain available. Design Studio keeps the original concept previews for comparison.
-
-### Command Centre reference
-
-The active theme is `command.css`, based on the supplied navy-and-lime reference. Home adds a compact, searchable preview of the 12 highest-rated matching players from the saved roster. Player cards use real saved names, portrait URLs, positions, ages and base ratings; missing values remain unknown, and the retired-player visibility rule still applies. Remaining-player links preserve the connected wallet. The screenshot’s example metrics, warnings and unimplemented features are not copied into live data. Formation planning, wallet components and sortable progression tables use the same dark palette.
-
-### Clickable player profiles
-
-Click a player card on Home (or focus it and press Enter) to open a profile dialog containing the saved portrait, club, age, positions, base OVR and all six attributes. The position-rating table uses the same supplied/manual ratings as the tactics planner. Missing attributes remain unavailable. Card URLs preserve the wallet and validate the selected player against that wallet’s currently visible roster. Opening a profile makes no API request; use the existing roster refresh action for newer attributes. Close with the button, Escape or the dialog close icon.
+Theme: `hub.css` and `.streamlit/config.toml`. Font licences: `assets/hub-fonts/`.

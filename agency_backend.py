@@ -55,6 +55,7 @@ def token():
 def ah(t):
  h=dict(H);h["Authorization"]="Bearer "+t;return h
 def get(path,t,params=None):
+ if hasattr(t,'get') and not isinstance(t,str):return t.get(path,params)
  last=None
  for attempt in range(5):
   try:
@@ -149,6 +150,10 @@ def profile(pid,t):
  name=p.get("name") or m.get("name")
  if not name:name=(str(p.get("firstName") or m.get("firstName") or "")+" "+str(p.get("lastName") or m.get("lastName") or "")).strip()
  meta=player_meta_from_payload(p)
+ from agency_full_sync import current_club
+ current,verified=current_club(p)
+ if verified:meta['club']=current
+ meta['position']=shared._position(p)
  return {"name":name or f"Player {pid}","age":meta.get("age"),"position":meta.get("position"),"club":meta.get("club"),
  "overall":stat(p,"overall","overallRating","ovr"),"pace":stat(p,"pace","PAC"),
  "shooting":stat(p,"shooting","SHO"),"passing":stat(p,"passing","PAS"),"dribbling":stat(p,"dribbling","DRI"),
@@ -286,6 +291,27 @@ def current_members(frame,wallet):
     ids={int(r['player_id']) for r in shared.roster_rows(wallet)}
     return frame[frame['player_id'].isin(ids)].copy()
 
+
+def save_analysis(wallet,result):
+ c=db();init(c);ensure_v2(c)
+ now=datetime.now(timezone.utc).isoformat()
+ player_id,cur,source,confidence,acq,hstart,start,owned,last,first,event_count=result
+ c.execute("""INSERT INTO player_meta(wallet,player_id,age,position,club) VALUES(?,?,?,?,?)
+ ON CONFLICT(wallet,player_id) DO UPDATE SET age=excluded.age,position=excluded.position,club=excluded.club""",
+ (wallet,player_id,cur.get('age'),cur.get('position'),cur.get('club')))
+ c.execute("""INSERT INTO ownership_v65 VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+  ON CONFLICT(wallet,player_id) DO UPDATE SET player_name=excluded.player_name,source=excluded.source,confidence=excluded.confidence,
+  acquired_at=excluded.acquired_at,history_start=excluded.history_start,start_ovr=excluded.start_ovr,start_pac=excluded.start_pac,
+  start_sho=excluded.start_sho,start_pas=excluded.start_pas,start_dri=excluded.start_dri,start_def=excluded.start_def,start_phy=excluded.start_phy,
+  current_ovr=excluded.current_ovr,current_pac=excluded.current_pac,current_sho=excluded.current_sho,current_pas=excluded.current_pas,
+  current_dri=excluded.current_dri,current_def=excluded.current_def,current_phy=excluded.current_phy,progression_owned=excluded.progression_owned,
+  last_progression=excluded.last_progression,first_progression=excluded.first_progression,event_count=excluded.event_count,updated_at=excluded.updated_at""",
+  (wallet,player_id,cur["name"],source,confidence,iso(acq),iso(hstart),
+   start["overall"],start["pace"],start["shooting"],start["passing"],start["dribbling"],start["defense"],start["physical"],
+   cur["overall"],cur["pace"],cur["shooting"],cur["passing"],cur["dribbling"],cur["defense"],cur["physical"],owned,iso(last),iso(first),event_count,now))
+
+ c.commit();c.close()
+
 def sync(wallet,progress=None,batch_size=12):
  wallet=wallet.strip().lower();t=token()
  ids=list(dict.fromkeys(pid(x) for x in roster(wallet,t)))
@@ -302,18 +328,7 @@ def sync(wallet,progress=None,batch_size=12):
    if "rate-limit" in str(e).lower() or "429" in str(e):break
   if progress:progress(n,len(todo))
   time.sleep(0.45)
- now=datetime.now(timezone.utc).isoformat()
- for player_id,cur,source,confidence,acq,hstart,start,owned,last,first,event_count in results:
-  c.execute("""INSERT INTO ownership_v65 VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-  ON CONFLICT(wallet,player_id) DO UPDATE SET player_name=excluded.player_name,source=excluded.source,confidence=excluded.confidence,
-  acquired_at=excluded.acquired_at,history_start=excluded.history_start,start_ovr=excluded.start_ovr,start_pac=excluded.start_pac,
-  start_sho=excluded.start_sho,start_pas=excluded.start_pas,start_dri=excluded.start_dri,start_def=excluded.start_def,start_phy=excluded.start_phy,
-  current_ovr=excluded.current_ovr,current_pac=excluded.current_pac,current_sho=excluded.current_sho,current_pas=excluded.current_pas,
-  current_dri=excluded.current_dri,current_def=excluded.current_def,current_phy=excluded.current_phy,progression_owned=excluded.progression_owned,
-  last_progression=excluded.last_progression,first_progression=excluded.first_progression,event_count=excluded.event_count,updated_at=excluded.updated_at""",
-  (wallet,player_id,cur["name"],source,confidence,iso(acq),iso(hstart),
-   start["overall"],start["pace"],start["shooting"],start["passing"],start["dribbling"],start["defense"],start["physical"],
-   cur["overall"],cur["pace"],cur["shooting"],cur["passing"],cur["dribbling"],cur["defense"],cur["physical"],owned,iso(last),iso(first),event_count,now))
+ for result in results:save_analysis(wallet,result)
  c.commit()
  analysed=c.execute("SELECT COUNT(*) FROM ownership_v65 WHERE wallet=?",(wallet,)).fetchone()[0]
  c.close()

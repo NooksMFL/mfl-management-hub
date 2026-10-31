@@ -1,0 +1,37 @@
+:root {--hub-bg:#101014;--hub-panel:#1b1b23;--hub-border:#30303d;--hub-muted:#a3a3b5;--hub-accent:#bb9aff;--hub-text:#f0eff8}
+html,body,.stApp,[data-testid="stAppViewContainer"],button,input,textarea,select {font-family:'Hub Sans',sans-serif!important}
+.stApp {background:radial-gradient(ellipse at 100% 0,rgba(119,83,193,.11),transparent 40%),#101014;color:var(--hub-text)}
+.block-container {max-width:1440px;padding:2.7rem 2.5rem 3rem}
+[data-testid="stHeader"] {background:transparent}
+[data-testid="stSidebar"] {background:#15151c;border-right:1px solid var(--hub-border)}
+[data-testid="stSidebar"] .block-container {padding:2rem 1rem}
+h1,h2,h3 {font-family:'Hub Sans',sans-serif!important;letter-spacing:-.04em!important;font-weight:600!important;color:var(--hub-text)}
+h1 {font-size:2.35rem!important;margin:0 0 1.5rem!important}h2 {font-size:1.4rem!important}h3 {font-size:1.1rem!important}
+.hub-brand {display:flex;align-items:center;gap:.75rem;margin:.5rem 0 2rem}
+.hub-brand-mark {display:grid;place-items:center;background:linear-gradient(145deg,#bb9aff,#8163df);color:#17121f;border-radius:12px;width:42px;height:42px;font-weight:600;font-size:.9rem}
+.hub-brand strong {display:block;font-size:.95rem;line-height:1.5}.hub-brand small {display:block;font-size:.68rem;color:#a3a3b5;letter-spacing:.08em;text-transform:uppercase}
+.hub-date {font-size:.75rem;color:#a3a3b5;text-align:right;padding-top:.8rem}
+[data-testid="stSidebar"] [role="radiogroup"] {gap:.4rem}
+[data-testid="stSidebar"] [data-testid="stRadio"] label {background:transparent;border:1px solid transparent;border-radius:10px;padding:.7rem .8rem;font-size:.9rem}
+[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) {background:#282136;border-color:#4b3d65}
+[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) p {color:#d3bcff!important;font-weight:600}
+[data-testid="stVerticalBlockBorderWrapper"]>div {border-color:var(--hub-border)!important;border-radius:14px!important;background:rgba(27,27,35,.75)}
+button[kind="primary"] {background:#bb9aff!important;color:#17121f!important;border:1px solid #bb9aff!important;border-radius:9px!important;min-height:2.8rem;font-weight:600!important}
+button[kind="primary"] p {color:#17121f!important;font-weight:600!important}button[kind="primary"]:hover {background:#cdb4ff!important;border-color:#cdb4ff!important}
+button[kind="secondary"],button[kind="secondaryFormSubmit"] {border:1px solid #383846!important;border-radius:9px!important;background:#22222d!important;color:#e4e1f0!important;min-height:2.6rem}
+button:focus-visible,input:focus-visible {outline:2px solid #bb9aff!important;outline-offset:3px}
+[data-baseweb="input"],[data-baseweb="select"]>div,[data-baseweb="textarea"] {background:#1c1c26!important;border-color:#383846!important;border-radius:9px!important}
+[data-testid="stMetric"] {background:#1b1b24;border:1px solid #30303d;border-radius:12px;padding:1.1rem 1.25rem}
+[data-testid="stMetricLabel"] {color:#aaa8ba;font-size:.78rem}[data-testid="stMetricValue"] {font-size:1.9rem!important;font-weight:600!important;letter-spacing:-.04em;color:#eeeaf8}
+[data-testid="stCaptionContainer"] {color:#aaa8ba!important;font-size:.76rem!important}
+[data-testid="stDataFrame"] {border:1px solid #30303d;border-radius:12px;overflow:hidden;margin-top:.4rem}
+[data-testid="stAlert"] {border:1px solid #363645;border-radius:10px;background:#1b1b26;color:#e3e0f1}
+[data-testid="stExpander"] {background:#191921;border:1px solid #30303d;border-radius:10px}
+[data-testid="stDownloadButton"] button {font-size:.8rem!important}
+[data-testid="stTabs"] [role="tablist"] {gap:1rem;border-bottom:1px solid #30303d}
+[data-testid="stTabs"] [role="tab"] {color:#a3a3b5;padding:.6rem .2rem}
+[data-testid="stTabs"] [role="tab"][aria-selected="true"] {color:#d0b4ff}
+[data-baseweb="tab-highlight"] {background:#bb9aff}
+a {color:#cdb4ff}hr {border-color:#30303d!important}
+.hub-note {color:#aaa8ba;font-size:.78rem;margin:.8rem 0}
+@media(max-width:760px) {.block-container {padding:1.5rem 1rem 2rem}h1 {font-size:1.8rem!important}.hub-date {text-align:left;padding:0}.hub-brand {margin-bottom:1.2rem}}

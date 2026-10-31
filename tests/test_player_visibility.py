@@ -37,18 +37,6 @@ class RetiredVisibilityTests(unittest.TestCase):
         c=agency.db();club=c.execute('SELECT club FROM player_meta WHERE wallet=? AND player_id=2',(self.wallet,)).fetchone()[0];c.close()
         self.assertIsNone(club)
 
-    def test_agency_hides_retired_by_default_and_toggle_restores_them(self):
-        agency.seed_from_shared(self.wallet)
-        # Simulate old analysis metadata surviving after a roster refresh.
-        c=agency.db();c.execute("UPDATE player_meta SET club='Stale Club' WHERE player_id=2");c.commit();c.close()
-        at=AppTest.from_file(str(APP),default_timeout=30);at.query_params['page']='Agency Development';at.session_state['wallet']=self.wallet;at.run()
-        self.assertFalse(at.exception)
-        data=next(d.value for d in at.dataframe if 'Player' in d.value.columns and 'Current' in d.value.columns)
-        self.assertEqual(data.Player.tolist(),['Active Player'])
-        at.toggle(key='show_retired_players').set_value(True).run()
-        self.assertFalse(at.exception)
-        data=next(d.value for d in at.dataframe if 'Player' in d.value.columns and 'Current' in d.value.columns)
-        self.assertEqual(set(data.Player),{'Active Player','Retired Player'})
 
     def test_no_roster_uses_known_club_metadata(self):
         frame=pd.DataFrame([{'player_id':10,'club':'Active'},{'player_id':11,'club':'Retired'},{'player_id':12,'club':None}])

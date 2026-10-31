@@ -29,6 +29,10 @@ def db():
     CREATE TABLE IF NOT EXISTS agency_full_profiles(
       wallet TEXT,run_id TEXT,player_id INTEGER,payload TEXT NOT NULL,checked_at TEXT NOT NULL,
       PRIMARY KEY(wallet,run_id,player_id));
+    CREATE TABLE IF NOT EXISTS hub_progress_jobs(wallet TEXT,job_key TEXT,payload TEXT,PRIMARY KEY(wallet,job_key));
+    CREATE TABLE IF NOT EXISTS hub_club_progress(
+      wallet TEXT,player_id INTEGER,club TEXT,season_start TEXT,payload TEXT,checked_at TEXT,
+      PRIMARY KEY(wallet,player_id,club,season_start));
     """)
     c.commit()
     columns={row[1] for row in c.execute("PRAGMA table_info(roster)")}

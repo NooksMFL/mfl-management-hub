@@ -5,6 +5,7 @@ import statistics
 import requests
 import pandas as pd
 import agency_backend as agency
+import agency_full_sync as full
 
 def _num(v):
     try: return float(v)
@@ -26,26 +27,15 @@ def _player(obj):
     return {"player":name,"age":age,"overall":overall,"position":position,
             "player_id":p.get("id") or p.get("playerId") or m.get("id")}
 
-def _public_market_get(path, params):
-    url=agency.BASE+path
-    try:
-        r=requests.get(url,headers=agency.H,params=params,timeout=25)
-    except requests.RequestException as e:
-        raise RuntimeError(f"MFL market API connection failed: {e}") from e
-    if r.status_code in (401,403):
-        raise RuntimeError("MFL does not permit unauthenticated market access. A working MFL session is required.")
-    if r.status_code==429:
-        raise RuntimeError("MFL market rate limit reached (429). Try a smaller scan later.")
-    if not r.ok:
-        raise RuntimeError(f"MFL market endpoint {path} returned HTTP {r.status_code}: {r.text[:180]}")
-    return r.json()
+def _public_market_get(path, params, client=None):
+    return (client or full.Client()).get(path,params)
 
-def _fetch_pages(path, token, pages, params, progress=None):
+def _fetch_pages(path, token, pages, params, progress=None, client=None):
     rows=[];seen=set();before=None
     for page in range(pages):
         opts=dict(params)
         if before is not None: opts["beforeListingId"]=before
-        data=_public_market_get(path,opts)
+        data=_public_market_get(path,opts,client)
         batch=agency.arr(data)
         if not batch:break
         fresh=0
@@ -68,8 +58,9 @@ def _median(vals):
 
 def scan(listing_pages=12,sales_pages=24,max_age=24,min_discount=15,progress=None):
     # Marketplace listings do not need wallet data; don't refresh a wallet token.
+    client=full.Client()
     live=_fetch_pages("/listings",None,listing_pages,
-                      {"limit":25,"type":"PLAYER","status":"AVAILABLE","view":"full"},progress)
+                      {"limit":25,"type":"PLAYER","status":"AVAILABLE","view":"full"},progress,client)
     # MFL /listings rejects SOLD; use other active asking prices as a
     # clearly labelled comparison, NEVER describe them as realised sales.
     reference=[]

@@ -24,29 +24,3 @@ class DesignStudioTests(unittest.TestCase):
             self.assertNotIn('href="fresh-index.html"', html)
         with self.assertRaises(ValueError):
             embedded_concept("../app")
-
-    def test_page_previews_without_a_wallet(self):
-        previous = os.getcwd()
-        with tempfile.TemporaryDirectory() as temp:
-            os.chdir(temp)
-            try:
-                at = AppTest.from_file(str(Path(ROOT).parent / "app.py"), default_timeout=30)
-                at.query_params["page"] = "Design Studio"
-                at.session_state["wallet"] = ""
-                at.run()
-                self.assertFalse(at.exception)
-                self.assertEqual(at.title[0].value, "Design Studio")
-                selector = next(s for s in at.selectbox if s.label == "Design concept")
-                self.assertEqual(len(selector.options), 15)
-                for i in range(1, 15):
-                    selector.set_value(i).run()
-                    self.assertFalse(at.exception)
-                    selector = next(s for s in at.selectbox if s.label == "Design concept")
-                next(r for r in at.radio if r.label == "Theme collection").set_value("Ten new · Wild collection").run()
-                self.assertFalse(at.exception)
-                self.assertEqual(len(next(s for s in at.selectbox if s.label == "Design concept").options),10)
-                next(r for r in at.radio if r.label == "Theme collection").set_value("Original six").run()
-                self.assertFalse(at.exception)
-                self.assertEqual(len(next(s for s in at.selectbox if s.label == "Design concept").options), 6)
-            finally:
-                os.chdir(previous)
