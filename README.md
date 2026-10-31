@@ -41,6 +41,38 @@ The shared theme is configured in `.streamlit/config.toml`; `mfl_text.py` and `w
 python -m unittest discover -s tests -v
 ```
 
+## Sync entire agency
+
+**Sync entire agency** is available on Home, Agency Development, Squad Builder and Sync Centre.
+It discovers every roster page, then reads each current player profile to refresh name,
+age, listed positions, current club, OVR, all attributes and explicit position ratings.
+It continues past short pages until the API returns an empty page, detects pagination
+that does not advance, and checks a declared total where provided. Current club/contract
+fields take precedence over a stale parent-club name; an explicit null club clears it.
+
+Progress shows the number of player profiles checked. Each checked profile is staged,
+so an interruption or rate limit offers **Resume entire agency sync** without repeating
+completed profiles. The old completed snapshot remains in use until every current ID is
+checked, ownership membership is re-read and reconciled, and the owned-club lookup succeeds.
+Publication updates shared roster, owned clubs and Agency current values together, while
+preserving historical ownership baselines, progression and tags. Sold players retain history
+but disappear from verified current-agency views. An interrupted running lease can be resumed
+after two minutes; a concurrent sync of the same wallet is rejected.
+
+After completion, use **Download full agency CSV** beside the sync control for squad analysis.
+It contains every player in that completed run, including no-club players hidden by normal
+display filters, with per-profile check timestamps, sync completion time, run ID, club
+verification flags and explicit position-rating maps. It exports the committed full-sync
+snapshot rather than mixing in a later quick-cache refresh. Missing API fields are marked,
+not silently filled from old data. This is a wallet-owned agency export, not a complete club
+roster of players loaned in from other owners. Current-data sync does not recompute historical
+ownership or season progression; those remain separate analyses.
+
+The development environment cannot currently reach the live MFL API past its Cloudflare
+block. Pagination, profile updates, membership changes, resumability, data preservation and
+the Streamlit control are checked with controlled API responses; verify live completion in
+the deployed app before using its new CSV as a current squad audit.
+
 The suite checks squad allocation, retirement and goalkeeper rules, player-card escaping, preview rendering, numbered pages and navigation. [The original six design studies](design-concepts/README.md) remain available for reference.
 
 ## Agency valuations

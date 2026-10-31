@@ -25,6 +25,10 @@ def db():
     CREATE TABLE IF NOT EXISTS club_snapshots(
       wallet TEXT,player_id INTEGER,snapshot_at TEXT,current_ovr REAL,ovr_gain REAL,attr_gain REAL,
       PRIMARY KEY(wallet,player_id,snapshot_at));
+    CREATE TABLE IF NOT EXISTS agency_full_sync(wallet TEXT PRIMARY KEY,payload TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS agency_full_profiles(
+      wallet TEXT,run_id TEXT,player_id INTEGER,payload TEXT NOT NULL,checked_at TEXT NOT NULL,
+      PRIMARY KEY(wallet,run_id,player_id));
     """)
     c.commit()
     columns={row[1] for row in c.execute("PRAGMA table_info(roster)")}
@@ -129,6 +133,19 @@ def _val(p,*names):
 
 def _club_name(p):
     p=_unwrap(p); m=p.get("metadata") if isinstance(p.get("metadata"),dict) else {}
+    # Explicit current assignment (including null) outranks an old parent club.
+    for key in ('currentClub','activeContract','club','contract'):
+        for src in (p,m):
+            if key not in src:continue
+            v=src[key]
+            if v is None:return None
+            if key in ('activeContract','contract'):
+                if not isinstance(v,dict) or 'club' not in v:continue
+                v=v['club']
+                if v is None:return None
+            if isinstance(v,str):return v.strip() or None
+            if isinstance(v,dict) and (v.get('name') or v.get('clubName')):
+                return str(v.get('name') or v.get('clubName'))
     for src in (p,m):
         for key in ("parentClub","owningClub","registeredClub","club","currentClub"):
             v=src.get(key)
@@ -179,13 +196,15 @@ def roster_payload(wallet,t=None,force=False):
         params={"ownerWalletAddress":wallet,"limit":100}
         if before is not None: params["beforePlayerId"]=before
         try:
-            batch=_arr(_public_get("/players",params,timeout=30))
+            from agency_full_sync import items
+            batch=items(_public_get("/players",params,timeout=30),'players')
         except Exception:
             if t is None:
                 try: t=token()
                 except Exception: t=None
             if t is None: raise
-            batch=_arr(_get("/players",t,params,timeout=30))
+            from agency_full_sync import items
+            batch=items(_get("/players",t,params,timeout=30),'players')
         fresh=[]
         for item in batch:
             p=_unwrap(item); m=p.get("metadata") if isinstance(p.get("metadata"),dict) else {}
@@ -194,9 +213,11 @@ def roster_payload(wallet,t=None,force=False):
             except: continue
             if pid in seen: continue
             seen.add(pid); fresh.append(item); raw.append(item)
-        if len(batch)<100 or not fresh: break
+        if not batch:break
+        if not fresh:raise RuntimeError('MFL roster pagination did not advance; the previous roster was retained.')
         nxt=min(int((_unwrap(x).get("id") or _unwrap(x).get("playerId") or ((_unwrap(x).get("metadata") or {}).get("id")))) for x in fresh)
-        if before is not None and nxt>=before: break
+        if before is not None and nxt>=before:
+            raise RuntimeError('MFL roster pagination did not advance; the previous roster was retained.')
         before=nxt
         time.sleep(.12)
 

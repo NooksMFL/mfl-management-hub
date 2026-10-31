@@ -769,7 +769,7 @@ def agency_frame(wallet):
       WHERE o.wallet=?""",(wallet.lower(),)).fetchall()
     c.close()
     if not rows:return pd.DataFrame()
-    df=visible_frame(pd.DataFrame([dict(r) for r in rows]),wallet,update_clubs=True)
+    df=visible_frame(agency.current_members(pd.DataFrame([dict(r) for r in rows]),wallet),wallet,update_clubs=True)
     for lab,cur,start_col in [
       ("OVR ↑","current_ovr","start_ovr"),("PAC ↑","current_pac","start_pac"),("SHO ↑","current_sho","start_sho"),
       ("PAS ↑","current_pas","start_pas"),("DRI ↑","current_dri","start_dri"),("DEF ↑","current_def","start_def"),("PHY ↑","current_phy","start_phy")]:
@@ -1112,6 +1112,8 @@ elif page=="Agency Development":
         </div>""",unsafe_allow_html=True)
         st.stop()
 
+    import agency_full_sync_ui
+    agency_full_sync_ui.render(wallet,key='agency_entire_sync')
     c=agency.db();agency.init(c);agency.ensure_v2(c)
     rows=c.execute("""SELECT o.*,COALESCE(t.tag,'NORMAL') tag,COALESCE(t.note,'') note,
       m.age,m.position,m.club,a.last_event_at,a.match_events,a.training_events,a.total_events
@@ -1151,7 +1153,7 @@ elif page=="Agency Development":
                     with st.expander("Technical detail"):
                         st.code(str(e))
     else:
-        df=visible_frame(pd.DataFrame([dict(r) for r in rows]),wallet,update_clubs=True)
+        df=visible_frame(agency.current_members(pd.DataFrame([dict(r) for r in rows]),wallet),wallet,update_clubs=True)
         if df.empty:
             st.info('No active players in this saved agency view. Retired / no-club players are hidden. Enable Show retired players in the sidebar to review them, or refresh team players on Home.')
             c.close()
@@ -1958,6 +1960,8 @@ elif page=="Sync Centre":
     if not wallet:
         st.warning("Connect a wallet first.");st.stop()
     st.markdown('<div class="suite-hero"><div class="suite-kicker">DATA & SYNC CENTRE</div><div class="suite-title">Refresh once. Reuse everywhere.</div><div class="suite-copy">The shared wallet roster is reused by Agency and Club Development, so the same wallet list is not fetched from MFL twice.</div></div>',unsafe_allow_html=True)
+    import agency_full_sync_ui
+    agency_full_sync_ui.render(wallet,key='sync_centre_entire_agency')
     fresh=shared.freshness(wallet)
     af=agency_frame(wallet);cf=visible_frame(club.cached(wallet),wallet)
     gc=grower.db();grower.init_db(gc);grows=grower.leaderboard(gc);gc.close()

@@ -79,7 +79,7 @@ class TacticsCacheTests(unittest.TestCase):
     def test_refreshed_roster_retains_explicit_secondary_ratings(self):
         with tempfile.TemporaryDirectory() as tmp,patch.object(cache,'DB',os.path.join(tmp,'cache.db')):
             payload=[{'id':1,'name':'Habibou','metadata':{'positions':['CM','CDM'],'overall':69,'positionRatings':{'CM':69,'CDM':62}},'club':{'name':'Club'}}]
-            with patch.object(cache,'_public_get',return_value=payload):
+            with patch.object(cache,'_public_get',side_effect=[payload,[]]):
                 restored=cache.roster_payload('wallet',force=True)
             self.assertEqual(json.loads(cache.roster_rows('wallet')[0]['position_ratings']),{'CM':69.0,'CDM':62.0})
             self.assertEqual(restored[0]['metadata']['positionRatings']['CDM'],62)

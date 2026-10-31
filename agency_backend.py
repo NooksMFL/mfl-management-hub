@@ -256,6 +256,10 @@ def seed_from_shared(wallet):
                   (wallet,pid,r.get("age"),r.get("position"),r.get("club")))
 
         if exists:
+            c.execute('''UPDATE ownership_v65 SET player_name=?,current_ovr=?,current_pac=?,current_sho=?,
+                current_pas=?,current_dri=?,current_def=?,current_phy=?,updated_at=? WHERE wallet=? AND player_id=?''',
+                (r.get('player_name') or f'Player {pid}',r.get('overall'),r.get('pace'),r.get('shooting'),
+                 r.get('passing'),r.get('dribbling'),r.get('defense'),r.get('physical'),r.get('cached_at') or now,wallet,pid))
             continue
 
         vals=(
@@ -273,6 +277,14 @@ def seed_from_shared(wallet):
 
     c.commit(); c.close()
     return added
+
+
+def current_members(frame,wallet):
+    """Keep sold players' history while excluding them from current agency views."""
+    if frame.empty or shared._meta_get(wallet,'agency_membership_verified')!='true':
+        return frame.copy()
+    ids={int(r['player_id']) for r in shared.roster_rows(wallet)}
+    return frame[frame['player_id'].isin(ids)].copy()
 
 def sync(wallet,progress=None,batch_size=12):
  wallet=wallet.strip().lower();t=token()

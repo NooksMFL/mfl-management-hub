@@ -4,9 +4,11 @@ import wallet_cache_backend as shared
 
 def render(wallet,key):
     if not wallet:return
+    import agency_full_sync_ui
+    agency_full_sync_ui.render(wallet,key=key+'_entire_agency')
     col1,col2=st.columns([1,2])
-    with col1:clicked=st.button('Load / refresh team players',key=key,type='primary',use_container_width=True)
-    with col2:st.caption('Loads your agency roster and owned-club list. No need to visit Club Development first. Club progression has separate since-joining and whole-season views.')
+    with col1:clicked=st.button('Load / refresh team players',key=key,use_container_width=True)
+    with col2:st.caption('Quick roster-list refresh. Use Sync entire agency above to check each player profile and produce a full analysis export.')
     if clicked:
         try:
             with st.spinner('Loading players and clubs from MFL…'):
