@@ -71,6 +71,18 @@ class FocusedHubTests(unittest.TestCase):
                 self.assertEqual(error.exception.status,429)
             session.get.assert_called_once()
         self.assertGreater(float(shared._meta_get('__api__','retry_until')),time.time())
+    def test_continue_button_unlocks_when_cooldown_expires(self):
+        import agency_full_sync_ui as ui
+        full._save(WALLET,{'status':'paused','retry_until':time.time()+120,'ids':[1],'checked':0})
+        at=self.page(PAGES[0],WALLET)
+        self.assertFalse(at.exception)
+        self.assertTrue(at.button(key='hub_sync').disabled)
+        with patch.object(ui.time,'time',return_value=time.time()+121):
+            at.run()
+        self.assertFalse(at.exception)
+        self.assertFalse(at.button(key='hub_sync').disabled)
+        self.assertEqual(at.button(key='hub_sync').label,'Continue sync')
+
     def test_json_403_refreshes_auth_once(self):
         denied=Mock(status_code=403,headers={'content-type':'application/json'})
         good=Mock(status_code=200,ok=True);good.json.return_value=[]

@@ -14,6 +14,7 @@ def short_date(value):
     except (ValueError,TypeError):return 'Not updated yet'
 
 
+@st.fragment(run_every=10)
 def render(wallet,key):
     if not wallet:return
     run=full.state(wallet)
