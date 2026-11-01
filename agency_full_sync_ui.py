@@ -52,7 +52,12 @@ def render(wallet,key):
         if run.get('status') in ('paused','running'):
             with st.expander('Sync help'):
                 st.write(run.get('error') or 'A previous update may have been interrupted.')
-                st.caption('Starting again checks the agency list afresh. Your last completed update stays available.')
-                if st.button('Start again',key=key+'_restart',disabled=waiting):
+                import browser_persistence
+                saved=browser_persistence.dump_wallet(wallet)
+                if saved:
+                    st.download_button('Download saved sync',saved['value'],file_name='mfl_saved_sync.txt',mime='text/plain',key=key+'_checkpoint')
+                if run.get('checked',0):
+                    st.caption('Continue sync keeps the players already checked.')
+                elif st.button('Start again',key=key+'_restart',disabled=waiting):
                     full.sync(wallet,restart=True)
                     st.rerun()

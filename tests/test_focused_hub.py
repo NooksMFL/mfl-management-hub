@@ -14,7 +14,7 @@ import wallet_cache_backend as shared
 from test_entire_agency_sync import FakeClient, WALLET, player
 
 APP=Path(__file__).resolve().parents[1]/'app.py'
-PAGES=['Agency progression','Club progression','Transfer Bargains']
+PAGES=['Agency progression','Club progression','Transfer Bargains','Squad analyser']
 
 class FocusedHubTests(unittest.TestCase):
     def setUp(self):
@@ -45,6 +45,10 @@ class FocusedHubTests(unittest.TestCase):
     def test_all_players_and_unknown_gains_stay_visible(self):
         full.sync(WALLET,FakeClient({1:player(1),2:player(2,None)}),delay=0)
         at=self.page(PAGES[0],WALLET)
+        self.assertFalse(at.exception)
+        frame=next(d.value for d in at.dataframe if 'Current OVR' in d.value)
+        self.assertEqual(len(frame),1)
+        at.toggle(key='agency_show_inactive').set_value(True).run()
         self.assertFalse(at.exception)
         frame=next(d.value for d in at.dataframe if 'Current OVR' in d.value)
         self.assertEqual(len(frame),2)

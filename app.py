@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 import streamlit as st
-from streamlit_js_eval import get_local_storage, set_local_storage
+from streamlit_js_eval import get_local_storage, set_local_storage, streamlit_js_eval
 
 import agency_full_sync as full
 import agency_full_sync_ui as sync_ui
@@ -21,7 +21,7 @@ import wallet_cache_backend as shared
 import wallet_connection
 
 ROOT=Path(__file__).resolve().parent
-PAGES=['Agency progression','Club progression','Transfer Bargains']
+PAGES=['Agency progression','Club progression','Transfer Bargains','Squad analyser']
 ALIASES={'Agency Development':'Agency progression','Club Development':'Club progression'}
 
 st.set_page_config(page_title='MFL Management Hub',page_icon='⚽',layout='wide',initial_sidebar_state='expanded')
@@ -66,11 +66,20 @@ st.query_params['page']=page
 if wallet:
     st.query_params['wallet']=wallet
     set_local_storage('mfl_hub_last_wallet',wallet,component_key='hub_save_wallet')
-    backup=get_local_storage(f'mfl_hub_wallet_{wallet[2:]}',component_key='hub_restore_'+wallet[-8:])
-    if backup and not shared.roster_rows(wallet) and not st.session_state.get('hub_restored_'+wallet):
-        try:persistence.restore_wallet(backup,wallet)
-        except Exception:st.session_state['hub_restore_failed']=True
+    # An explicit ready flag separates an empty browser backup from a component
+    # that has not replied yet. Never overwrite a backup during startup.
+    storage_key=f'mfl_hub_wallet_{wallet[2:]}'
+    backup_reply=streamlit_js_eval(js_expressions="({ready:true,value:localStorage.getItem('"+storage_key+"')})",key='hub_safe_restore_'+wallet[-8:])
+    backup_ready=isinstance(backup_reply,dict) and backup_reply.get('ready') is True
+    if backup_ready and not st.session_state.get('hub_restored_'+wallet):
+        backup=backup_reply.get('value')
+        if backup and not shared.roster_rows(wallet) and not full.state(wallet):
+            try:persistence.restore_wallet(backup,wallet)
+            except Exception:
+                st.session_state['hub_restore_failed']=True
         st.session_state['hub_restored_'+wallet]=True
+    if st.session_state.get('hub_restore_failed'):
+        st.error('Your browser backup could not be restored. It has been kept unchanged.')
 
 head,date=st.columns([4,1])
 with head:st.title(page)
@@ -135,7 +144,16 @@ def update_button(kind,start=''):
 
 if page=='Agency progression' and wallet:
     frame=progression.agency_frame(wallet)
-    if frame.empty:st.info('Sync your agency to load your players.')
+    if not frame.empty:
+        import squad_analysis
+        latest,_=squad_analysis.snapshot(wallet)
+        by_id={p['player_id']:p for p in latest}
+        show_inactive=st.toggle('Show retired / no club',value=False,key='agency_show_inactive')
+        active_mask=frame.apply(lambda r:squad_analysis.is_active(by_id.get(r['Player ID'],{'club':r['Club']})),axis=1)
+        excluded=int((~active_mask).sum())
+        if excluded:st.caption(f'{excluded} retired or no-club players hidden. Their saved records are kept.')
+        if not show_inactive:frame=frame[active_mask].copy()
+    if frame.empty:st.info('No active players to show. Continue your existing sync, or show retired / no-club players.')
     else:
         columns=st.columns(3)
         gains=pd.to_numeric(frame['OVR gain'],errors='coerce')
@@ -170,6 +188,10 @@ elif page=='Club progression' and wallet:
         with st.expander('Season dates'):
             st.write(f'{season} is measured from {datetime.fromisoformat(start).strftime("%d %B %Y")}. Players without starting stats show —.')
 
+elif page=='Squad analyser' and wallet:
+    import squad_analysis_ui
+    squad_analysis_ui.render(wallet)
+
 elif page=='Transfer Bargains':
     import transfer_bargains_backend as bargains
     with st.container(border=True):
@@ -201,7 +223,7 @@ elif page=='Transfer Bargains':
         st.dataframe(display.drop(columns=['Listing ID'],errors='ignore'),hide_index=True,width='stretch')
         st.download_button('Download bargains CSV',result.to_csv(index=False).encode('utf-8-sig'),'mfl_bargains.csv','text/csv')
 
-if wallet:
+if wallet and backup_ready and not st.session_state.get('hub_restore_failed'):
     try:
         backup=persistence.dump_wallet(wallet)
         if backup and backup['signature']!=st.session_state.get('hub_backup_signature'):
